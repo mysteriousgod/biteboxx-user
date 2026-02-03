@@ -1,0 +1,96 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
+}
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.bitbox.user"
+    compileSdk 36
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.bitbox.user"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
+        versionCode 10
+        versionName '2.0.0'
+        multiDexEnabled true
+        ndk {
+            abiFilters "arm64-v8a", "x86_64"
+        }
+    }
+
+    packagingOptions {
+        exclude 'lib/armeabi-v7a/libapp.so'
+        exclude 'lib/armeabi-v7a/libdatastore_shared_counter.so'
+        exclude 'lib/armeabi-v7a/libflutter.so'
+        exclude 'lib/armeabi-v7a/libsqlite3.so'
+    }
+
+    signingConfigs {
+        release {
+            keyAlias 'bitebox_user' // Replace with your actual key alias
+            keyPassword '@Anilch133'
+            storeFile file('keystore/keystore.jks') // Replace with the path to your keystore file
+            storePassword '@Anilch133'
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
+        }
+    }
+    ndkVersion "27.0.12077973"
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation "com.google.firebase:firebase-messaging:23.4.1"
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
+}

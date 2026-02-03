@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "178881509769",
+    "project_id": "biteboxx-82e93",
+    "storage_bucket": "biteboxx-82e93.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178881509769:android:907b254dbc6c1d96f6c958",
+        "android_client_info": {
+          "package_name": "com.bitbox.user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178881509769:android:3ce6acf98afea187f6c958",
+        "android_client_info": {
+          "package_name": "com.bitebox.delivery_man"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178881509769:android:1823267c1cfd1560f6c958",
+        "android_client_info": {
+          "package_name": "com.bitebox.restaurant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
