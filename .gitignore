@@ -104,7 +104,6 @@ build/
 !**/ios/**/default.perspectivev3
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Coverage
 coverage/
