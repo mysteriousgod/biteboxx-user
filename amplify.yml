@@ -1,0 +1,22 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Installing Flutter..."
+        - git clone https://github.com/flutter/flutter.git -b stable
+        - export PATH="$PATH:`pwd`/flutter/bin"
+        - flutter precache
+        - flutter doctor
+        - flutter pub get
+    build:
+      commands:
+        - echo "Building Flutter Web..."
+        - flutter build web --release
+  artifacts:
+    baseDirectory: build/web
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - flutter/**/*
