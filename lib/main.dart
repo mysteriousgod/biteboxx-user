@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
@@ -28,12 +29,14 @@ import 'helper/get_di.dart' as di;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+
 Future<void> main() async {
   if(ResponsiveHelper.isMobilePhone()) {
     HttpOverrides.global = MyHttpOverrides();
   }
   setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
   // // Pass all uncaught "fatal" errors from the framework to Crashlytics
   // FlutterError.onError = (errorDetails) {
@@ -48,19 +51,19 @@ Future<void> main() async {
   DeepLinkBody? linkBody;
 
   if(GetPlatform.isWeb) {
-    await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg',
-      appId: '1:178881509769:android:907b254dbc6c1d96f6c958',
-      messagingSenderId: '178881509769',
-      projectId: 'biteboxx-82e93',
+    await Firebase.initializeApp(options: FirebaseOptions(
+      apiKey: dotenv.env['FIREBASE_API_KEY']!,
+      appId: dotenv.env['FIREBASE_APP_ID']!,
+      messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
+      projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
     ));
   }else if(GetPlatform.isAndroid) {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg',
-        appId: '1:178881509769:android:907b254dbc6c1d96f6c958',
-        messagingSenderId: '178881509769',
-        projectId: 'biteboxx-82e93',
+      options: FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY']!,
+        appId: dotenv.env['FIREBASE_APP_ID']!,
+        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
+        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
       ),
     );
   } else {
@@ -83,7 +86,7 @@ Future<void> main() async {
 
   if (ResponsiveHelper.isWeb()) {
     await FacebookAuth.instance.webAndDesktopInitialize(
-      appId: "452131619626499",
+      appId: dotenv.env['FACEBOOK_APP_ID']!,
       cookie: true,
       xfbml: true,
       version: "v13.0",
