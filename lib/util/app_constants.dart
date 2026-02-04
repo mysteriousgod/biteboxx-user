@@ -8,17 +8,17 @@ class AppConstants {
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
-  static const String webHostedUrl = 'https://biteboxx.com';
+  static const String webHostedUrl = 'https://main.d1wk7b6t2z78p1.amplifyapp.com';
   static const bool useReactWebsite = false;
 
   static String get baseUrl {
     // Check if we're in production environment
     if (const bool.fromEnvironment('dart.vm.product')) {
       // Production environment - use environment variable or fallback
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
     } else {
       // Development environment - can use localhost or staging
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
     }
   }
   static const String categoryUri = '/api/v1/categories';

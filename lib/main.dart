@@ -37,7 +37,11 @@ Future<void> main() async {
     }
     setPathUrlStrategy();
     WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      // debugPrint('Could not load .env file: $e');
+    }
 
     // // Pass all uncaught "fatal" errors from the framework to Crashlytics
     // FlutterError.onError = (errorDetails) {
@@ -52,19 +56,19 @@ Future<void> main() async {
     DeepLinkBody? linkBody;
 
     if(GetPlatform.isWeb) {
-      await Firebase.initializeApp(options: FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY']!,
-        appId: dotenv.env['FIREBASE_APP_ID']!,
-        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+      await Firebase.initializeApp(options: const FirebaseOptions(
+        apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg'),
+        appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: '1:178881509769:android:907b254dbc6c1d96f6c958'),
+        messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '178881509769'),
+        projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: 'biteboxx-82e93'),
       ));
     }else if(GetPlatform.isAndroid) {
       await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: dotenv.env['FIREBASE_API_KEY']!,
-          appId: dotenv.env['FIREBASE_APP_ID']!,
-          messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-          projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        options: const FirebaseOptions(
+          apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg'),
+          appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: '1:178881509769:android:907b254dbc6c1d96f6c958'),
+          messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '178881509769'),
+          projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: 'biteboxx-82e93'),
         ),
       );
     } else {
@@ -87,7 +91,7 @@ Future<void> main() async {
 
     if (ResponsiveHelper.isWeb()) {
       await FacebookAuth.instance.webAndDesktopInitialize(
-        appId: dotenv.env['FACEBOOK_APP_ID']!,
+        appId: const String.fromEnvironment('FACEBOOK_APP_ID', defaultValue: '452131619626499'),
         cookie: true,
         xfbml: true,
         version: "v13.0",
