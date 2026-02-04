@@ -3,7 +3,7 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:get/get.dart';
 
 class AppConstants {
-  static const String appName = 'BiteBoxx';
+  static const String appName = 'Bite Boxxer';
   static const double appVersion = 8.4; ///Flutter SDK: 3.35.2
 
   static const String fontFamily = 'Roboto';

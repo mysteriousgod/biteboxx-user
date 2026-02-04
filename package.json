@@ -1,0 +1,12 @@
+{
+  "name": "stackfood-multivendor",
+  "version": "1.0.0",
+  "description": "A Flutter web application deployed on Vercel",
+  "scripts": {
+    "build": "flutter build web --release",
+    "dev": "flutter run -d chrome --web-port=3000"
+  },
+  "devDependencies": {
+    "flutter": "^3.0.0"
+  }
+}

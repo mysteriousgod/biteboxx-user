@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.bitbox.user"
+    namespace "com.biteboxer.user"
     compileSdk 36
 
     buildFeatures {
@@ -54,7 +54,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.bitbox.user"
+        applicationId "com.biteboxer.user"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode 10
