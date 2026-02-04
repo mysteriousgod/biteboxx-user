@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "A Flutter web application deployed on Vercel",
   "scripts": {
-    "build": "flutter build web --release",
+    "build": "flutter pub get && flutter build web --release",
     "dev": "flutter run -d chrome --web-port=3000"
   },
-  "devDependencies": {
-    "flutter": "^3.0.0"
+ "engines": {
+    "node": "18.x"
   }
 }

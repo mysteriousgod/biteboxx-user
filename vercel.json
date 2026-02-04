@@ -2,10 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "pubspec.yaml",
-      "use": "@vercel/flutter",
+      "src": "vercel-build.sh",
+      "use": "@vercel/static-build",
       "config": {
-        "framework": "flutter"
+        "distDir": "build/web"
       }
     }
   ],
