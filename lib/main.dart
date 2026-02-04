@@ -31,68 +31,90 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 
 
 Future<void> main() async {
-  if(ResponsiveHelper.isMobilePhone()) {
-    HttpOverrides.global = MyHttpOverrides();
-  }
-  setPathUrlStrategy();
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  try {
+    if(ResponsiveHelper.isMobilePhone()) {
+      HttpOverrides.global = MyHttpOverrides();
+    }
+    setPathUrlStrategy();
+    WidgetsFlutterBinding.ensureInitialized();
+    await dotenv.load(fileName: ".env");
 
-  // // Pass all uncaught "fatal" errors from the framework to Crashlytics
-  // FlutterError.onError = (errorDetails) {
-  //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  // };
-  // // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  // PlatformDispatcher.instance.onError = (error, stack) {
-  //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-  //   return true;
-  // };
+    // // Pass all uncaught "fatal" errors from the framework to Crashlytics
+    // FlutterError.onError = (errorDetails) {
+    //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // };
+    // // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    // PlatformDispatcher.instance.onError = (error, stack) {
+    //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    //   return true;
+    // };
 
-  DeepLinkBody? linkBody;
+    DeepLinkBody? linkBody;
 
-  if(GetPlatform.isWeb) {
-    await Firebase.initializeApp(options: FirebaseOptions(
-      apiKey: dotenv.env['FIREBASE_API_KEY']!,
-      appId: dotenv.env['FIREBASE_APP_ID']!,
-      messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-      projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
-    ));
-  }else if(GetPlatform.isAndroid) {
-    await Firebase.initializeApp(
-      options: FirebaseOptions(
+    if(GetPlatform.isWeb) {
+      await Firebase.initializeApp(options: FirebaseOptions(
         apiKey: dotenv.env['FIREBASE_API_KEY']!,
         appId: dotenv.env['FIREBASE_APP_ID']!,
         messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
         projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
-      ),
-    );
-  } else {
-    await Firebase.initializeApp();
-  }
-
-  Map<String, Map<String, String>> languages = await di.init();
-
-  NotificationBodyModel? body;
-  try {
-    if (GetPlatform.isMobile) {
-      final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
-      if (remoteMessage != null) {
-        body = NotificationHelper.convertNotification(remoteMessage.data);
-      }
-      await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
-      FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+      ));
+    }else if(GetPlatform.isAndroid) {
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+          apiKey: dotenv.env['FIREBASE_API_KEY']!,
+          appId: dotenv.env['FIREBASE_APP_ID']!,
+          messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
+          projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
     }
-  }catch(_) {}
 
-  if (ResponsiveHelper.isWeb()) {
-    await FacebookAuth.instance.webAndDesktopInitialize(
-      appId: dotenv.env['FACEBOOK_APP_ID']!,
-      cookie: true,
-      xfbml: true,
-      version: "v13.0",
-    );
+    Map<String, Map<String, String>> languages = await di.init();
+
+    NotificationBodyModel? body;
+    try {
+      if (GetPlatform.isMobile) {
+        final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
+        if (remoteMessage != null) {
+          body = NotificationHelper.convertNotification(remoteMessage.data);
+        }
+        await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
+        FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+      }
+    }catch(_) {}
+
+    if (ResponsiveHelper.isWeb()) {
+      await FacebookAuth.instance.webAndDesktopInitialize(
+        appId: dotenv.env['FACEBOOK_APP_ID']!,
+        cookie: true,
+        xfbml: true,
+        version: "v13.0",
+      );
+    }
+    runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
+  } catch (e, stackTrace) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Initialization Error:", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red)),
+              const SizedBox(height: 20),
+              Text(e.toString(), style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 20),
+              const Text("Stack Trace:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text(stackTrace.toString(), style: const TextStyle(fontSize: 12, fontFamily: 'Courier')),
+            ],
+          ),
+        ),
+      ),
+    ));
   }
-  runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
 }
 
 class MyApp extends StatefulWidget {

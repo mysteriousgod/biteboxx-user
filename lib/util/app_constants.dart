@@ -11,7 +11,16 @@ class AppConstants {
   static const String webHostedUrl = 'https://biteboxx.com';
   static const bool useReactWebsite = false;
 
-  static const String baseUrl = 'https://biteboxx.com';
+  static String get baseUrl {
+    // Check if we're in production environment
+    if (const bool.fromEnvironment('dart.vm.product')) {
+      // Production environment - use environment variable or fallback
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
+    } else {
+      // Development environment - can use localhost or staging
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
+    }
+  }
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String restaurantProductUri = '/api/v1/products/latest';
