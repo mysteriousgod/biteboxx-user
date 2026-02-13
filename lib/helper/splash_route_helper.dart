@@ -41,11 +41,9 @@ void _handleNavigation(NotificationBodyModel? notificationBody, DeepLinkBody? li
     _forLoggedInUserRouteProcess();
   } else if (Get.find<SplashController>().showIntro()!) {
     _newlyRegisteredRouteProcess();
-  } else if (Get.find<AuthController>().isGuestLoggedIn()) {
-    _forGuestUserRouteProcess();
   } else {
-    await Get.find<AuthController>().guestLogin();
-    _forGuestUserRouteProcess();
+    // SMS-only login: redirect to sign-in screen for non-logged-in users
+    Get.offNamed(RouteHelper.getSignInRoute(RouteHelper.splash));
   }
 }
 
@@ -81,10 +79,3 @@ void _newlyRegisteredRouteProcess() {
   }
 }
 
-void _forGuestUserRouteProcess() {
-  if (AddressHelper.getAddressFromSharedPref() != null) {
-    Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-  } else {
-    Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
-  }
-}

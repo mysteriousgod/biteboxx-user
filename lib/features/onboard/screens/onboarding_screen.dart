@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/onboard/controllers/onboard_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
@@ -166,11 +164,7 @@ class OnBoardingScreen extends StatelessWidget {
 
   void _configureToRouteInitialPage() async {
     Get.find<SplashController>().disableIntro();
-    await Get.find<AuthController>().guestLogin();
-    if (AddressHelper.getAddressFromSharedPref() != null) {
-      Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-    } else {
-      Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
-    }
+    // SMS-only login: redirect to sign-in screen after onboarding
+    Get.offNamed(RouteHelper.getSignInRoute(RouteHelper.onBoarding));
   }
 }
