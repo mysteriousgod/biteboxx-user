@@ -49,16 +49,18 @@ class VerificationScreenState extends State<VerificationScreen> {
   Timer? _timer;
   int _seconds = 0;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _otpController = TextEditingController();
+  String? _firebaseSession;
 
   @override
   void initState() {
     super.initState();
 
-    Get.find<VerificationController>().updateVerificationCode('', canUpdate: false);
     if(widget.number != null && widget.number!.isNotEmpty) {
       _number = widget.number!.startsWith('+') ? widget.number : '+${widget.number!.substring(1, widget.number!.length)}';
     }
     _email = widget.email;
+    _firebaseSession = widget.firebaseSession;
     _startTimer();
   }
 
@@ -76,6 +78,7 @@ class VerificationScreenState extends State<VerificationScreen> {
 
   @override
   void dispose() {
+    _otpController.dispose();
     super.dispose();
 
     _timer?.cancel();
@@ -99,6 +102,9 @@ class VerificationScreenState extends State<VerificationScreen> {
             color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
           ) : null,
           child: GetBuilder<VerificationController>(builder: (verificationController) {
+            if(verificationController.verificationCode.length == 6 && _otpController.text != verificationController.verificationCode){
+              _otpController.text = verificationController.verificationCode;
+            }
             return Column(children: [
 
               isDesktop ? Align(
@@ -134,6 +140,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                 child: PinCodeTextField(
                   length: 6,
                   appContext: context,
+                  controller: _otpController,
                   keyboardType: TextInputType.number,
                   animationType: AnimationType.slide,
                   pinTheme: PinTheme(
@@ -159,6 +166,7 @@ class VerificationScreenState extends State<VerificationScreen> {
                   enableActiveFill: true,
                   onChanged: verificationController.updateVerificationCode,
                   beforeTextPaste: (text) => true,
+
                 ),
               ),
               const SizedBox(height: Dimensions.paddingSizeExtraLarge),
@@ -172,11 +180,11 @@ class VerificationScreenState extends State<VerificationScreen> {
                         buttonText: 'verify'.tr,
                         isLoading: verificationController.isLoading || profileController.isLoading,
                         onPressed: verificationController.verificationCode.length < 6 ? null : () {
-                          if(widget.firebaseSession != null && widget.userModel == null) {
+                          if(_firebaseSession != null && widget.userModel == null) {
                             verificationController.verifyFirebaseOtp(
-                              phoneNumber: _number!, session: widget.firebaseSession!, loginType: widget.loginType,
-                              otp: verificationController.verificationCode, token: widget.token, isForgetPassPage: widget.fromForgetPassword,
-                              isSignUpPage: widget.loginType == CentralizeLoginType.otp.name ? false : true,
+                               phoneNumber: _number!, session: _firebaseSession!, loginType: widget.loginType,
+                               otp: verificationController.verificationCode, token: widget.token, isForgetPassPage: widget.fromForgetPassword,
+                               isSignUpPage: false,
                             ).then((value) {
                               if(value.isSuccess) {
                                 _handleVerifyResponse(value, _number, _email);
@@ -242,8 +250,12 @@ class VerificationScreenState extends State<VerificationScreen> {
                   ),
                   TextButton(
                     onPressed: _seconds < 1 ? () async {
-                      if(widget.firebaseSession != null) {
-                        await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false);
+                      if(_firebaseSession != null) {
+                        await Get.find<AuthController>().firebaseVerifyPhoneNumber(_number!, widget.token, widget.loginType, fromSignUp: widget.fromSignUp, canRoute: false, onCodeSent: (vId) {
+                          setState(() {
+                            _firebaseSession = vId;
+                          });
+                        });
                         _startTimer();
                       } else {
                         _resendOtp();

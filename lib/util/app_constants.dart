@@ -3,24 +3,15 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:get/get.dart';
 
 class AppConstants {
-  static const String appName = 'Bite Boxxer';
+  static const String appName = 'BiteBoxx';
   static const double appVersion = 8.4; ///Flutter SDK: 3.35.2
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
-  static const String webHostedUrl = 'https://main.d1wk7b6t2z78p1.amplifyapp.com';
+  static const String webHostedUrl = 'https://biteboxx.com';
   static const bool useReactWebsite = false;
 
-  static String get baseUrl {
-    // Check if we're in production environment
-    if (const bool.fromEnvironment('dart.vm.product')) {
-      // Production environment - use environment variable or fallback
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
-    } else {
-      // Development environment - can use localhost or staging
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
-    }
-  }
+  static const String baseUrl = 'https://biteboxx.com';
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String restaurantProductUri = '/api/v1/products/latest';

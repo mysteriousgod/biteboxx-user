@@ -49,14 +49,17 @@ class _SignInViewState extends State<SignInView> {
     AuthController authController  = Get.find<AuthController>();
 
     _countryDialCode = authController.getUserCountryCode().isNotEmpty ? authController.getUserCountryCode()
-        : CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+        : CountryCode.fromCountryCode(Get.find<SplashController>().configModel?.country ?? "BD").dialCode;
     _phoneController.text =  authController.getUserNumber();
     _passwordController.text = authController.getUserPassword();
     _otpPhoneController.text = authController.getUserOtpPhoneNumber();
 
     WidgetsBinding.instance.addPostFrameCallback((_){
-      bool isOtpActive = CentralizeLoginHelper.getPreferredLoginMethod(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController.isOtpViewEnable).type == CentralizeLoginType.otp
-      || CentralizeLoginHelper.getPreferredLoginMethod(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController.isOtpViewEnable).type == CentralizeLoginType.otpAndSocial ;
+      bool isOtpActive = false;
+      if(Get.find<SplashController>().configModel != null && Get.find<SplashController>().configModel!.centralizeLoginSetup != null) {
+        isOtpActive = CentralizeLoginHelper.getPreferredLoginMethod(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController.isOtpViewEnable).type == CentralizeLoginType.otp
+            || CentralizeLoginHelper.getPreferredLoginMethod(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController.isOtpViewEnable).type == CentralizeLoginType.otpAndSocial ;
+      }
       if(_countryDialCode != "" && _phoneController.text != "" && _phoneController.text.contains('@') && isOtpActive) {
         _phoneController.text = '';
       } else if(_countryDialCode != "" && _phoneController.text != "" && !_phoneController.text.contains('@')){
@@ -80,94 +83,22 @@ class _SignInViewState extends State<SignInView> {
     return GetBuilder<AuthController>(builder: (authController) {
       return Form(
         key: _formKeyLogin,
-        child: activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController),
+        child: Get.find<SplashController>().configModel != null && Get.find<SplashController>().configModel!.centralizeLoginSetup != null ? activeCentralizeLogin(Get.find<SplashController>().configModel!.centralizeLoginSetup!, authController) : const SizedBox(),
       );
     });
   }
 
   Widget activeCentralizeLogin(CentralizeLoginSetup centralizeLoginSetup, AuthController authController) {
-    CentralizeLoginType centralizeLogin = CentralizeLoginHelper.getPreferredLoginMethod(centralizeLoginSetup, authController.isOtpViewEnable).type;
-
-    switch (centralizeLogin) {
-      case CentralizeLoginType.otp:
-        return OtpLoginWidget(
-          phoneController: _otpPhoneController, phoneFocus: _otpPhoneFocus,
-          countryDialCode: _countryDialCode,
-          onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
-          onClickLoginButton: () {
-            _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
-          },
-        );
-
-      case CentralizeLoginType.manual:
-        return ManualLoginWidget(
-          phoneController: _phoneController, passwordController: _passwordController,
-          phoneFocus: _phoneFocus, passwordFocus: _passwordFocus, onWebSubmit: (){},
-          onClickLoginButton: () {
-            _login(Get.find<AuthController>(), CentralizeLoginType.manual);
-          },
-        );
-
-      case CentralizeLoginType.social:
-        return const SocialLoginWidget(onlySocialLogin: true);
-
-      case CentralizeLoginType.manualAndSocial:
-        return ManualLoginWidget(
-          phoneController: _phoneController, passwordController: _passwordController, phoneFocus: _phoneFocus, passwordFocus: _passwordFocus,
-          socialEnable: true,
-          onWebSubmit: (){}, onClickLoginButton: () {
-            _login(Get.find<AuthController>(), CentralizeLoginType.manual);
-          },
-        );
-
-      case CentralizeLoginType.manualAndOtp:
-        return ManualLoginWidget(
-          phoneController: _phoneController, passwordController: _passwordController, phoneFocus: _phoneFocus, passwordFocus: _passwordFocus,
-          onOtpViewClick: () {
-            widget.isOtpViewEnable!(true);
-            if(_countryDialCode != "" && _phoneController.text != "" && _phoneController.text.contains('@')) {
-              _phoneController.text = '';
-            }
-            setState(() {
-              authController.enableOtpView(enable: true);
-            });
-          },
-          onWebSubmit: (){},
-          onClickLoginButton: () {
-            _login(Get.find<AuthController>(), CentralizeLoginType.manual);
-          },
-        );
-
-      case CentralizeLoginType.otpAndSocial:
-        return SocialLoginWidget(onlySocialLogin: true, onOtpViewClick: (){
-          widget.isOtpViewEnable!(true);
-          if(_countryDialCode != "" && _phoneController.text != "" && _phoneController.text.contains('@')) {
-            _phoneController.text = '';
-          }
-          setState(() {
-            authController.enableOtpView(enable: true);
-          });
-        });
-
-      case CentralizeLoginType.manualAndSocialAndOtp:
-        return ManualLoginWidget(
-          phoneController: _phoneController, passwordController: _passwordController, phoneFocus: _phoneFocus, passwordFocus: _passwordFocus,
-          onWebSubmit: (){}, socialEnable: true,
-          onClickLoginButton: () {
-            _login(Get.find<AuthController>(), CentralizeLoginType.manual);
-          },
-          onOtpViewClick: () {
-            widget.isOtpViewEnable!(true);
-            if(_countryDialCode != "" && _phoneController.text != "" && _phoneController.text.contains('@')) {
-              _phoneController.text = '';
-            }
-            setState(() {
-              authController.enableOtpView(enable: true);
-            });
-          },
-        );
-
-      }
+    return OtpLoginWidget(
+      phoneController: _otpPhoneController, phoneFocus: _otpPhoneFocus,
+      countryDialCode: _countryDialCode,
+      onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
+      onClickLoginButton: () {
+        _otpLogin(Get.find<AuthController>(), _countryDialCode!, CentralizeLoginType.otp);
+      },
+      onMainViewClick: null,
+      socialEnable: false,
+    );
   }
 
 
@@ -236,7 +167,7 @@ class _SignInViewState extends State<SignInView> {
       List<int> encoded = utf8.encode(password);
       String data = base64Encode(encoded);
       String token = status.authResponseModel!.token??'';
-      if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
+      if(Get.find<SplashController>().configModel?.firebaseOtpVerification ?? false) {
         Get.find<AuthController>().firebaseVerifyPhoneNumber(phone, token, CentralizeLoginType.manual.name, fromSignUp: true);
       } else {
         Get.toNamed(RouteHelper.getVerificationRoute(
@@ -271,7 +202,7 @@ class _SignInViewState extends State<SignInView> {
       await Get.find<FavouriteController>().getFavouriteList();
     }
     if(response.authResponseModel != null && !response.authResponseModel!.isPhoneVerified!) {
-      if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
+      if(Get.find<SplashController>().configModel?.firebaseOtpVerification ?? false) {
         Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
       } else {
         if(ResponsiveHelper.isDesktop(Get.context)) {

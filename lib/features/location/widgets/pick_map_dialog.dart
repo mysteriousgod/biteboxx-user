@@ -251,10 +251,9 @@ class _PickMapDialogState extends State<PickMapDialog> {
             Positioned(
               bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeLarge,
               child: CustomButtonWidget(
-                buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
-                    : 'service_not_available_in_this_area'.tr,
+                buttonText: widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr,
                 isLoading: locationController.isLoading,
-                onPressed: locationController.isLoading ? (){} : (locationController.buttonDisabled || locationController.loading) ? null : () {
+                onPressed: locationController.isLoading ? (){} : (locationController.loading) ? null : () {
                   _onPickAddressButtonPressed(locationController);
                 },
               ),

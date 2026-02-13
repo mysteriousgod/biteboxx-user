@@ -51,7 +51,7 @@ class BottomButton extends StatelessWidget {
               }else {
                 Get.back();
                 Get.toNamed(RouteHelper.getPickMapRoute(route ?? RouteHelper.accessLocation, route != null));
-                showCustomSnackBar('service_not_available_in_current_location'.tr);
+                // showCustomSnackBar('service_not_available_in_current_location'.tr);
               }
             });
           },

@@ -20,7 +20,8 @@ class OtpLoginWidget extends StatelessWidget {
   final Function(CountryCode countryCode)? onCountryChanged;
   final Function() onClickLoginButton;
   final bool socialEnable;
-  const OtpLoginWidget({super.key, required this.phoneController, required this.phoneFocus, required this.onCountryChanged, required this.countryDialCode, required this.onClickLoginButton, this.socialEnable = false});
+  final Function()? onMainViewClick;
+  const OtpLoginWidget({super.key, required this.phoneController, required this.phoneFocus, required this.onCountryChanged, required this.countryDialCode, required this.onClickLoginButton, this.socialEnable = false, this.onMainViewClick});
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +95,20 @@ class OtpLoginWidget extends StatelessWidget {
           socialEnable && isDesktop ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
           !socialEnable ? const SizedBox(height: 100) : const SizedBox(),
+
+          onMainViewClick != null ? Column(children: [
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+            
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Text('sign_in_with'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
+              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+
+              InkWell(
+                onTap: onMainViewClick,
+                child: Text('password'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, decoration: TextDecoration.underline)),
+              ),
+            ]),
+          ]) : const SizedBox(),
 
         ]),
       );

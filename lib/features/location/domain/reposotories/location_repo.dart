@@ -33,7 +33,7 @@ class LocationRepo implements LocationRepoInterface {
     if(response.statusCode == 200 && response.body['status'] == 'OK') {
       address = response.body['results'][0]['formatted_address'].toString();
     }else {
-      showCustomSnackBar(response.body['error_message'] ?? response.bodyString);
+      // showCustomSnackBar(response.body['error_message'] ?? response.bodyString);
     }
     return address;
   }
