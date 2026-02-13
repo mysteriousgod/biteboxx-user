@@ -31,30 +31,34 @@ class NewUserSetupScreen extends StatefulWidget {
 
 class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
   final FocusNode _nameFocus = FocusNode();
-  final FocusNode _emailFocus = FocusNode();
   final FocusNode _phoneFocus = FocusNode();
   final FocusNode _referCodeFocus = FocusNode();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _referCodeController = TextEditingController();
   String? _countryDialCode;
   GlobalKey<FormState>? _formKeyInfo;
 
-  bool _isSocial = false;
-
   @override
   void initState() {
     super.initState();
 
-
-    _isSocial = widget.loginType == CentralizeLoginType.social.name;
     _formKeyInfo = GlobalKey<FormState>();
     _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+
+    // Pre-fill name from SMS login if available
+    AuthController authController = Get.find<AuthController>();
+    if (authController.smsLoginName.isNotEmpty) {
+      _nameController.text = authController.smsLoginName;
+    } else if (widget.name.isNotEmpty) {
+      _nameController.text = widget.name;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool needsPhone = widget.phone == null || widget.phone!.isEmpty;
+
     return Scaffold(
       backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
       appBar: ResponsiveHelper.isDesktop(context) ? null : AppBar(leading: IconButton(
@@ -100,7 +104,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   required: true,
                   controller: _nameController,
                   focusNode: _nameFocus,
-                  nextFocus: _isSocial ? _phoneFocus : _emailFocus,
+                  nextFocus: needsPhone ? _phoneFocus : _referCodeFocus,
                   inputType: TextInputType.name,
                   capitalization: TextCapitalization.words,
                   prefixIcon: CupertinoIcons.person_alt_circle_fill,
@@ -109,7 +113,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                _isSocial ? CustomTextFieldWidget(
+                needsPhone ? CustomTextFieldWidget(
                   hintText: 'xxx-xxx-xxxxx'.tr,
                   labelText: 'phone'.tr,
                   showLabelText: true,
@@ -125,19 +129,8 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
                       : Get.find<LocalizationController>().locale.countryCode,
                   validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
-                ) : CustomTextFieldWidget(
-                  hintText: 'enter_email'.tr,
-                  labelText: 'email'.tr,
-                  showLabelText: true,
-                  required: true,
-                  controller: _emailController,
-                  focusNode: _emailFocus,
-                  nextFocus: _referCodeFocus,
-                  inputType: TextInputType.emailAddress,
-                  prefixIcon: CupertinoIcons.mail_solid,
-                  validator: (value) => ValidateCheck.validateEmail(value),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                ) : const SizedBox(),
+                needsPhone ? const SizedBox(height: Dimensions.paddingSizeExtraLarge) : const SizedBox(),
 
                 (Get.find<SplashController>().configModel!.refEarningStatus == 1 ) ? CustomTextFieldWidget(
                   hintText: 'refer_code'.tr,
@@ -170,38 +163,42 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
 
                       String? countryCode = _countryDialCode;
                       String numberWithCountryCode = countryCode! + number;
-                      PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-                      numberWithCountryCode = phoneValid.phone;
 
-                      if (_isSocial && number.isEmpty && !_formKeyInfo!.currentState!.validate()) {
-                        showCustomSnackBar('enter_phone_number'.tr);
-                      } else if (_isSocial && !phoneValid.isValid && !_formKeyInfo!.currentState!.validate()) {
-                        showCustomSnackBar('invalid_phone_number'.tr);
-                      } else if(referCode.isNotEmpty && referCode.length != 10){
+                      if (needsPhone) {
+                        PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+                        numberWithCountryCode = phoneValid.phone;
+
+                        if (number.isEmpty && !_formKeyInfo!.currentState!.validate()) {
+                          showCustomSnackBar('enter_phone_number'.tr);
+                          return;
+                        } else if (!phoneValid.isValid && !_formKeyInfo!.currentState!.validate()) {
+                          showCustomSnackBar('invalid_phone_number'.tr);
+                          return;
+                        }
+                      }
+
+                      if(referCode.isNotEmpty && referCode.length != 10){
                         showCustomSnackBar('invalid_refer_code'.tr);
-                      }else if(_formKeyInfo!.currentState!.validate()) {
+                      } else if(_formKeyInfo!.currentState!.validate()) {
                         authController.updatePersonalInfo(
-                          name: name.isNotEmpty ? name : widget.name, phone: (widget.phone != null && widget.phone!.isNotEmpty) ?  widget.phone : _countryDialCode! + _phoneController.text.trim(),
-                          loginType: widget.loginType, email: widget.email ?? _emailController.text.trim(),
+                          name: name.isNotEmpty ? name : widget.name,
+                          phone: (widget.phone != null && widget.phone!.isNotEmpty) ? widget.phone : _countryDialCode! + _phoneController.text.trim(),
+                          loginType: widget.loginType,
+                          email: widget.email,
                           referCode: _referCodeController.text.trim(),
                         ).then((response) {
                           if(response.isSuccess) {
                             Get.offAllNamed(RouteHelper.getAccessLocationRoute('sign-in'));
                           } else {
-
-                            if(response.code == 'email'){
-                              FocusScope.of(Get.context!).requestFocus(_emailFocus);
-                            }else if(response.code == 'phone'){
+                            if(response.code == 'phone'){
                               FocusScope.of(Get.context!).requestFocus(_phoneFocus);
-                            }else if(response.code == 'ref_code'){
+                            } else if(response.code == 'ref_code'){
                               FocusScope.of(Get.context!).requestFocus(_referCodeFocus);
                             }
-
                             showCustomSnackBar(response.message);
                           }
                         });
                       }
-
                     },
                   );
                 }),

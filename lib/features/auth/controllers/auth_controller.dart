@@ -49,6 +49,13 @@ class AuthController extends GetxController implements GetxService {
   bool _isOtpViewEnable = false;
   bool get isOtpViewEnable => _isOtpViewEnable;
 
+  String _smsLoginName = '';
+  String get smsLoginName => _smsLoginName;
+
+  void setSmsLoginName(String name) {
+    _smsLoginName = name;
+  }
+
   Future<ResponseModel> login({required String emailOrPhone, required String password, required String loginType, required String fieldType, bool alreadyInApp = false}) async {
     _isLoading = true;
     update();
