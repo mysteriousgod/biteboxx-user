@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
@@ -236,51 +237,170 @@ class AuthController extends GetxController implements GetxService {
     return authServiceInterface.getGuestNumber();
   }
 
-  Future<void> firebaseVerifyPhoneNumber(String phoneNumber, String? token, String loginType, {bool fromSignUp = true, bool canRoute = true, UpdateUserModel? updateUserModel})async {
+  // --- Firebase Phone Auth: rate-limit & resend token tracking ---
+  int? _forceResendingToken;
+  int? get forceResendingToken => _forceResendingToken;
+
+  DateTime? _lastOtpRequestTime;
+  static const int _otpCooldownSeconds = 30;
+
+  /// Returns true if we are still within the cooldown window after the last
+  /// OTP request. Shows a user-facing message and refuses to fire another
+  /// request so we don't hit Firebase's rate-limiter.
+  bool _isRateLimited() {
+    if (_lastOtpRequestTime != null) {
+      final elapsed = DateTime.now().difference(_lastOtpRequestTime!).inSeconds;
+      if (elapsed < _otpCooldownSeconds) {
+        final remaining = _otpCooldownSeconds - elapsed;
+        showCustomSnackBar('please_wait_before_requesting_another_code'.trParams({'seconds': '$remaining'}) );
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Translates raw Firebase error codes into user-friendly messages.
+  String _friendlyFirebaseError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-phone-number':
+        return 'please_submit_a_valid_phone_number'.tr;
+      case 'too-many-requests':
+        return 'too_many_attempts_please_try_again_later'.tr;
+      case 'quota-exceeded':
+        return 'sms_quota_exceeded_please_try_again_later'.tr;
+      case 'app-not-authorized':
+        return 'app_not_authorized_for_firebase_phone_auth'.tr;
+      case 'captcha-check-failed':
+        return 'verification_failed_please_try_again'.tr;
+      case 'missing-client-identifier':
+        return 'app_verification_failed_please_reinstall'.tr;
+      case 'network-request-failed':
+        return 'network_error_check_your_connection'.tr;
+      case 'user-disabled':
+        return 'this_account_has_been_disabled'.tr;
+      case 'session-expired':
+        return 'verification_code_expired_please_resend'.tr;
+      case 'invalid-verification-code':
+        return 'invalid_verification_code'.tr;
+      default:
+        // Fallback: clean up the raw message a little
+        return e.message?.replaceAll('_', ' ') ?? 'something_went_wrong'.tr;
+    }
+  }
+
+  Future<void> firebaseVerifyPhoneNumber(
+    String phoneNumber,
+    String? token,
+    String loginType, {
+    bool fromSignUp = true,
+    bool canRoute = true,
+    UpdateUserModel? updateUserModel,
+  }) async {
+    // Prevent rapid-fire OTP requests
+    if (_isRateLimited()) return;
+
     _isLoading = true;
     update();
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        _isLoading = false;
-        update();
-
-        if(e.code == 'invalid-phone-number') {
-          showCustomSnackBar('please_submit_a_valid_phone_number'.tr);
-        }else{
-          showCustomSnackBar(e.message?.replaceAll('_', ' '));
-        }
-
-      },
-      codeSent: (String vId, int? resendToken) {
-
-        _isLoading = false;
-        update();
-        if(updateUserModel != null) {
-          updateUserModel.sessionInfo = vId;
-        }
-
-        if(canRoute) {
-          if(ResponsiveHelper.isDesktop(Get.context)) {
-
-            Get.back();
-            Get.dialog(VerificationScreen(
-              number: phoneNumber, email: null, token: token, fromSignUp: fromSignUp, fromForgetPassword: !fromSignUp,
-              loginType: loginType, password: '', firebaseSession: vId, userModel: updateUserModel,
-            ));
-          } else {
-            Get.toNamed(RouteHelper.getVerificationRoute(
-              phoneNumber, '', token, fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword, '', loginType,
-              session: vId, updateUserModel: updateUserModel,
-            ));
-          }
-        }
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
+    developer.log(
+      'Firebase Phone Auth: requesting OTP for $phoneNumber '
+      '(resendToken: $_forceResendingToken)',
+      name: 'AuthController',
     );
 
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _forceResendingToken,
+
+        verificationCompleted: (PhoneAuthCredential credential) {
+          // Auto-verification (e.g. on Android with SMS Retriever).
+          // We intentionally leave this empty because the backend
+          // handles verification via the session id + OTP code.
+          developer.log(
+            'Firebase Phone Auth: auto-verification completed',
+            name: 'AuthController',
+          );
+        },
+
+        verificationFailed: (FirebaseAuthException e) {
+          _isLoading = false;
+          update();
+
+          developer.log(
+            'Firebase Phone Auth FAILED: code=${e.code}, message=${e.message}',
+            name: 'AuthController',
+            error: e,
+          );
+
+          showCustomSnackBar(_friendlyFirebaseError(e));
+        },
+
+        codeSent: (String vId, int? resendToken) {
+          _isLoading = false;
+          _forceResendingToken = resendToken;
+          _lastOtpRequestTime = DateTime.now();
+          update();
+
+          developer.log(
+            'Firebase Phone Auth: code sent, vId=$vId, resendToken=$resendToken',
+            name: 'AuthController',
+          );
+
+          if (updateUserModel != null) {
+            updateUserModel.sessionInfo = vId;
+          }
+
+          if (canRoute) {
+            if (ResponsiveHelper.isDesktop(Get.context)) {
+              Get.back();
+              Get.dialog(VerificationScreen(
+                number: phoneNumber,
+                email: null,
+                token: token,
+                fromSignUp: fromSignUp,
+                fromForgetPassword: !fromSignUp,
+                loginType: loginType,
+                password: '',
+                firebaseSession: vId,
+                userModel: updateUserModel,
+              ));
+            } else {
+              Get.toNamed(RouteHelper.getVerificationRoute(
+                phoneNumber, '', token,
+                fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword,
+                '', loginType,
+                session: vId,
+                updateUserModel: updateUserModel,
+              ));
+            }
+          }
+        },
+
+        codeAutoRetrievalTimeout: (String verificationId) {
+          developer.log(
+            'Firebase Phone Auth: auto-retrieval timeout for $verificationId',
+            name: 'AuthController',
+          );
+        },
+      );
+    } catch (e) {
+      _isLoading = false;
+      update();
+      developer.log(
+        'Firebase Phone Auth: unexpected error: $e',
+        name: 'AuthController',
+        error: e,
+      );
+      showCustomSnackBar('something_went_wrong'.tr);
+    }
+  }
+
+  /// Resets the resend token (e.g. when navigating away from verification).
+  void resetFirebaseResendToken() {
+    _forceResendingToken = null;
+    _lastOtpRequestTime = null;
   }
 
 }

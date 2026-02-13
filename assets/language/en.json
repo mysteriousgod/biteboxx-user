@@ -1295,5 +1295,18 @@
   "please_try_again_after_some_time_or_contact_with_our_support_team" : "Please try again after some time or Contact with our support team.",
   "regular" : "Regular",
   "no_payment_method_has_been_selected_kindly_select_a_payment_method" : "No payment method has been selected. Kindly select a payment method.",
-  "search_by_category" : "Search by category"
+  "search_by_category" : "Search by category",
+  "too_many_attempts_please_try_again_later" : "Too many attempts. Please try again after a few minutes.",
+  "sms_quota_exceeded_please_try_again_later" : "SMS limit reached. Please try again later.",
+  "app_not_authorized_for_firebase_phone_auth" : "This app is not authorized for phone authentication. Please contact support.",
+  "verification_failed_please_try_again" : "Verification failed. Please try again.",
+  "app_verification_failed_please_reinstall" : "App verification failed. Please reinstall the app and try again.",
+  "network_error_check_your_connection" : "Network error. Please check your internet connection and try again.",
+  "this_account_has_been_disabled" : "This account has been disabled. Please contact support.",
+  "verification_code_expired_please_resend" : "Verification code has expired. Please request a new one.",
+  "invalid_verification_code" : "Invalid verification code. Please check and try again.",
+  "something_went_wrong" : "Something went wrong. Please try again.",
+  "please_wait_before_requesting_another_code" : "Please wait @seconds seconds before requesting another code.",
+  "enter_your_name_and_phone_to_continue" : "Enter your name and phone number to continue",
+  "please_enter_your_name" : "Please enter your name"
 }
