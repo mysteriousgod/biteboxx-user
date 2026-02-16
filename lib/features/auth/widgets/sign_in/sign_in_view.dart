@@ -9,7 +9,6 @@ import 'package:stackfood_multivendor/features/auth/domain/centralize_login_enum
 import 'package:stackfood_multivendor/features/auth/widgets/sign_in/otp_login_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
 import 'package:stackfood_multivendor/helper/custom_validator.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
@@ -72,29 +71,51 @@ class _SignInViewState extends State<SignInView> {
   }
 
   void _otpLogin(AuthController authController, String countryDialCode, CentralizeLoginType loginType) async {
+    debugPrint('_otpLogin triggered');
     String phone = _otpPhoneController.text.trim();
     String numberWithCountryCode = countryDialCode + phone;
+    debugPrint('Validating phone number: $numberWithCountryCode');
     PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
     numberWithCountryCode = phoneValid.phone;
 
-    if (_formKeyLogin!.currentState!.validate()) {
-      if (!phoneValid.isValid) {
-        showCustomSnackBar('invalid_phone_number'.tr);
+    // Bypass validation for Firebase Test Number
+    if (numberWithCountryCode.replaceAll(' ', '') == '+911234567890') {
+      debugPrint('Bypassing validation for Test Number');
+      phoneValid.isValid = true;
+    }
+
+    try {
+      if (_formKeyLogin!.currentState!.validate()) {
+        if (!phoneValid.isValid) {
+          debugPrint('Invalid phone number validation for: $numberWithCountryCode');
+          showCustomSnackBar('invalid_phone_number'.tr);
+        } else {
+          debugPrint('Calling authController.otpLogin...');
+          authController.otpLogin(
+            phone: numberWithCountryCode,
+            otp: '',
+            loginType: loginType.name,
+            verified: '',
+            alreadyInApp: widget.backFromThis,
+          ).then((response) {
+            debugPrint('authController.otpLogin returned: ${response.message}');
+            if (response.isSuccess) {
+              debugPrint('OTP Login Success: ${response.message}');
+              _processOtpSuccessSetup(response, authController, phone, countryDialCode);
+            } else {
+              debugPrint('OTP Login Failed: ${response.message}');
+              showCustomSnackBar(response.message);
+            }
+          }).catchError((e) {
+            debugPrint('Error in otpLogin promise: $e');
+            showCustomSnackBar('Login failed: $e');
+          });
+        }
       } else {
-        authController.otpLogin(
-          phone: numberWithCountryCode,
-          otp: '',
-          loginType: loginType.name,
-          verified: '',
-          alreadyInApp: widget.backFromThis,
-        ).then((response) {
-          if (response.isSuccess) {
-            _processOtpSuccessSetup(response, authController, phone, countryDialCode);
-          } else {
-            showCustomSnackBar(response.message);
-          }
-        });
+        debugPrint('Form validation failed');
       }
+    } catch (e) {
+      debugPrint('Exception in _otpLogin: $e');
     }
   }
 
@@ -108,21 +129,8 @@ class _SignInViewState extends State<SignInView> {
       await Get.find<FavouriteController>().getFavouriteList();
     }
     if (response.authResponseModel != null && !response.authResponseModel!.isPhoneVerified!) {
-      if (Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
-        Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
-      } else {
-        if (ResponsiveHelper.isDesktop(Get.context)) {
-          Get.back();
-          Get.dialog(VerificationScreen(
-            number: countryDialCode + phone, email: null, token: '', fromSignUp: true,
-            fromForgetPassword: false, loginType: CentralizeLoginType.otp.name, password: '',
-          ));
-        } else {
-          Get.toNamed(RouteHelper.getVerificationRoute(
-            countryDialCode + phone, null, '', RouteHelper.signUp, null, CentralizeLoginType.otp.name,
-          ));
-        }
-      }
+      // Always use Firebase Phone Auth for OTP verification
+      Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
     } else {
       if (widget.backFromThis) {
         if (ResponsiveHelper.isDesktop(Get.context)) {

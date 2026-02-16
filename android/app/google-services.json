@@ -15,6 +15,14 @@
       "oauth_client": [
         {
           "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitbox.user",
+            "certificate_hash": "b0fb8cb7860dca6e0e966794e1dedd730c3a0de4"
+          }
+        },
+        {
+          "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

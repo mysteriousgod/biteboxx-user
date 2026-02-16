@@ -6,7 +6,6 @@ import 'package:stackfood_multivendor/features/language/controllers/localization
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/verification/controllers/verification_controller.dart';
-import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
 import 'package:stackfood_multivendor/helper/custom_validator.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
@@ -44,8 +43,9 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
   void initState() {
     super.initState();
 
-    isPhone = (Get.find<SplashController>().configModel!.isSmsActive! || Get.find<SplashController>().configModel!.firebaseOtpVerification!);
-    isEmail = Get.find<SplashController>().configModel!.isMailActive!;
+    // Always enable phone-based forgot password (Firebase handles OTP)
+    isPhone = true;
+    isEmail = false;
 
     _formKeyLogin = GlobalKey<FormState>();
     if (!kIsWeb) {
@@ -219,19 +219,8 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
       } else {
         Get.find<VerificationController>().forgetPassword(email: email, phone: numberWithCountryCode).then((status) async {
           if (status.isSuccess) {
-            if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
-              Get.find<AuthController>().firebaseVerifyPhoneNumber(numberWithCountryCode, status.message, '', fromSignUp: false);
-            } else {
-              if(ResponsiveHelper.isDesktop(Get.context)) {
-                Get.back();
-                Get.dialog(VerificationScreen(
-                  number: numberWithCountryCode, email: email, token: '', fromSignUp: false,
-                  fromForgetPassword: true, loginType: '', password: '',
-                ));
-              } else {
-                Get.toNamed(RouteHelper.getVerificationRoute(numberWithCountryCode, email, '', RouteHelper.forgotPassword, '', ''));
-              }
-            }
+            // Always use Firebase Phone Auth for OTP delivery
+            Get.find<AuthController>().firebaseVerifyPhoneNumber(numberWithCountryCode, status.message, '', fromSignUp: false);
           }else {
             showCustomSnackBar(status.message);
           }

@@ -1,5 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
@@ -229,51 +230,96 @@ class AuthController extends GetxController implements GetxService {
     return authServiceInterface.getGuestNumber();
   }
 
+  int? _forceResendingToken;
+
   Future<void> firebaseVerifyPhoneNumber(String phoneNumber, String? token, String loginType, {bool fromSignUp = true, bool canRoute = true, UpdateUserModel? updateUserModel})async {
     _isLoading = true;
     update();
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        _isLoading = false;
-        update();
+    debugPrint('===== Firebase Phone Auth =====');
+    debugPrint('Phone: $phoneNumber');
+    debugPrint('LoginType: $loginType');
+    debugPrint('FromSignUp: $fromSignUp');
 
-        if(e.code == 'invalid-phone-number') {
-          showCustomSnackBar('please_submit_a_valid_phone_number'.tr);
-        }else{
-          showCustomSnackBar(e.message?.replaceAll('_', ' '));
-        }
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _forceResendingToken,
+        verificationCompleted: (PhoneAuthCredential credential) {
+          debugPrint('===== Auto-verification completed =====');
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          _isLoading = false;
+          update();
 
-      },
-      codeSent: (String vId, int? resendToken) {
+          debugPrint('===== Firebase Verification Failed =====');
+          debugPrint('Error code: ${e.code}');
+          debugPrint('Error message: ${e.message}');
 
-        _isLoading = false;
-        update();
-        if(updateUserModel != null) {
-          updateUserModel.sessionInfo = vId;
-        }
-
-        if(canRoute) {
-          if(ResponsiveHelper.isDesktop(Get.context)) {
-
-            Get.back();
-            Get.dialog(VerificationScreen(
-              number: phoneNumber, email: null, token: token, fromSignUp: fromSignUp, fromForgetPassword: !fromSignUp,
-              loginType: loginType, password: '', firebaseSession: vId, userModel: updateUserModel,
-            ));
-          } else {
-            Get.toNamed(RouteHelper.getVerificationRoute(
-              phoneNumber, '', token, fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword, '', loginType,
-              session: vId, updateUserModel: updateUserModel,
-            ));
+          String errorMessage;
+          switch(e.code) {
+            case 'invalid-phone-number':
+              errorMessage = 'please_submit_a_valid_phone_number'.tr;
+              break;
+            case 'too-many-requests':
+              errorMessage = 'Too many OTP requests. Please try again later.';
+              break;
+            case 'quota-exceeded':
+              errorMessage = 'SMS quota exceeded. Please try again later.';
+              break;
+            case 'app-not-authorized':
+              errorMessage = 'App not authorized for Firebase Phone Auth. Check SHA-1 fingerprint in Firebase Console.';
+              break;
+            case 'captcha-check-failed':
+              errorMessage = 'reCAPTCHA verification failed. Please try again.';
+              break;
+            case 'missing-client-identifier':
+              errorMessage = 'Missing client identifier. Please check Firebase configuration and SHA-1/SHA-256 fingerprints.';
+              break;
+            default:
+              errorMessage = e.message?.replaceAll('_', ' ') ?? 'Phone verification failed. Please try again.';
           }
-        }
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
+          showCustomSnackBar(errorMessage);
+        },
+        codeSent: (String vId, int? resendToken) {
+          debugPrint('===== OTP Code Sent Successfully =====');
+          debugPrint('Verification ID: $vId');
 
+          _isLoading = false;
+          _forceResendingToken = resendToken;
+          update();
+
+          if(updateUserModel != null) {
+            updateUserModel.sessionInfo = vId;
+          }
+
+          if(canRoute) {
+            if(ResponsiveHelper.isDesktop(Get.context)) {
+              Get.back();
+              Get.dialog(VerificationScreen(
+                number: phoneNumber, email: null, token: token, fromSignUp: fromSignUp, fromForgetPassword: !fromSignUp,
+                loginType: loginType, password: '', firebaseSession: vId, userModel: updateUserModel,
+              ));
+            } else {
+              Get.toNamed(RouteHelper.getVerificationRoute(
+                phoneNumber, '', token, fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword, '', loginType,
+                session: vId, updateUserModel: updateUserModel,
+              ));
+            }
+          }
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          debugPrint('===== Auto retrieval timeout for: $verificationId =====');
+        },
+      );
+    } catch (e) {
+      _isLoading = false;
+      update();
+      debugPrint('===== Firebase Phone Auth Exception =====');
+      debugPrint('Error: $e');
+      showCustomSnackBar('Failed to send OTP: ${e.toString()}');
+    }
   }
 
 }

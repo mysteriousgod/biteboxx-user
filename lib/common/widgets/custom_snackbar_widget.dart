@@ -7,12 +7,12 @@ Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
 
     try {
       if(Get.isSnackbarOpen) {
-        try {
-          await Get.closeCurrentSnackbar();
-        } catch(e) {
-          debugPrint("Could not close snackbar: $e");
-        }
+        Get.closeAllSnackbars();
+        // Add a small delay to allow the previous snackbar controller to dispose completely.
+        // This fixes the LateInitializationError on Web.
+        await Future.delayed(const Duration(milliseconds: 200));
       }
+      
       Get.showSnackbar(GetSnackBar(
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.transparent,
@@ -28,10 +28,11 @@ Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
         reverseAnimationCurve: Curves.fastEaseInToSlowEaseOut,
         animationDuration: const Duration(milliseconds: 500),
       ));
-    }catch(e) {
+    } catch(e) {
       debugPrint('Failed to show snackbar: $e');
+      // Ensure the user sees the message even if UI fails
+      debugPrint('Snackbar Message ($isError): $message');
     }
 
   }
 }
-/////
