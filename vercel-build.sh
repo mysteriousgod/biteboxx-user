@@ -88,7 +88,7 @@ flutter pub get
 
 echo "   > Building release bundle..."
 # --no-tree-shake-icons is often safer for complex apps
-flutter build web --release --no-tree-shake-icons --web-renderer html
+flutter build web --release --no-tree-shake-icons
 
 # 4. Post-Build Setup for Vercel
 echo "📝 Post-build: Ensuring .env file is accessible..."
