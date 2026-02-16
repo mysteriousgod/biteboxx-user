@@ -32,55 +32,85 @@ import 'firebase_options.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
-  if(ResponsiveHelper.isMobilePhone()) {
-    HttpOverrides.global = MyHttpOverrides();
-  }
-  setPathUrlStrategy();
-  WidgetsFlutterBinding.ensureInitialized();
   try {
-    await dotenv.load(fileName: ".env");
-  } catch (e) {
-    debugPrint("Failed to load .env file: $e");
-    // Optionally provide default values or throw again if critical
-  }
-
-  // // Pass all uncaught "fatal" errors from the framework to Crashlytics
-  // FlutterError.onError = (errorDetails) {
-  //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  // };
-  // // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  // PlatformDispatcher.instance.onError = (error, stack) {
-  //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-  //   return true;
-  // };
-
-  DeepLinkBody? linkBody;
-
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  Map<String, Map<String, String>> languages = await di.init();
-
-  NotificationBodyModel? body;
-  try {
-    if (GetPlatform.isMobile) {
-      final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
-      if (remoteMessage != null) {
-        body = NotificationHelper.convertNotification(remoteMessage.data);
-      }
-      await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
-      FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+    if(ResponsiveHelper.isMobilePhone()) {
+      HttpOverrides.global = MyHttpOverrides();
     }
-  }catch(_) {}
+    setPathUrlStrategy();
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      debugPrint("Failed to load .env file: $e");
+    }
 
-  if (ResponsiveHelper.isWeb()) {
-    await FacebookAuth.instance.webAndDesktopInitialize(
-      appId: dotenv.env['FACEBOOK_APP_ID']!,
-      cookie: true,
-      xfbml: true,
-      version: "v13.0",
-    );
+    // // Pass all uncaught "fatal" errors from the framework to Crashlytics
+    // FlutterError.onError = (errorDetails) {
+    //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // };
+    // // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    // PlatformDispatcher.instance.onError = (error, stack) {
+    //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    //   return true;
+    // };
+
+    DeepLinkBody? linkBody;
+
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } catch (e) {
+      debugPrint("Firebase Initialize Failed: $e");
+       // Continue, as it might behave differently on web
+    }
+
+    Map<String, Map<String, String>> languages = await di.init();
+
+    NotificationBodyModel? body;
+    try {
+      if (GetPlatform.isMobile) {
+        final RemoteMessage? remoteMessage = await FirebaseMessaging.instance.getInitialMessage();
+        if (remoteMessage != null) {
+          body = NotificationHelper.convertNotification(remoteMessage.data);
+        }
+        await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
+        FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+      }
+    }catch(_) {}
+
+    if (ResponsiveHelper.isWeb()) {
+      try {
+        await FacebookAuth.instance.webAndDesktopInitialize(
+          appId: dotenv.env['FACEBOOK_APP_ID'] ?? "452131619626499",
+          cookie: true,
+          xfbml: true,
+          version: "v13.0",
+        );
+      } catch (e) {
+         debugPrint("Facebook Auth Failed: $e");
+      }
+    }
+    runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
+  } catch (e, stack) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                const Text("Startup Error", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red)),
+                const SizedBox(height: 20),
+                Text(e.toString(), style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 20),
+                Text(stack.toString(), style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
   }
-  runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
 }
 
 class MyApp extends StatefulWidget {
