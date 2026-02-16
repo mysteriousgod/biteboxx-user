@@ -7,7 +7,11 @@ Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
 
     try {
       if(Get.isSnackbarOpen) {
-        Get.closeCurrentSnackbar();
+        try {
+          await Get.closeCurrentSnackbar();
+        } catch(e) {
+          debugPrint("Could not close snackbar: $e");
+        }
       }
       Get.showSnackbar(GetSnackBar(
         snackPosition: SnackPosition.BOTTOM,

@@ -5,7 +5,6 @@ import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_check_box_widget.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
@@ -33,6 +32,17 @@ class OtpLoginWidget extends StatelessWidget {
           Align(
             alignment: Alignment.topLeft,
             child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              'enter_your_mobile_number_to_continue'.tr.isEmpty
+                  ? 'Enter your mobile number to sign in or create an account'
+                  : 'enter_your_mobile_number_to_continue'.tr,
+              style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+            ),
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
@@ -81,7 +91,7 @@ class OtpLoginWidget extends StatelessWidget {
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomButtonWidget(
-            buttonText: 'login'.tr,
+            buttonText: 'get_otp'.tr.isEmpty ? 'Get OTP' : 'get_otp'.tr,
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,
@@ -90,25 +100,8 @@ class OtpLoginWidget extends StatelessWidget {
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
-          socialEnable ? const SocialLoginWidget(onlySocialLogin: false) : const SizedBox(),
-
-          socialEnable && isDesktop ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
-
-          !socialEnable ? const SizedBox(height: 100) : const SizedBox(),
-
-          onMainViewClick != null ? Column(children: [
-            const SizedBox(height: Dimensions.paddingSizeLarge),
-            
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              Text('sign_in_with'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-              InkWell(
-                onTap: onMainViewClick,
-                child: Text('password'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, decoration: TextDecoration.underline)),
-              ),
-            ]),
-          ]) : const SizedBox(),
+          // No social login, no sign-up link — phone OTP only
+          const SizedBox(height: 50),
 
         ]),
       );

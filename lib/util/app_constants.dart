@@ -1,17 +1,18 @@
 import 'package:stackfood_multivendor/features/language/domain/models/language_model.dart';
 import 'package:stackfood_multivendor/util/images.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 
 class AppConstants {
-  static const String appName = 'BiteBoxx';
+  static String appName = dotenv.env['APP_NAME']!;
   static const double appVersion = 8.4; ///Flutter SDK: 3.35.2
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
-  static const String webHostedUrl = 'https://biteboxx.com';
+  static String webHostedUrl = dotenv.env['WEB_HOSTED_URL']!;
   static const bool useReactWebsite = false;
 
-  static const String baseUrl = 'https://biteboxx.com';
+  static String baseUrl = dotenv.env['BASE_URL']!;
   static const String categoryUri = '/api/v1/categories';
   static const String bannerUri = '/api/v1/banners';
   static const String restaurantProductUri = '/api/v1/products/latest';

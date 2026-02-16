@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -46,33 +47,33 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBrHF7qZasZfKix7exO1jMqXspGc8tVnZc',
-    appId: '1:651863605412:web:ed34e7c41d10960e682631',
-    messagingSenderId: '651863605412',
-    projectId: 'biteboxx-dc20d',
-    authDomain: 'biteboxx-dc20d.firebaseapp.com',
-    storageBucket: 'biteboxx-dc20d.firebasestorage.app',
-    measurementId: 'G-2WRJLDNYJ7',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_WEB_API_KEY']!,
+    appId: dotenv.env['FIREBASE_WEB_APP_ID']!,
+    messagingSenderId: dotenv.env['FIREBASE_WEB_MESSAGING_SENDER_ID']!,
+    projectId: dotenv.env['FIREBASE_WEB_PROJECT_ID']!,
+    authDomain: dotenv.env['FIREBASE_WEB_AUTH_DOMAIN'],
+    storageBucket: dotenv.env['FIREBASE_WEB_STORAGE_BUCKET'],
+    measurementId: dotenv.env['FIREBASE_WEB_MEASUREMENT_ID'],
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCNUTuR4L1SVVaT6vy9Z6lW3gm3V63iO6k',
-    appId: '1:651863605412:android:3cf54a39e823ef7b682631',
-    messagingSenderId: '651863605412',
-    projectId: 'biteboxx-dc20d',
-    storageBucket: 'biteboxx-dc20d.firebasestorage.app',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY']!,
+    appId: dotenv.env['FIREBASE_ANDROID_APP_ID']!,
+    messagingSenderId: dotenv.env['FIREBASE_ANDROID_MESSAGING_SENDER_ID']!,
+    projectId: dotenv.env['FIREBASE_ANDROID_PROJECT_ID']!,
+    storageBucket: dotenv.env['FIREBASE_ANDROID_STORAGE_BUCKET'],
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBpyH2qnwdW0h-p-tbTuXD2IAaaObzrSQw',
-    appId: '1:651863605412:ios:ed542932b3449da5682631',
-    messagingSenderId: '651863605412',
-    projectId: 'biteboxx-dc20d',
-    storageBucket: 'biteboxx-dc20d.firebasestorage.app',
-    androidClientId: '651863605412-53j2b4ehb0l5kqf8n5gttr50dhcjmu9q.apps.googleusercontent.com',
-    iosClientId: '651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com',
-    iosBundleId: 'com.bitbox.user',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_IOS_API_KEY']!,
+    appId: dotenv.env['FIREBASE_IOS_APP_ID']!,
+    messagingSenderId: dotenv.env['FIREBASE_IOS_MESSAGING_SENDER_ID']!,
+    projectId: dotenv.env['FIREBASE_IOS_PROJECT_ID']!,
+    storageBucket: dotenv.env['FIREBASE_IOS_STORAGE_BUCKET'],
+    androidClientId: dotenv.env['FIREBASE_IOS_ANDROID_CLIENT_ID'],
+    iosClientId: dotenv.env['FIREBASE_IOS_CLIENT_ID'],
+    iosBundleId: dotenv.env['FIREBASE_IOS_BUNDLE_ID']!,
   );
 
 }

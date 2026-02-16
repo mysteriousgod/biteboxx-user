@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/sign_in/sign_in_view.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
@@ -23,7 +22,6 @@ class SignInScreen extends StatefulWidget {
 
 class SignInScreenState extends State<SignInScreen> {
   bool _canExit = GetPlatform.isWeb ? true : false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -52,24 +50,14 @@ class SignInScreenState extends State<SignInScreen> {
               _canExit = false;
             });
           }
-        }else {
-          if(Get.find<AuthController>().isOtpViewEnable){
-            Get.find<AuthController>().enableOtpView(enable: false);
-          }else{
-            Get.back();
-          }
+        } else {
+          Get.back();
         }
       },
       child: Scaffold(
         backgroundColor: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
         appBar: ResponsiveHelper.isDesktop(context) ? null : !widget.exitFromApp ? AppBar(leading: IconButton(
-          onPressed: () {
-            if(Get.find<AuthController>().isOtpViewEnable){
-              Get.find<AuthController>().enableOtpView(enable: false);
-            }else{
-              Get.back(result: false);
-            }
-          },
+          onPressed: () => Get.back(result: false),
           icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).textTheme.bodyLarge!.color),
         ), elevation: 0, backgroundColor: Theme.of(context).cardColor) : null,
         body: SafeArea(child: Align(
@@ -110,4 +98,3 @@ class SignInScreenState extends State<SignInScreen> {
   }
 
 }
-

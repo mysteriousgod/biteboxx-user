@@ -1,7 +1,4 @@
-import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/sign_in/sign_in_view.dart';
-import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/helper/centralize_login_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 import 'package:flutter/material.dart';
@@ -17,21 +14,10 @@ class AuthDialogWidget extends StatefulWidget {
 }
 
 class AuthDialogWidgetState extends State<AuthDialogWidget> {
-
-  bool _isOtpViewEnable = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Get.find<AuthController>().resetOtpView(isUpdate: false);
-    _isOtpViewEnable = false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    double width = _isOtpViewEnable ? 400 : CentralizeLoginHelper.getPreferredLoginMethod(Get.find<SplashController>().configModel!.centralizeLoginSetup!, false).size;
     return SizedBox(
-      width: width,
+      width: 400,
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
         backgroundColor: Theme.of(context).cardColor,
@@ -42,7 +28,7 @@ class AuthDialogWidgetState extends State<AuthDialogWidget> {
 
             Align(
               alignment: Alignment.topRight,
-              child: IconButton(onPressed: ()=> Get.back(), icon: const Icon(Icons.clear)),
+              child: IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.clear)),
             ),
 
             SingleChildScrollView(
@@ -58,11 +44,7 @@ class AuthDialogWidgetState extends State<AuthDialogWidget> {
                   const SizedBox(height: Dimensions.paddingSizeLarge),
 
                   SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis,
-                    isOtpViewEnable: (bool val) {
-                    setState(() {
-                      _isOtpViewEnable = true;
-                    });
-                    },
+                    isOtpViewEnable: (bool val) {},
                   ),
                 ]),
               ),
