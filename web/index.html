@@ -23,43 +23,19 @@
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="stackfood_multivendor">
+  <meta name="apple-mobile-web-app-title" content="BiteBoxx">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>stackfood_multivendor</title>
+  <title>BiteBoxx</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=drawing,visualization,places"></script>
 </head>
 <body>
-  <div id="loading" style="font-family: sans-serif; padding: 20px; text-align: center;">
-    <h1>App Loading...</h1>
-    <p>If this stays on screen, check console logs.</p>
-  </div>
-  <div id="error-container" style="color: red; padding: 20px; font-family: monospace; white-space: pre-wrap; display: none; background: #ffebeb; border: 1px solid red; margin: 20px;">
-    <h2>Startup Error:</h2>
-    <div id="error-message"></div>
-  </div>
-
-  <script>
-    function showcaseError(msg) {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error-container').style.display = 'block';
-      document.getElementById('error-message').innerText += msg + "\n";
-    }
-
-    window.onerror = function (message, source, lineno, colno, error) {
-      showcaseError("Global Error: " + message + " at " + source + ":" + lineno + ":" + colno);
-      if(error && error.stack) showcaseError("Stack: " + error.stack);
-      return false;
-    };
-
-    window.addEventListener('unhandledrejection', function(event) {
-      showcaseError("Unhandled Rejection: " + event.reason);
-    });
-  </script>
-
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

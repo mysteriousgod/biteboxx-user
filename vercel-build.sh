@@ -102,6 +102,15 @@ mkdir -p build/web/assets
 cp .env build/web/assets/.env
 echo "   + Copied .env to build/web/assets/.env"
 
+# Inject Google Maps API Key if set
+if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
+    echo "🗺️  Injecting Google Maps API Key..."
+    sed -i "s/YOUR_GOOGLE_MAPS_API_KEY/$GOOGLE_MAPS_API_KEY/g" build/web/index.html
+    echo "   + Replaced YOUR_GOOGLE_MAPS_API_KEY with actual key"
+else
+    echo "⚠️  GOOGLE_MAPS_API_KEY not found in environment variables. Maps might not load."
+fi
+
 echo "----------------------------------------------------------------"
 echo "✅  Build Complete! Output directory: build/web"
 echo "----------------------------------------------------------------"
