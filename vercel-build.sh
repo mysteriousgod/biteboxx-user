@@ -33,6 +33,7 @@ append_to_env() {
     local var_name=$1
     local var_value=${!1}
     
+    # Check if variable is set (even if empty string provided as value)
     if [ -n "$var_value" ]; then
         echo "$var_name=$var_value" >> .env
         echo "   + Added $var_name"
@@ -87,7 +88,19 @@ flutter pub get
 
 echo "   > Building release bundle..."
 # --no-tree-shake-icons is often safer for complex apps
-flutter build web --release --no-tree-shake-icons
+flutter build web --release --no-tree-shake-icons --web-renderer html
+
+# 4. Post-Build Setup for Vercel
+echo "📝 Post-build: Ensuring .env file is accessible..."
+
+# Copy .env to the root of the build output (build/web/.env)
+cp .env build/web/.env
+echo "   + Copied .env to build/web/.env"
+
+# Also ensure it exists in assets directory if flutter uses that path
+mkdir -p build/web/assets
+cp .env build/web/assets/.env
+echo "   + Copied .env to build/web/assets/.env"
 
 echo "----------------------------------------------------------------"
 echo "✅  Build Complete! Output directory: build/web"
