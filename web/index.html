@@ -33,6 +33,33 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <div id="loading" style="font-family: sans-serif; padding: 20px; text-align: center;">
+    <h1>App Loading...</h1>
+    <p>If this stays on screen, check console logs.</p>
+  </div>
+  <div id="error-container" style="color: red; padding: 20px; font-family: monospace; white-space: pre-wrap; display: none; background: #ffebeb; border: 1px solid red; margin: 20px;">
+    <h2>Startup Error:</h2>
+    <div id="error-message"></div>
+  </div>
+
+  <script>
+    function showcaseError(msg) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-container').style.display = 'block';
+      document.getElementById('error-message').innerText += msg + "\n";
+    }
+
+    window.onerror = function (message, source, lineno, colno, error) {
+      showcaseError("Global Error: " + message + " at " + source + ":" + lineno + ":" + colno);
+      if(error && error.stack) showcaseError("Stack: " + error.stack);
+      return false;
+    };
+
+    window.addEventListener('unhandledrejection', function(event) {
+      showcaseError("Unhandled Rejection: " + event.reason);
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
