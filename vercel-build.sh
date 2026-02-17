@@ -74,6 +74,7 @@ append_to_env "APP_NAME"
 append_to_env "BASE_URL"
 append_to_env "WEB_HOSTED_URL"
 append_to_env "FACEBOOK_APP_ID"
+append_to_env "GOOGLE_MAPS_API_KEY"
 
 echo "✅ .env file created successfully."
 
