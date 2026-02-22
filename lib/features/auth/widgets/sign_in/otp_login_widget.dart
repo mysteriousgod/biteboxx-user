@@ -95,7 +95,7 @@ class OtpLoginWidget extends StatelessWidget {
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,
-            onPressed: onClickLoginButton,
+            onPressed: authController.acceptTerms ? onClickLoginButton : null,
             fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
