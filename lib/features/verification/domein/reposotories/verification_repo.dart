@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
 import 'package:stackfood_multivendor/api/api_client.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/auth_response_model.dart';
@@ -7,6 +8,7 @@ import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
 
 class VerificationRepo implements VerificationRepoInterface{
   final ApiClient apiClient;
@@ -106,9 +108,41 @@ class VerificationRepo implements VerificationRepoInterface{
     if(guestId.isNotEmpty) {
       data.addAll({"guest_id": guestId});
     }
-    Response response = await apiClient.postData(AppConstants.firebaseAuthVerify, data);
+    
+    // Create headers without authorization for Firebase verification
+    AddressModel? addressModel;
+    try {
+      addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
+    }catch(_) {}
+    
+    Map<String, String> headersWithoutAuth = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      AppConstants.zoneId: addressModel?.zoneIds != null ? jsonEncode(addressModel!.zoneIds) : '',
+      AppConstants.localizationKey: sharedPreferences.getString(AppConstants.languageCode) ?? AppConstants.languages[0].languageCode!,
+      AppConstants.latitude: addressModel?.latitude != null ? jsonEncode(addressModel!.latitude) : '',
+      AppConstants.longitude: addressModel?.longitude != null ? jsonEncode(addressModel!.longitude) : '',
+    };
+    
+    Response response = await apiClient.postData(AppConstants.firebaseAuthVerify, data, headers: headersWithoutAuth);
     if (response.statusCode == 200) {
       AuthResponseModel authResponse = AuthResponseModel.fromJson(response.body);
+      if (authResponse.token != null && authResponse.token!.isNotEmpty) {
+        // Save the token to shared preferences
+        await sharedPreferences.setString(AppConstants.token, authResponse.token!);
+        // Update the API client's token
+        AddressModel? currentAddressModel;
+        try {
+          currentAddressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
+        }catch(_) {}
+        
+        apiClient.updateHeader(
+          authResponse.token!,
+          currentAddressModel?.zoneIds,
+          sharedPreferences.getString(AppConstants.languageCode),
+          currentAddressModel?.latitude,
+          currentAddressModel?.longitude
+        );
+      }
       return ResponseModel(true, response.body["message"], authResponseModel: authResponse);
     } else {
       return ResponseModel(false, response.statusText);
@@ -117,6 +151,20 @@ class VerificationRepo implements VerificationRepoInterface{
 
   @override
   Future<ResponseModel> verifyForgetPassFirebaseOtp({required String phoneNumber, required String session, required String otp}) async {
+    // Create headers without authorization for Firebase reset password verification
+    AddressModel? addressModel;
+    try {
+      addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
+    }catch(_) {}
+    
+    Map<String, String> headersWithoutAuth = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      AppConstants.zoneId: addressModel?.zoneIds != null ? jsonEncode(addressModel!.zoneIds) : '',
+      AppConstants.localizationKey: sharedPreferences.getString(AppConstants.languageCode) ?? AppConstants.languages[0].languageCode!,
+      AppConstants.latitude: addressModel?.latitude != null ? jsonEncode(addressModel!.latitude) : '',
+      AppConstants.longitude: addressModel?.longitude != null ? jsonEncode(addressModel!.longitude) : '',
+    };
+    
     Response response = await apiClient.postData(AppConstants.firebaseResetPassword,
       {'sessionInfo' : session,
         'phoneNumber' : phoneNumber,
@@ -124,6 +172,7 @@ class VerificationRepo implements VerificationRepoInterface{
         'is_reset_token' : 1,
         '_method': 'PUT'
       },
+      headers: headersWithoutAuth
     );
     if (response.statusCode == 200) {
       return ResponseModel(true, response.body["message"]);

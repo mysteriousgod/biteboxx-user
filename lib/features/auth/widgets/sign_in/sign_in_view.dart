@@ -74,46 +74,62 @@ class _SignInViewState extends State<SignInView> {
     debugPrint('_otpLogin triggered');
     String phone = _otpPhoneController.text.trim();
     String numberWithCountryCode = countryDialCode + phone;
+    
+    // Normalize phone number for comparison
+    String normalizedNumber = numberWithCountryCode.replaceAll(' ', '');
     debugPrint('Validating phone number: $numberWithCountryCode');
-    PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-    numberWithCountryCode = phoneValid.phone;
-
-    // Bypass validation for Firebase Test Number
-    if (numberWithCountryCode.replaceAll(' ', '') == '+911234567890') {
-      debugPrint('Bypassing validation for Test Number');
-      phoneValid.isValid = true;
+    
+    bool isTestNumber = (normalizedNumber == '+911234567890');
+    PhoneValid phoneValid;
+    
+    if (isTestNumber) {
+       debugPrint('Bypassing validation for Test Number');
+       phoneValid = PhoneValid(isValid: true, countryCode: countryDialCode, phone: normalizedNumber);
+    } else {
+       phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+    }
+    
+    // Update the phone number to the one returned by validator (or the normalized test number)
+    if (phoneValid.isValid) {
+      numberWithCountryCode = phoneValid.phone;
     }
 
     try {
-      if (_formKeyLogin!.currentState!.validate()) {
-        if (!phoneValid.isValid) {
-          debugPrint('Invalid phone number validation for: $numberWithCountryCode');
-          showCustomSnackBar('invalid_phone_number'.tr);
-        } else {
-          debugPrint('Calling authController.otpLogin...');
-          authController.otpLogin(
-            phone: numberWithCountryCode,
-            otp: '',
-            loginType: loginType.name,
-            verified: '',
-            alreadyInApp: widget.backFromThis,
-          ).then((response) {
-            debugPrint('authController.otpLogin returned: ${response.message}');
-            if (response.isSuccess) {
-              debugPrint('OTP Login Success: ${response.message}');
-              _processOtpSuccessSetup(response, authController, phone, countryDialCode);
-            } else {
-              debugPrint('OTP Login Failed: ${response.message}');
-              showCustomSnackBar(response.message);
-            }
-          }).catchError((e) {
-            debugPrint('Error in otpLogin promise: $e');
-            showCustomSnackBar('Login failed: $e');
-          });
-        }
-      } else {
-        debugPrint('Form validation failed');
+      // Validate form first
+      if (!_formKeyLogin!.currentState!.validate()) {
+          debugPrint('Form validation failed');
+          return;
       }
+      
+      if (!phoneValid.isValid) {
+        debugPrint('Invalid phone number validation for: $numberWithCountryCode');
+        showCustomSnackBar('invalid_phone_number'.tr);
+        return;
+      }
+      
+      debugPrint('Calling authController.otpLogin...');
+      try {
+        ResponseModel response = await authController.otpLogin(
+          phone: numberWithCountryCode,
+          otp: '',
+          loginType: loginType.name,
+          verified: '',
+          alreadyInApp: widget.backFromThis,
+        );
+        
+        debugPrint('authController.otpLogin returned: ${response.message}');
+        if (response.isSuccess) {
+          debugPrint('OTP Login Success: ${response.message}');
+          _processOtpSuccessSetup(response, authController, phone, countryDialCode);
+        } else {
+          debugPrint('OTP Login Failed: ${response.message}');
+          showCustomSnackBar(response.message);
+        }
+      } catch (e) {
+        debugPrint('Error in otpLogin: $e');
+        showCustomSnackBar('Login failed: $e');
+      }
+
     } catch (e) {
       debugPrint('Exception in _otpLogin: $e');
     }
