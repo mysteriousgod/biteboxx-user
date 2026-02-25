@@ -18,6 +18,7 @@ import 'package:stackfood_multivendor/features/home/widgets/best_review_item_vie
 import 'package:stackfood_multivendor/features/home/widgets/cuisine_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/location_banner_view_widget.dart';
+import 'package:stackfood_multivendor/features/home/widgets/location_picker_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/home/widgets/new_on_stackfood_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/order_again_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/popular_foods_nearby_view_widget.dart';
@@ -157,6 +158,31 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((value) => Get.find<SplashController>().saveReferBottomSheetStatus(false));
   }
 
+  Widget _buildLocationIcon(BuildContext context) {
+    final address = AddressHelper.getAddressFromSharedPref();
+    if (address != null && AuthHelper.isLoggedIn()) {
+      if (address.addressType == 'home') {
+        return Icon(Icons.home_filled, size: 20, color: Theme.of(context).cardColor);
+      } else if (address.addressType == 'office') {
+        return Icon(Icons.work, size: 20, color: Theme.of(context).cardColor);
+      }
+    }
+    return Icon(Icons.location_on, size: 20, color: Theme.of(context).cardColor);
+  }
+
+  String _getLocationText(BuildContext context) {
+    final address = AddressHelper.getAddressFromSharedPref();
+    if (address != null && AuthHelper.isLoggedIn() && address.addressType != 'others') {
+      return address.addressType!.tr;
+    }
+    return 'your_location'.tr;
+  }
+
+  String _getAddressText(BuildContext context) {
+    final address = AddressHelper.getAddressFromSharedPref();
+    return address?.address ?? 'Unknown Location Found';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(child: Transform.translate(
                                     offset: Offset(0, -(scrollingRate * 20)),
                                     child: InkWell(
-                                      onTap: () => Get.toNamed(RouteHelper.getAccessLocationRoute('home')),
+                                      onTap: () => LocationPickerBottomSheet.show(context),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
                                         child: GetBuilder<LocationController>(builder: (locationController) {
@@ -230,17 +256,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                             if(scrollingRate < 0.2)
                                             Row(children: [
-                                              AuthHelper.isLoggedIn() ? Icon(
-                                                AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
-                                                    : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on,
-                                                size: 20, color: Theme.of(context).cardColor,
-                                              ) : Icon(Icons.location_on, size: 20, color: Theme.of(context).cardColor,),
+                                              _buildLocationIcon(context),
                                               const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
                                               Text(
-                                                (AuthHelper.isLoggedIn() && AddressHelper.getAddressFromSharedPref()!.addressType != 'others') ? AddressHelper.getAddressFromSharedPref()!.addressType!.tr : 'your_location'.tr,
+                                                _getLocationText(context),
                                                 style: robotoMedium.copyWith(
-                                                  color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeDefault /* - (scrollingRate * Dimensions.fontSizeDefault)*/,
+                                                  color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeDefault,
                                                 ),
                                                 maxLines: 1, overflow: TextOverflow.ellipsis,
                                               ),
@@ -254,14 +276,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 children: [
                                                   Flexible(
                                                     child: Text(
-                                                      AddressHelper.getAddressFromSharedPref()!.address!,
+                                                      _getAddressText(context),
                                                       style: robotoRegular.copyWith(
-                                                        color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall/* - (scrollingRate * Dimensions.fontSizeSmall)*/,
+                                                        color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall,
                                                       ),
                                                       maxLines: 1, overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
-                                                  Icon(Icons.arrow_drop_down, color: Theme.of(context).cardColor, size: 16 /*- (scrollingRate * 16)*/,),
+                                                  Icon(Icons.arrow_drop_down, color: Theme.of(context).cardColor, size: 16),
                                                 ],
                                               ),
                                             ),
