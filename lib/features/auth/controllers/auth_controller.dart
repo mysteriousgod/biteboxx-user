@@ -34,7 +34,7 @@ class AuthController extends GetxController implements GetxService {
   bool _guestLoading = false;
   bool get guestLoading => _guestLoading;
 
-  bool _acceptTerms = false;
+  bool _acceptTerms = true;
   bool get acceptTerms => _acceptTerms;
 
   bool _isActiveRememberMe = false;

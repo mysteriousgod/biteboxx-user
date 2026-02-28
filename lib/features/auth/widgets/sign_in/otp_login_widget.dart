@@ -91,7 +91,7 @@ class OtpLoginWidget extends StatelessWidget {
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomButtonWidget(
-            buttonText: 'get_otp'.tr.isEmpty ? 'Get OTP' : 'get_otp'.tr,
+            buttonText: 'Continue',
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,

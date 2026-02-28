@@ -79,18 +79,6 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                 ),
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                Text('just_one_step_away'.tr, style: robotoMedium.copyWith(color: Theme.of(context).disabledColor), textAlign: TextAlign.center),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                Text(
-                  'please_enter_your_name_to_complete_setup'.tr.isEmpty
-                      ? 'Please enter your name to complete your account setup'
-                      : 'please_enter_your_name_to_complete_setup'.tr,
-                  style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
                 CustomTextFieldWidget(
                   hintText: 'ex_jhon'.tr,
                   labelText: 'user_name'.tr,
