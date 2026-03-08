@@ -98,7 +98,7 @@ class _WebHighlightWidgetViewState extends State<WebHighlightWidgetView> {
             ]),
           ],
         ),
-      ) : advertisementController.advertisementList == null ? const AdvertisementShimmer() : const SizedBox();
+      ) : advertisementController.advertisementList == null ? const SizedBox() : const SizedBox();
     });
   }
 }

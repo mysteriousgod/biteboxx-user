@@ -14,7 +14,7 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -23,17 +23,27 @@
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="stackfood_multivendor">
+  <meta name="apple-mobile-web-app-title" content="BiteBoxx">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>biteboxx</title>
+  <title>stackfood_multivendor</title>
   <link rel="manifest" href="manifest.json">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAubvGlINRYKLseOvU0KZBrF49WpeZ16BA"></script>
+  
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOm7T7rwWnXIhpLSfGmuc80K-7NbiEXls&libraries=drawing,visualization,places"></script>
+  
+  <!-- Firebase SDKs for Web -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <!-- reCAPTCHA container for Firebase Phone Auth -->
+  <div id="recaptcha-container"></div>
+  <!-- Invisible reCAPTCHA for Firebase Phone Auth -->
+  <div id="recaptcha-verifier" style="visibility: hidden;"></div>
 </body>
 </html>

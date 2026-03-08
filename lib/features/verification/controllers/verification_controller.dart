@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/verification/domein/model/verification_data_model.dart';
@@ -86,14 +87,21 @@ class VerificationController extends GetxController implements GetxService {
   Future<ResponseModel> verifyFirebaseOtp({required String phoneNumber, required String session, required String otp, required String loginType, required String? token, required bool isSignUpPage, required bool isForgetPassPage}) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await verificationServiceInterface.verifyFirebaseOtp(phoneNumber: phoneNumber, session: session, otp: otp, loginType: loginType, token: token, isSignUpPage: isSignUpPage, isForgetPassPage: isForgetPassPage);
+    try {
+      ResponseModel responseModel = await verificationServiceInterface.verifyFirebaseOtp(phoneNumber: phoneNumber, session: session, otp: otp, loginType: loginType, token: token, isSignUpPage: isSignUpPage, isForgetPassPage: isForgetPassPage).timeout(const Duration(seconds: 30));
 
-    if (responseModel.isSuccess && isSignUpPage && !isForgetPassPage) {
-      Get.find<ProfileController>().getUserInfo();
+      if (responseModel.isSuccess && isSignUpPage && !isForgetPassPage) {
+        await Get.find<ProfileController>().getUserInfo();
+      }
+      _isLoading = false;
+      update();
+      return responseModel;
+    } catch (e) {
+      _isLoading = false;
+      update();
+      debugPrint('Error in verifyFirebaseOtp: $e');
+      return ResponseModel(false, e.toString());
     }
-    _isLoading = false;
-    update();
-    return responseModel;
   }
 
 }

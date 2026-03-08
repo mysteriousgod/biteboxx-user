@@ -27,8 +27,9 @@ import 'package:get/get.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'helper/get_di.dart' as di;
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+import 'firebase_options.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   try {
@@ -37,10 +38,11 @@ Future<void> main() async {
     }
     setPathUrlStrategy();
     WidgetsFlutterBinding.ensureInitialized();
+    
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {
-      // debugPrint('Could not load .env file: $e');
+      debugPrint("Failed to load .env file: $e");
     }
 
     // // Pass all uncaught "fatal" errors from the framework to Crashlytics
@@ -55,24 +57,11 @@ Future<void> main() async {
 
     DeepLinkBody? linkBody;
 
-    if(GetPlatform.isWeb) {
-      await Firebase.initializeApp(options: const FirebaseOptions(
-        apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg'),
-        appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: '1:178881509769:android:907b254dbc6c1d96f6c958'),
-        messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '178881509769'),
-        projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: 'biteboxx-82e93'),
-      ));
-    }else if(GetPlatform.isAndroid) {
-      await Firebase.initializeApp(
-        options: const FirebaseOptions(
-          apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg'),
-          appId: String.fromEnvironment('FIREBASE_APP_ID', defaultValue: '1:178881509769:android:907b254dbc6c1d96f6c958'),
-          messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '178881509769'),
-          projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: 'biteboxx-82e93'),
-        ),
-      );
-    } else {
-      await Firebase.initializeApp();
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } catch (e) {
+      debugPrint("Firebase Initialize Failed: $e");
+       // Continue, as it might behave differently on web
     }
 
     Map<String, Map<String, String>> languages = await di.init();
@@ -90,30 +79,33 @@ Future<void> main() async {
     }catch(_) {}
 
     if (ResponsiveHelper.isWeb()) {
-      await FacebookAuth.instance.webAndDesktopInitialize(
-        appId: const String.fromEnvironment('FACEBOOK_APP_ID', defaultValue: '452131619626499'),
-        cookie: true,
-        xfbml: true,
-        version: "v13.0",
-      );
+      try {
+        await FacebookAuth.instance.webAndDesktopInitialize(
+          appId: dotenv.env['FACEBOOK_APP_ID'] ?? "452131619626499",
+          cookie: true,
+          xfbml: true,
+          version: "v13.0",
+        );
+      } catch (e) {
+         debugPrint("Facebook Auth Failed: $e");
+      }
     }
     runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
-  } catch (e, stackTrace) {
+  } catch (e, stack) {
     runApp(MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Initialization Error:", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red)),
-              const SizedBox(height: 20),
-              Text(e.toString(), style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 20),
-              const Text("Stack Trace:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Text(stackTrace.toString(), style: const TextStyle(fontSize: 12, fontFamily: 'Courier')),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                const Text("Startup Error", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red)),
+                const SizedBox(height: 20),
+                Text(e.toString(), style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 20),
+                Text(stack.toString(), style: const TextStyle(fontSize: 12)),
+              ],
+            ),
           ),
         ),
       ),

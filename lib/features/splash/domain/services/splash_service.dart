@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
 import 'package:stackfood_multivendor/features/splash/domain/repositories/splash_repository_interface.dart';
@@ -23,7 +24,17 @@ class SplashService implements SplashServiceInterface {
   ConfigModel? prepareConfigData(Response response){
     ConfigModel? configModel;
     if(response.statusCode == 200) {
-      configModel = ConfigModel.fromJson(response.body);
+      dynamic body = response.body;
+      if (body is String) {
+        try {
+          body = jsonDecode(body);
+        } catch (_) {
+           print('SplashService: Failed to decode config response: $body');
+        }
+      }
+      if (body is Map<String, dynamic>) {
+        configModel = ConfigModel.fromJson(body);
+      }
     }
     return configModel;
   }

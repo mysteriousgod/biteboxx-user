@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/auth_response_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/signup_body_model.dart';
@@ -38,7 +39,11 @@ class AuthService implements AuthServiceInterface{
 
   @override
   Future<ResponseModel> otpLogin({required String phone, required String otp, required String loginType, required String verified, bool alreadyInApp = false}) async {
+    debugPrint('AuthService: otpLogin called with phone: $phone');
     Response response = await authRepoInterface.otpLogin(phone: phone, otp: otp, loginType: loginType, verified: verified);
+    debugPrint('AuthService: otpLogin response status: ${response.statusCode}');
+    debugPrint('AuthService: otpLogin response body: ${response.body}');
+
     if (response.statusCode == 200) {
       AuthResponseModel authResponse = AuthResponseModel.fromJson(response.body);
       await _updateHeaderFunctionality(authResponse, alreadyInApp: alreadyInApp);

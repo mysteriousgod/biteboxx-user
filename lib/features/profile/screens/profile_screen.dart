@@ -1,6 +1,7 @@
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
+import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/profile/widgets/account_deletion_bottom_sheet.dart';
@@ -199,6 +200,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 // authController.setNotificationActive(!authController.notification);
                               },
                               );
+                            }) : const SizedBox(),
+                            SizedBox(height: isLoggedIn ? Dimensions.paddingSizeSmall : 0),
+
+                            isLoggedIn ? ProfileButtonWidget(icon: Icons.language, iconImage: Images.languageIcon, title: 'language'.tr, onTap: () {
+                              Get.toNamed(RouteHelper.getLanguageRoute('profile'));
                             }) : const SizedBox(),
                             SizedBox(height: isLoggedIn ? Dimensions.paddingSizeSmall : 0),
 

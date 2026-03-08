@@ -334,23 +334,8 @@ class SignUpWidgetState extends State<SignUpWidget> {
         Get.find<CartController>().getCartDataOnline();
       }
       if(status.authResponseModel != null && !status.authResponseModel!.isPhoneVerified!) {
-        List<int> encoded = utf8.encode(password);
-        String data = base64Encode(encoded);
-        if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
-          Get.find<AuthController>().firebaseVerifyPhoneNumber(numberWithCountryCode, status.message, CentralizeLoginType.manual.name, fromSignUp: true);
-        } else {
-          if(ResponsiveHelper.isDesktop(context)) {
-            Get.back();
-            Get.dialog(VerificationScreen(
-              number: numberWithCountryCode, email: null, token: status.message, fromSignUp: true,
-              fromForgetPassword: false, loginType: CentralizeLoginType.manual.name, password: password,
-            ));
-          } else {
-            Get.toNamed(RouteHelper.getVerificationRoute(
-              numberWithCountryCode, null, status.message, RouteHelper.signUp, data, CentralizeLoginType.manual.name,
-            ));
-          }
-        }
+        // Always use Firebase for OTP even if config says otherwise
+        Get.find<AuthController>().firebaseVerifyPhoneNumber(numberWithCountryCode, status.message, CentralizeLoginType.manual.name, fromSignUp: true);
       } else if(status.authResponseModel != null && !status.authResponseModel!.isEmailVerified!) {
         List<int> encoded = utf8.encode(password);
         String data = base64Encode(encoded);

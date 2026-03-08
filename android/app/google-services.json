@@ -1,64 +1,176 @@
 {
   "project_info": {
-    "project_number": "178881509769",
-    "project_id": "biteboxx-82e93",
-    "storage_bucket": "biteboxx-82e93.firebasestorage.app"
+    "project_number": "651863605412",
+    "project_id": "biteboxx-dc20d",
+    "storage_bucket": "biteboxx-dc20d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:178881509769:android:907b254dbc6c1d96f6c958",
+        "mobilesdk_app_id": "1:651863605412:android:3cf54a39e823ef7b682631",
         "android_client_info": {
-          "package_name": "com.biteboxer.user"
+          "package_name": "com.bitbox.user"
         }
       },
-      "oauth_client": [],
-      "api_key": [
+      "oauth_client": [
         {
-          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+          "client_id": "651863605412-01h7oat2md07tujt402s06bhe0svnjsf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitbox.user",
+            "certificate_hash": "b0fb8cb7860dca6e0e966794e1dedd730c3a0de4"
+          }
+        },
+        {
+          "client_id": "651863605412-uvd16f6rqhjft3btf4iqmji5ja6il6ta.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitbox.user",
+            "certificate_hash": "87fb463fcbefdf9cd25039a8d0cc80de9fe7908c"
+          }
+        },
+        {
+          "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        
+        {
+          "current_key": "AIzaSyBOm7T7rwWnXIhpLSfGmuc80K-7NbiEXls"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bitbox.user"
+              }
+            }
+          ]
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:178881509769:android:3ce6acf98afea187f6c958",
+        "mobilesdk_app_id": "1:651863605412:android:d253844b351de70f682631",
         "android_client_info": {
-          "package_name": "com.bitebox.delivery_man"
+          "package_name": "com.bite_box.bitebox"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "651863605412-53j2b4ehb0l5kqf8n5gttr50dhcjmu9q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bite_box.bitebox",
+            "certificate_hash": "b0fb8cb7860dca6e0e966794e1dedd730c3a0de4"
+          }
+        },
+        {
+          "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+          "current_key": "AIzaSyBOm7T7rwWnXIhpLSfGmuc80K-7NbiEXls"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bitbox.user"
+              }
+            }
+          ]
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:178881509769:android:1823267c1cfd1560f6c958",
+        "mobilesdk_app_id": "1:651863605412:android:7f5ec9082e8b86b6682631",
         "android_client_info": {
-          "package_name": "com.bitebox.restaurant"
+          "package_name": "com.bite_box.delivery_boy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyC2ztNxIqRZKJhCqbfgmwCpte3KqlgGdrg"
+          "current_key": "AIzaSyBOm7T7rwWnXIhpLSfGmuc80K-7NbiEXls"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bitbox.user"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651863605412:android:cc0bc7429b67edbc682631",
+        "android_client_info": {
+          "package_name": "com.bite_box.restaurant_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOm7T7rwWnXIhpLSfGmuc80K-7NbiEXls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651863605412-l0ivj5kcbgn7sha8arbvahhrrebcgjtq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bitbox.user"
+              }
+            }
+          ]
         }
       }
     }

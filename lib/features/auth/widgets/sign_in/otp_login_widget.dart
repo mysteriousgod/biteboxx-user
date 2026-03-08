@@ -5,7 +5,6 @@ import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_check_box_widget.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
@@ -20,7 +19,8 @@ class OtpLoginWidget extends StatelessWidget {
   final Function(CountryCode countryCode)? onCountryChanged;
   final Function() onClickLoginButton;
   final bool socialEnable;
-  const OtpLoginWidget({super.key, required this.phoneController, required this.phoneFocus, required this.onCountryChanged, required this.countryDialCode, required this.onClickLoginButton, this.socialEnable = false});
+  final Function()? onMainViewClick;
+  const OtpLoginWidget({super.key, required this.phoneController, required this.phoneFocus, required this.onCountryChanged, required this.countryDialCode, required this.onClickLoginButton, this.socialEnable = false, this.onMainViewClick});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,17 @@ class OtpLoginWidget extends StatelessWidget {
           Align(
             alignment: Alignment.topLeft,
             child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
+          ),
+          const SizedBox(height: Dimensions.paddingSizeSmall),
+
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              'enter_your_mobile_number_to_continue'.tr.isEmpty
+                  ? 'Enter your mobile number to sign in or create an account'
+                  : 'enter_your_mobile_number_to_continue'.tr,
+              style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+            ),
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
@@ -80,20 +91,17 @@ class OtpLoginWidget extends StatelessWidget {
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
           CustomButtonWidget(
-            buttonText: 'login'.tr,
+            buttonText: 'Continue',
             radius: Dimensions.radiusDefault,
             isBold: isDesktop ? false : true,
             isLoading: authController.isLoading,
-            onPressed: onClickLoginButton,
+            onPressed: authController.acceptTerms ? onClickLoginButton : null,
             fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
           ),
           const SizedBox(height: Dimensions.paddingSizeLarge),
 
-          socialEnable ? const SocialLoginWidget(onlySocialLogin: false) : const SizedBox(),
-
-          socialEnable && isDesktop ? const SizedBox(height: Dimensions.paddingSizeLarge) : const SizedBox(),
-
-          !socialEnable ? const SizedBox(height: 100) : const SizedBox(),
+          // No social login, no sign-up link — phone OTP only
+          const SizedBox(height: 50),
 
         ]),
       );

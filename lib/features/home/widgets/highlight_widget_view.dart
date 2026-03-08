@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer_animation/shimmer_animation.dart';
+// import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:stackfood_multivendor/common/models/restaurant_model.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
@@ -105,7 +105,7 @@ class _HighlightWidgetViewState extends State<HighlightWidgetView> {
             ]),
           ],
         ),
-      ) : advertisementController.advertisementList == null ? const AdvertisementShimmer() : const SizedBox();
+      ) : advertisementController.advertisementList == null ? const SizedBox() : const SizedBox();
     });
   }
 }
@@ -427,160 +427,5 @@ class AdvertisementIndicator extends StatelessWidget {
         ),
       ): const SizedBox();
     });
-  }
-}
-
-class AdvertisementShimmer extends StatelessWidget {
-  const AdvertisementShimmer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue.withValues(alpha: 0.05),
-        ),
-        margin:  EdgeInsets.only(
-          top: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge * 3.5 : 0 ,
-          right: Get.find<LocalizationController>().isLtr && ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0,
-          left: !Get.find<LocalizationController>().isLtr && ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : 0,
-        ),
-        child: Padding( padding : const EdgeInsets.symmetric(vertical : Dimensions.paddingSizeDefault),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              const SizedBox(height: Dimensions.paddingSizeLarge,),
-
-              Container(height: 20, width: 200,
-                margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Theme.of(context).shadowColor
-                ),),
-
-              const SizedBox(height: Dimensions.paddingSizeSmall,),
-
-              Container(height: 15, width: 250,
-                margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).shadowColor,
-                ),),
-
-              const SizedBox(height: Dimensions.paddingSizeDefault * 2,),
-
-              SizedBox(
-                height: 250,
-                child: ListView.builder(
-                  itemCount: ResponsiveHelper.isDesktop(context) ? 3 : 1,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: ResponsiveHelper.isDesktop(context) ? (Dimensions.webMaxWidth - 20) / 3 : MediaQuery.of(context).size.width,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Padding(padding: const EdgeInsets.only(bottom: 0, left: 10, right: 10),
-                            child: Container(
-                              height: 250,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                color: Theme.of(context).shadowColor,
-                                border: Border.all(color: Theme.of(context).hintColor.withValues(alpha: 0.2),),
-                              ),
-                              padding: const EdgeInsets.only(bottom: 25),
-                              child: const Center(child: Icon(Icons.play_circle, color: Colors.white,size: 45,),),
-                            ),
-                          ),
-
-                          Positioned( bottom: 0, left: 0,right: 0, child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                color: Theme.of(context).cardColor,
-                                border: Border.all(color: Theme.of(context).shadowColor)
-                            ),
-                            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                            margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                            child: Column(children: [
-                              Row( children: [
-
-                                Expanded(
-                                  child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Container(
-                                      height: 17, width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: Dimensions.paddingSizeSmall,),
-                                    Container(
-                                      height: 17, width: 150,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
-
-                                    Container(
-                                      height: 17, width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        color: Theme.of(context).shadowColor,
-                                      ),
-                                    )
-                                  ]),
-                                ),
-
-                                const SizedBox(width: Dimensions.paddingSizeLarge,),
-
-                                InkWell(
-                                  onTap: () => Get.back(),
-                                  child: Container(
-                                    margin: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
-                                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall + 5, vertical: Dimensions.paddingSizeSmall),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                      color: Theme.of(context).shadowColor,
-                                    ),
-                                    child:  Icon(Icons.arrow_forward_rounded, size: 20, color: Colors.white.withValues(alpha: 0.8),),
-                                  ),
-                                )
-                              ],)
-                            ],),
-                          ))
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: Dimensions.paddingSizeLarge * 2,),
-
-              Align(
-                alignment: Alignment.center,
-                child: AnimatedSmoothIndicator(
-                  activeIndex: 0,
-                  count: 3,
-                  effect: ExpandingDotsEffect(
-                    dotHeight: 7,
-                    dotWidth: 7,
-                    spacing: 5,
-                    activeDotColor: Theme.of(context).disabledColor,
-                    dotColor: Theme.of(context).hintColor.withValues(alpha: 0.6),
-                  ),
-                ),
-              ),
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

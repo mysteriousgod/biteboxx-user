@@ -19,7 +19,9 @@ import 'package:stackfood_multivendor/features/splash/controllers/splash_control
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
+import 'package:stackfood_multivendor/features/address/controllers/address_controller.dart';
 import 'package:stackfood_multivendor/helper/address_helper.dart';
+import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
@@ -60,26 +62,7 @@ class Theme1HomeScreen extends StatelessWidget {
                     horizontal: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeSmall : 0,
                   ),
                   child: GetBuilder<LocationController>(builder: (locationController) {
-                    return Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(
-                          AddressHelper.getAddressFromSharedPref()!.addressType == 'home' ? Icons.home_filled
-                              : AddressHelper.getAddressFromSharedPref()!.addressType == 'office' ? Icons.work : Icons.location_on,
-                          size: 20, color: Theme.of(context).textTheme.bodyLarge!.color,
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            AddressHelper.getAddressFromSharedPref()!.address!,
-                            style: robotoRegular.copyWith(
-                              color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeSmall,
-                            ),
-                            maxLines: 1, overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(Icons.arrow_drop_down, color: Theme.of(context).textTheme.bodyLarge!.color),
-                      ],
-                    );
+                    return _buildLocationBar(context);
                   }),
                 ),
               )),
@@ -193,6 +176,107 @@ class Theme1HomeScreen extends StatelessWidget {
           )),
         ),
       ],
+    );
+  }
+
+  Widget _buildLocationBar(BuildContext context) {
+    final currentAddress = AddressHelper.getAddressFromSharedPref();
+    IconData icon;
+
+    if (currentAddress != null && AuthHelper.isLoggedIn()) {
+      if (currentAddress.addressType == 'home') {
+        icon = Icons.home_filled;
+      } else if (currentAddress.addressType == 'office') {
+        icon = Icons.work;
+      } else {
+        icon = Icons.location_on;
+      }
+    } else {
+      icon = Icons.location_on;
+    }
+
+    return InkWell(
+      onTap: () => _showAddressDropdown(context),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).textTheme.bodyLarge!.color),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              currentAddress?.address ?? 'Select Location',
+              style: robotoRegular.copyWith(
+                color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeSmall,
+              ),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Icon(Icons.arrow_drop_down, color: Theme.of(context).textTheme.bodyLarge!.color),
+        ],
+      ),
+    );
+  }
+
+  void _showAddressDropdown(BuildContext context) {
+    // Fetch address list before showing dialog
+    Get.find<AddressController>().getAddressList();
+    
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.paddingSizeDefault)),
+        title: Text('Select Location', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GetBuilder<AddressController>(
+            builder: (addressController) {
+              return addressController.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : addressController.addressList == null || addressController.addressList!.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                          child: Text('No saved addresses found'),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: addressController.addressList!.length,
+                          itemBuilder: (context, index) {
+                            final address = addressController.addressList![index];
+                            final currentAddress = AddressHelper.getAddressFromSharedPref();
+                            final isSelected = address.id == currentAddress?.id;
+                            return ListTile(
+                              leading: Icon(
+                                address.addressType == 'home' ? Icons.home_filled :
+                                address.addressType == 'office' ? Icons.work : Icons.location_on,
+                                color: isSelected ? Theme.of(context).primaryColor : null,
+                              ),
+                              title: Text(
+                                address.address ?? '',
+                                style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                              ),
+                              subtitle: Text(
+                                '${address.addressType?.toUpperCase()} - ${address.latitude}, ${address.longitude}',
+                                style: TextStyle(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
+                              ),
+                              selected: isSelected,
+                              onTap: () {
+                                Get.find<LocationController>().saveAddressAndNavigate(
+                                  address, false, null, false, ResponsiveHelper.isDesktop(context),
+                                );
+                                Get.back();
+                              },
+                            );
+                          },
+                        );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

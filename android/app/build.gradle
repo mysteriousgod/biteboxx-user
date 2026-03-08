@@ -5,7 +5,6 @@ plugins {
     id "com.google.gms.google-services"
     id "com.google.firebase.crashlytics"
 }
-
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -31,30 +30,24 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.biteboxer.user"
+    namespace "com.bitbox.user"
     compileSdk 36
-
-    buildFeatures {
-        buildConfig = true
-    }
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '1.8'
     }
-
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.biteboxer.user"
+        applicationId "com.bitbox.user"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode 10

@@ -19,15 +19,18 @@ class TramsConditionsCheckBoxWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: /*fromSignUp || fromDmRegistration ?*/ MainAxisAlignment.start /*: MainAxisAlignment.center*/, children: [
+    // Show checkbox for signUp, dmRegistration, or dialog (login)
+    bool showCheckbox = fromSignUp || fromDmRegistration || fromDialog;
+    
+    return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
 
-      fromSignUp || fromDmRegistration ? Checkbox(
+      showCheckbox ? Checkbox(
         activeColor: Theme.of(context).primaryColor,
         value: fromDmRegistration ? deliverymanRegistrationController?.acceptTerms : authController?.acceptTerms,
         onChanged: (bool? isChecked) => fromDmRegistration ? deliverymanRegistrationController?.toggleTerms() : authController?.toggleTerms(),
       ) : const SizedBox(),
 
-      fromSignUp || fromDmRegistration ? const SizedBox() : Text( '* ', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+      showCheckbox ? const SizedBox() : Text( '* ', style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
 
       Flexible(
         child: RichText(

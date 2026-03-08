@@ -104,6 +104,7 @@ build/
 !**/ios/**/default.perspectivev3
 
 # Web related
+lib/generated_plugin_registrant.dart
 
 # Coverage
 coverage/
@@ -145,3 +146,6 @@ android/app/.cxx/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+.env
+biteboxx-backend
