@@ -67,6 +67,7 @@ dependencies:
   drift: ^2.28.1
   drift_flutter: ^0.2.5
   flutter_dotenv: ^6.0.0
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,7 @@ flutter:
     - assets/image/
     - assets/language/
     - assets/map/
+    - assets/audio/
     - .env
 
   fonts:

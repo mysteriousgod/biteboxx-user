@@ -132,10 +132,9 @@ class _PickMapScreenState extends State<PickMapScreen> {
             Positioned(
               bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
               child: CustomButtonWidget(
-                buttonText: locationController.inZone ? widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr
-                    : 'service_not_available_in_this_area'.tr,
+                buttonText: widget.fromAddAddress ? 'pick_address'.tr : 'pick_location'.tr,
                 isLoading: locationController.isLoading,
-                onPressed: (locationController.buttonDisabled || locationController.loading) ? null
+                onPressed: (locationController.loading) ? null
                     : () => _onPickAddressButtonPressed(locationController),
               ),
             ),

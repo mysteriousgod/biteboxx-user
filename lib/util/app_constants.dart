@@ -15,10 +15,10 @@ class AppConstants {
     // Check if we're in production environment
     if (const bool.fromEnvironment('dart.vm.product')) {
       // Production environment - use environment variable or fallback
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
     } else {
       // Development environment - can use localhost or staging
-      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://main.d1wk7b6t2z78p1.amplifyapp.com');
+      return const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://biteboxx.com');
     }
   }
   static const String categoryUri = '/api/v1/categories';
