@@ -1,6 +1,8 @@
 
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
+import 'package:stackfood_multivendor/features/countdown/controllers/countdown_controller.dart';
+import 'package:stackfood_multivendor/features/countdown/views/countdown_view.dart';
 import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
 import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
@@ -17,10 +19,15 @@ void route({required NotificationBodyModel? notificationBody, required DeepLinkB
   bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
   if (needsUpdate || isInMaintenance) {
     Get.offNamed(RouteHelper.getUpdateRoute(needsUpdate));
-  } else if(!GetPlatform.isWeb){
+  } else if (!GetPlatform.isWeb) {
     _handleNavigation(notificationBody, linkBody);
   } else if (GetPlatform.isWeb && Get.currentRoute.contains(RouteHelper.update) && !isInMaintenance) {
     Get.offNamed(RouteHelper.getInitialRoute());
+  } else if (GetPlatform.isWeb && !isInMaintenance) {
+    // Show countdown for web users
+    Get.off(() => const CountdownView());
+    // Initialize countdown controller
+    Get.put(CountdownController());
   }
 }
 
