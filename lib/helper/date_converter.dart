@@ -171,6 +171,8 @@ class DateConverter {
         minTime = int.parse(timeList[0]);
       }catch(_) {}
     }
+    // Add 10 minutes for delivery man timing
+    minTime = minTime + 10;
     DateTime deliveryTime0 = dateTimeStringToDate(scheduleAt ?? orderTime!).add(Duration(minutes: minTime));
     return deliveryTime0.difference(DateTime.now()).inMinutes;
   }

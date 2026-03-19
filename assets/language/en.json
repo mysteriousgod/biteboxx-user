@@ -411,7 +411,7 @@
   "refer_code": "Refer Code (Optional)",
   "delivery_man_tips": "Delivery Man Tips ",
   "street_number": "Add Locality",
-  "house": "Building, House No.",
+  "house": "Building Name",
   "floor": "Floor",
   "number": "Number",
   "your_food_will_delivered_within": "Your food will delivered within ",
@@ -1297,5 +1297,6 @@
   "sorry_something_went_wrong": "Sorry, something went wrong",
   "please_try_again_after_some_time_or_contact_with_our_support_team": "Please try again after some time or Contact with our support team.",
   "regular": "Regular",
-  "no_payment_method_has_been_selected_kindly_select_a_payment_method": "No payment method has been selected. Kindly select a payment method."
+  "no_payment_method_has_been_selected_kindly_select_a_payment_method": "No payment method has been selected. Kindly select a payment method.",
+  "search_by_category": "Search by category"
 }
