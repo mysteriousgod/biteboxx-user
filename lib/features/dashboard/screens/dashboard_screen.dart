@@ -17,10 +17,10 @@ import 'package:stackfood_multivendor/features/dashboard/widgets/bottom_nav_item
 import 'package:stackfood_multivendor/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/screens/favourite_screen.dart';
 import 'package:stackfood_multivendor/features/loyalty/controllers/loyalty_controller.dart';
+import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/cart_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_dialog_widget.dart';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +115,6 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvokedWithResult: (didPop, result) async{
@@ -149,33 +148,14 @@ class DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         key: _scaffoldKey,
 
-        floatingActionButton: GetBuilder<OrderController>(builder: (orderController) {
-            return ResponsiveHelper.isDesktop(context) || keyboardVisible ? const SizedBox() :
-            (orderController.showBottomSheet && orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin)
-            ? const SizedBox.shrink() : Material(
-              elevation: 3,
-              shape: const CircleBorder(),
-              child: FloatingActionButton(
-                backgroundColor: _pageIndex == 2 ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
-                onPressed: () {
-                  // _setPage(2);
-                  Get.toNamed(RouteHelper.getCartRoute());
-                },
-                child: CartWidget(color: _pageIndex == 2 ? Theme.of(context).cardColor : Theme.of(context).disabledColor, size: 30),
-              ),
-            );
-          }
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: const SizedBox.shrink(),
 
         bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
 
             return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
             ? const SizedBox() : BottomAppBar(
               elevation: 5,
-              notchMargin: 6,
               clipBehavior: Clip.antiAlias,
-              shape: const CircularNotchedRectangle(),
               shadowColor: Theme.of(context).disabledColor,
               color: Theme.of(context).cardColor,
               child: Padding(
@@ -183,7 +163,14 @@ class DashboardScreenState extends State<DashboardScreen> {
                 child: Row(children: [
                   BottomNavItem(iconData: Icons.home, isSelected: _pageIndex == 0, onTap: () => _setPage(0)),
                   BottomNavItem(iconData: Icons.favorite, isSelected: _pageIndex == 1, onTap: () => _setPage(1)),
-                  const Expanded(child: SizedBox()),
+                  GetBuilder<CartController>(builder: (cartController) {
+                    return BottomNavItem(
+                      iconData: Icons.shopping_cart,
+                      isSelected: _pageIndex == 2,
+                      onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
+                      badge: cartController.cartList.isNotEmpty ? cartController.cartList.length : null,
+                    );
+                  }),
                   BottomNavItem(iconData: Icons.shopping_bag, isSelected: _pageIndex == 3, onTap: () => _setPage(3)),
                   BottomNavItem(iconData: Icons.menu, isSelected: _pageIndex == 4, onTap: () => _setPage(4)),
                 ]),
