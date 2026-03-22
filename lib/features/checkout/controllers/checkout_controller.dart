@@ -485,33 +485,57 @@ class CheckoutController extends GetxController implements GetxService {
         ))
     );
 
-    _address.add(AddressHelper.getAddressFromSharedPref()!);
-    _addressList.add(
-        DropdownItem<int>(value: 0, child: SizedBox(
-          width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
-          child: AddressCardWidget(
-            address: AddressHelper.getAddressFromSharedPref(),
-            fromAddress: false, fromCheckout: true,
-          ),
-        ))
-    );
+    // Priority 1: Check if there's a "Home" address available
+    AddressModel? homeAddress = _getHomeAddress();
+    if (homeAddress != null) {
+      _address.add(homeAddress);
+      _addressList.add(
+          DropdownItem<int>(value: 0, child: SizedBox(
+            width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
+            child: AddressCardWidget(
+              address: homeAddress,
+              fromAddress: false, fromCheckout: true,
+            ),
+          ))
+      );
+      setAddressIndex(0);
+    } else {
+      // Fallback: Use the saved address from shared pref
+      AddressModel? savedAddress = AddressHelper.getAddressFromSharedPref();
+      if (savedAddress != null) {
+        _address.add(savedAddress);
+        _addressList.add(
+            DropdownItem<int>(value: 0, child: SizedBox(
+              width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
+              child: AddressCardWidget(
+                address: savedAddress,
+                fromAddress: false, fromCheckout: true,
+              ),
+            ))
+        );
+        setAddressIndex(0);
+      }
+    }
 
     if(Get.find<RestaurantController>().restaurant != null) {
       if(Get.find<AddressController>().addressList != null) {
-        int i = 0;
+        int i = _address.length; // Start from current address count
         for(int index=0; index<Get.find<AddressController>().addressList!.length; index++) {
-          if(Get.find<AddressController>().addressList![index].zoneIds!.contains(Get.find<RestaurantController>().restaurant!.zoneId)) {
+          AddressModel address = Get.find<AddressController>().addressList![index];
+          
+          // Skip if already added (home address) or doesn't match zone
+          if (_address.any((a) => a.id == address.id)) continue;
+          if (address.zoneIds == null || !address.zoneIds!.contains(Get.find<RestaurantController>().restaurant!.zoneId)) continue;
 
-            _address.add(Get.find<AddressController>().addressList![index]);
-            _addressList.add(DropdownItem<int>(value: i + 1, child: SizedBox(
-              width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
-              child: AddressCardWidget(
-                address: Get.find<AddressController>().addressList![index],
-                fromAddress: false, fromCheckout: true,
-              ),
-            )));
-            i++;
-          }
+          _address.add(address);
+          _addressList.add(DropdownItem<int>(value: i, child: SizedBox(
+            width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
+            child: AddressCardWidget(
+              address: address,
+              fromAddress: false, fromCheckout: true,
+            ),
+          )));
+          i++;
         }
 
       }
@@ -726,6 +750,25 @@ class CheckoutController extends GetxController implements GetxService {
 
   String getDmTipIndex() {
     return checkoutServiceInterface.getDmTipIndex();
+  }
+
+  /// Get the first available "Home" address from the address list
+  AddressModel? _getHomeAddress() {
+    if (Get.find<AddressController>().addressList == null || 
+        Get.find<AddressController>().addressList!.isEmpty) {
+      return null;
+    }
+
+    // Find the first address with addressType == "Home" that matches the restaurant zone
+    for (var address in Get.find<AddressController>().addressList!) {
+      if (address.addressType?.toLowerCase() == 'home' && 
+          address.zoneIds != null && 
+          Get.find<RestaurantController>().restaurant != null &&
+          address.zoneIds!.contains(Get.find<RestaurantController>().restaurant!.zoneId)) {
+        return address;
+      }
+    }
+    return null;
   }
 
   Future<void> getOrderTax(PlaceOrderBodyModel placeOrderBody) async {
