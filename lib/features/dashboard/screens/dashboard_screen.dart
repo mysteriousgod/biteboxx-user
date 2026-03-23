@@ -29,7 +29,8 @@ import 'package:get/get.dart';
 class DashboardScreen extends StatefulWidget {
   final int pageIndex;
   final bool fromSplash;
-  const DashboardScreen({super.key, required this.pageIndex, this.fromSplash = false});
+  const DashboardScreen(
+      {super.key, required this.pageIndex, this.fromSplash = false});
 
   @override
   DashboardScreenState createState() => DashboardScreenState();
@@ -52,9 +53,14 @@ class DashboardScreenState extends State<DashboardScreen> {
 
     _showRegistrationSuccessBottomSheet();
 
-    if(_isLogin){
-      if(Get.find<SplashController>().configModel!.loyaltyPointStatus == 1 && Get.find<LoyaltyController>().getEarningPint().isNotEmpty && !ResponsiveHelper.isDesktop(Get.context)){
-        Future.delayed(const Duration(seconds: 1), () => showAnimatedDialog(Get.context!, const CongratulationDialogue()));
+    if (_isLogin) {
+      if (Get.find<SplashController>().configModel!.loyaltyPointStatus == 1 &&
+          Get.find<LoyaltyController>().getEarningPint().isNotEmpty &&
+          !ResponsiveHelper.isDesktop(Get.context)) {
+        Future.delayed(
+            const Duration(seconds: 1),
+            () => showAnimatedDialog(
+                Get.context!, const CongratulationDialogue()));
       }
       _suggestAddressBottomSheet();
       Get.find<OrderController>().getRunningOrders(1, notify: false);
@@ -75,35 +81,48 @@ class DashboardScreenState extends State<DashboardScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {});
     });
-
   }
 
   void _showRegistrationSuccessBottomSheet() {
-    bool canShowBottomSheet = Get.find<DashboardController>().getRegistrationSuccessfulSharedPref();
-    if(canShowBottomSheet) {
+    bool canShowBottomSheet =
+        Get.find<DashboardController>().getRegistrationSuccessfulSharedPref();
+    if (canShowBottomSheet) {
       Future.delayed(const Duration(seconds: 1), () {
-        ResponsiveHelper.isDesktop(Get.context) ? Get.dialog(const Dialog(child: RegistrationSuccessBottomSheet())).then((value) {
-          Get.find<DashboardController>().saveRegistrationSuccessfulSharedPref(false);
-          Get.find<DashboardController>().saveIsRestaurantRegistrationSharedPref(false);
-          setState(() {});
-        }) : showModalBottomSheet(
-          context: Get.context!, isScrollControlled: true, backgroundColor: Colors.transparent,
-          builder: (con) => const RegistrationSuccessBottomSheet(),
-        ).then((value) {
-          Get.find<DashboardController>().saveRegistrationSuccessfulSharedPref(false);
-          Get.find<DashboardController>().saveIsRestaurantRegistrationSharedPref(false);
-          setState(() {});
-        });
+        ResponsiveHelper.isDesktop(Get.context)
+            ? Get.dialog(const Dialog(child: RegistrationSuccessBottomSheet()))
+                .then((value) {
+                Get.find<DashboardController>()
+                    .saveRegistrationSuccessfulSharedPref(false);
+                Get.find<DashboardController>()
+                    .saveIsRestaurantRegistrationSharedPref(false);
+                setState(() {});
+              })
+            : showModalBottomSheet(
+                context: Get.context!,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (con) => const RegistrationSuccessBottomSheet(),
+              ).then((value) {
+                Get.find<DashboardController>()
+                    .saveRegistrationSuccessfulSharedPref(false);
+                Get.find<DashboardController>()
+                    .saveIsRestaurantRegistrationSharedPref(false);
+                setState(() {});
+              });
       });
     }
   }
 
   Future<void> _suggestAddressBottomSheet() async {
     active = await Get.find<DashboardController>().checkLocationActive();
-    if(widget.fromSplash && Get.find<DashboardController>().showLocationSuggestion && active){
+    if (widget.fromSplash &&
+        Get.find<DashboardController>().showLocationSuggestion &&
+        active) {
       Future.delayed(const Duration(seconds: 1), () {
         showModalBottomSheet(
-          context: Get.context!, isScrollControlled: true, backgroundColor: Colors.transparent,
+          context: Get.context!,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
           builder: (con) => const AddressBottomSheet(),
         ).then((value) {
           Get.find<DashboardController>().hideSuggestedLocation();
@@ -117,21 +136,22 @@ class DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: Navigator.canPop(context),
-      onPopInvokedWithResult: (didPop, result) async{
+      onPopInvokedWithResult: (didPop, result) async {
         debugPrint('$_canExit');
         if (_pageIndex != 0) {
           _setPage(0);
         } else {
-          if(_canExit) {
+          if (_canExit) {
             if (GetPlatform.isAndroid) {
               SystemNavigator.pop();
             } else if (GetPlatform.isIOS) {
               exit(0);
             }
           }
-          if(!ResponsiveHelper.isDesktop(context)) {
+          if (!ResponsiveHelper.isDesktop(context)) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('back_press_again_to_exit'.tr, style: const TextStyle(color: Colors.white)),
+              content: Text('back_press_again_to_exit'.tr,
+                  style: const TextStyle(color: Colors.white)),
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
@@ -147,86 +167,110 @@ class DashboardScreenState extends State<DashboardScreen> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-
         floatingActionButton: const SizedBox.shrink(),
+        bottomNavigationBar: ResponsiveHelper.isDesktop(context)
+            ? const SizedBox()
+            : GetBuilder<OrderController>(builder: (orderController) {
+                return (orderController.showBottomSheet &&
+                        (orderController.runningOrderList != null &&
+                            orderController.runningOrderList!.isNotEmpty &&
+                            _isLogin))
+                    ? const SizedBox()
+                    : BottomAppBar(
+                        elevation: 4,
+                        clipBehavior: Clip.none,
+                        shadowColor: Colors.black.withValues(alpha: 0.08),
+                        color: Colors.grey[100],
+                        height: 56,
+                        child: Row(
+                          children: [
+                            BottomNavItem(
+                              iconData: Icons.home,
+                              isSelected: _pageIndex == 0,
+                              onTap: () => _setPage(0),
+                            ),
+                            BottomNavItem(
+                              iconData: Icons.favorite,
+                              isSelected: _pageIndex == 1,
+                              onTap: () => _setPage(1),
+                            ),
+                            GetBuilder<CartController>(
+                                builder: (cartController) {
+                              return BottomNavItem(
+                                iconData: Icons.shopping_cart,
+                                isSelected: _pageIndex == 2,
+                                onTap: () => _setPage(2),
+                                badge: cartController.cartList.isNotEmpty
+                                    ? cartController.cartList.length
+                                    : null,
+                              );
+                            }),
+                            BottomNavItem(
+                              iconData: Icons.shopping_bag,
+                              isSelected: _pageIndex == 3,
+                              onTap: () => _setPage(3),
+                            ),
+                            BottomNavItem(
+                              iconData: Icons.menu,
+                              isSelected: _pageIndex == 4,
+                              onTap: () => _setPage(4),
+                            ),
+                          ],
+                        ),
+                      );
+              }),
+        body: GetBuilder<OrderController>(builder: (orderController) {
+          List<OrderModel> runningOrder =
+              orderController.runningOrderList != null
+                  ? orderController.runningOrderList!
+                  : [];
 
-        bottomNavigationBar: ResponsiveHelper.isDesktop(context) ? const SizedBox() : GetBuilder<OrderController>(builder: (orderController) {
-
-            return (orderController.showBottomSheet && (orderController.runningOrderList != null && orderController.runningOrderList!.isNotEmpty && _isLogin))
-            ? const SizedBox() : BottomAppBar(
-              elevation: 5,
-              clipBehavior: Clip.antiAlias,
-              shadowColor: Theme.of(context).disabledColor,
-              color: Theme.of(context).cardColor,
-              child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                child: Row(children: [
-                  BottomNavItem(iconData: Icons.home, isSelected: _pageIndex == 0, onTap: () => _setPage(0)),
-                  BottomNavItem(iconData: Icons.favorite, isSelected: _pageIndex == 1, onTap: () => _setPage(1)),
-                  GetBuilder<CartController>(builder: (cartController) {
-                    return BottomNavItem(
-                      iconData: Icons.shopping_cart,
-                      isSelected: _pageIndex == 2,
-                      onTap: () => Get.toNamed(RouteHelper.getCartRoute()),
-                      badge: cartController.cartList.isNotEmpty ? cartController.cartList.length : null,
-                    );
-                  }),
-                  BottomNavItem(iconData: Icons.shopping_bag, isSelected: _pageIndex == 3, onTap: () => _setPage(3)),
-                  BottomNavItem(iconData: Icons.menu, isSelected: _pageIndex == 4, onTap: () => _setPage(4)),
-                ]),
-              ),
-            );
-          }
-        ),
-        body: GetBuilder<OrderController>(
-          builder: (orderController) {
-            List<OrderModel> runningOrder = orderController.runningOrderList != null ? orderController.runningOrderList! : [];
-
-            List<OrderModel> reversOrder =  List.from(runningOrder.reversed);
-            return ExpandableBottomSheet(
-              background: PageView.builder(
-                controller: _pageController,
-                itemCount: _screens.length,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return _screens[index];
-                },
-              ),
-              persistentContentHeight: 100,
-
-              onIsContractedCallback: () {
-                if(!orderController.showOneOrder) {
-                  orderController.showOrders();
-                }
+          List<OrderModel> reversOrder = List.from(runningOrder.reversed);
+          return ExpandableBottomSheet(
+            background: PageView.builder(
+              controller: _pageController,
+              itemCount: _screens.length,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return _screens[index];
               },
-              onIsExtendedCallback: () {
-                if(orderController.showOneOrder) {
-                  orderController.showOrders();
-                }
-              },
-
-              enableToggle: true,
-
-              expandableContent: (ResponsiveHelper.isDesktop(context) || !_isLogin || orderController.runningOrderList == null
-                  || orderController.runningOrderList!.isEmpty || !orderController.showBottomSheet) ? const SizedBox()
-                  : Dismissible(
+            ),
+            persistentContentHeight: 100,
+            onIsContractedCallback: () {
+              if (!orderController.showOneOrder) {
+                orderController.showOrders();
+              }
+            },
+            onIsExtendedCallback: () {
+              if (orderController.showOneOrder) {
+                orderController.showOrders();
+              }
+            },
+            enableToggle: true,
+            expandableContent: (ResponsiveHelper.isDesktop(context) ||
+                    !_isLogin ||
+                    orderController.runningOrderList == null ||
+                    orderController.runningOrderList!.isEmpty ||
+                    !orderController.showBottomSheet)
+                ? const SizedBox()
+                : Dismissible(
                     key: UniqueKey(),
                     onDismissed: (direction) {
-                      if(orderController.showBottomSheet){
+                      if (orderController.showBottomSheet) {
                         orderController.showRunningOrders();
                       }
                     },
-                    child: RunningOrderViewWidget(reversOrder: reversOrder, onMoreClick: () {
-                      if(orderController.showBottomSheet){
-                        orderController.showRunningOrders();
-                      }
-                      _setPage(3);
-                    }),
-              ),
-
-            );
-          }
-        ),
+                    child: RunningOrderViewWidget(
+                        reversOrder: reversOrder,
+                        onMoreClick: () {
+                          if (orderController.showBottomSheet) {
+                            orderController.showRunningOrders();
+                          }
+                          _setPage(3);
+                        }),
+                  ),
+          );
+        }),
       ),
     );
   }
