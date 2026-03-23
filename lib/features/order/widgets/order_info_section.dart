@@ -24,6 +24,7 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:stackfood_multivendor/common/widgets/countdown_timer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
@@ -204,22 +205,23 @@ class OrderInfoSection extends StatelessWidget {
                 ? Images.preparingFoodOrderDetails : Images.animateDeliveryMan, fit: BoxFit.contain, height: 180)),
             const SizedBox(height: Dimensions.paddingSizeDefault),
 
-            Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
-            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
             Center(
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  order.scheduled == 1 && order.scheduleAt != null && DateConverter.isBeforeTime(order.scheduleAt)
+                      ? Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor))
+                      : Text('your_order_is_arriving_soon'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
+                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                Text(
-                  DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt) < 5 ? '1 - 5'
-                      : '${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt)-5} '
-                      '- ${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt)}',
-                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
-                ),
-                const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor)),
-              ]),
+                  CountdownTimerWidget(
+                    startTime: DateTime.parse(order.createdAt!),
+                    durationMinutes: _getDeliveryDurationMinutes(order),
+                    textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
+                    showMessageOnTimeUp: false,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -1246,6 +1248,22 @@ Widget offlineView(BuildContext context, OrderController orderController, Expans
       ),
     ),
   );
+}
+
+int _getDeliveryDurationMinutes(OrderModel order) {
+  // Get the base delivery time from deliveryTime range (e.g., '15-20' -> 15)
+  int minTime = 0;
+  if (order.restaurant?.deliveryTime != null && order.restaurant!.deliveryTime!.isNotEmpty) {
+    try {
+      List<String> timeList = order.restaurant!.deliveryTime!.split('-');
+      minTime = int.parse(timeList[0]);
+    } catch (_) {}
+  }
+  
+  // Add 10 minutes for delivery man timing (same logic as DateConverter.differenceInMinute)
+  minTime = minTime + 10;
+  
+  return minTime;
 }
 
 void openDialog(BuildContext context, String imageUrl) => showDialog(

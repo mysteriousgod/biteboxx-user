@@ -410,6 +410,7 @@
   "floor": "أرضية",
   "number": "رقم",
   "your_food_will_delivered_within": "سيتم تسليم طعامك في الداخل ",
+  "your_food_will_delivered_within_minutes": "سيتم تسليم طعامك خلال {{minutes}} دقيقة",
   "invalid_refer_code": "رمز الإحالة غير صالح",
   "search_item_in_store": "البحث عن الطعام في هذا المطعم",
   "refer_and_earn": "الرجوع وكسب",
