@@ -18,7 +18,6 @@ import 'package:stackfood_multivendor/features/home/widgets/best_review_item_vie
 import 'package:stackfood_multivendor/features/home/widgets/cuisine_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/enjoy_off_banner_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/location_banner_view_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/location_picker_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/home/widgets/new_on_stackfood_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/order_again_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/popular_foods_nearby_view_widget.dart';
@@ -39,10 +38,8 @@ import 'package:stackfood_multivendor/features/address/controllers/address_contr
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/category/controllers/category_controller.dart';
 import 'package:stackfood_multivendor/features/cuisine/controllers/cuisine_controller.dart';
-import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/features/product/controllers/product_controller.dart';
 import 'package:stackfood_multivendor/features/review/controllers/review_controller.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
@@ -158,32 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((value) => Get.find<SplashController>().saveReferBottomSheetStatus(false));
   }
 
-  Widget _buildLocationIcon(BuildContext context) {
-    final address = AddressHelper.getAddressFromSharedPref();
-    if (address != null && AuthHelper.isLoggedIn()) {
-      if (address.addressType == 'home') {
-        return Icon(Icons.home_filled, size: 20, color: Theme.of(context).cardColor);
-      } else if (address.addressType == 'office') {
-        return Icon(Icons.work, size: 20, color: Theme.of(context).cardColor);
-      }
-    }
-    return Icon(Icons.location_on, size: 20, color: Theme.of(context).cardColor);
-  }
-
-  String _getLocationText(BuildContext context) {
-    final address = AddressHelper.getAddressFromSharedPref();
-    if (address != null && AuthHelper.isLoggedIn() && address.addressType != 'others') {
-      return address.addressType!.tr;
-    }
-    return 'your_location'.tr;
-  }
-
-  String _getAddressText(BuildContext context) {
-    final address = AddressHelper.getAddressFromSharedPref();
-    return address?.address ?? 'Unknown Location Found';
-  }
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -238,93 +209,63 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: CustomizableSpaceBarWidget(
                           builder: (context, scrollingRate) {
                             scrollPoint = scrollingRate;
-                            return Center(child: Container(
-                              width: Dimensions.webMaxWidth, color: Theme.of(context).primaryColor,
-                              padding: const EdgeInsets.only(top: 30),
-                              child: Opacity(
-                                opacity: 1 - scrollPoint,
-                                child: Row(children: [
+                            return SizedBox(
+                              width: Dimensions.webMaxWidth,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Opacity(
+                                  opacity: 1 - scrollPoint,
+                                  child: Row(children: [
 
-                                  Expanded(child: Transform.translate(
-                                    offset: Offset(0, -(scrollingRate * 20)),
-                                    child: InkWell(
-                                      onTap: () => LocationPickerBottomSheet.show(context),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                                        child: GetBuilder<LocationController>(builder: (locationController) {
-                                          return Column(mainAxisSize: MainAxisSize.min, children: [
+                                    Transform.translate(
+                                      offset: Offset(0, -(scrollingRate * 20)),
+                                      child: Row(children: [
+                                        Image.asset(Images.logo, height: 50, width: 50),
+                                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                        Text(
+                                          'BiteBoxx',
+                                          style: robotoMedium.copyWith(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                          ),
+                                        ),
+                                      ]),
+                                    ),
 
-                                            if(scrollingRate < 0.2)
-                                            Row(children: [
-                                              _buildLocationIcon(context),
-                                              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                                    const Spacer(),
 
-                                              Text(
-                                                _getLocationText(context),
-                                                style: robotoMedium.copyWith(
-                                                  color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeDefault,
-                                                ),
-                                                maxLines: 1, overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ]),
-                                            SizedBox(height: (scrollingRate < 0.15) ? 5 : 0),
-
-                                            if(scrollingRate < 0.8)
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 5),
-                                              child: Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      _getAddressText(context),
-                                                      style: robotoRegular.copyWith(
-                                                        color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall,
-                                                      ),
-                                                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  Icon(Icons.arrow_drop_down, color: Theme.of(context).cardColor, size: 16),
-                                                ],
-                                              ),
+                                    Transform.translate(
+                                      offset: Offset(0, -(scrollingRate * 10)),
+                                      child: InkWell(
+                                        child: GetBuilder<NotificationController>(builder: (notificationController) {
+                                          return Container(
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor.withValues(alpha: 0.9),
+                                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                                             ),
-                                          ]);
+                                            padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                                            child: Stack(children: [
+                                              Transform.translate(
+                                                offset: Offset(0, -(scrollingRate * 10)),
+                                                child: Icon(Icons.notifications_outlined, size: 25, color: Theme.of(context).primaryColor),
+                                            ),
+                                              notificationController.hasNotification ? Positioned(top: 0, right: 0, child: Container(
+                                                height: 10, width: 10, decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor, shape: BoxShape.circle,
+                                                border: Border.all(width: 1, color: Theme.of(context).cardColor),
+                                              ),
+                                              )) : const SizedBox(),
+                                            ]),
+                                          );
                                         }),
+                                        onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
                                       ),
                                     ),
-                                  )),
 
-                                  Transform.translate(
-                                    offset: Offset(0, -(scrollingRate * 10)),
-                                    child: InkWell(
-                                      child: GetBuilder<NotificationController>(builder: (notificationController) {
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).cardColor.withValues(alpha: 0.9),
-                                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                          ),
-                                          padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                          child: Stack(children: [
-                                            Transform.translate(
-                                              offset: Offset(0, -(scrollingRate * 10)),
-                                              child: Icon(Icons.notifications_outlined, size: 25, color: Theme.of(context).primaryColor),
-                                          ),
-                                            notificationController.hasNotification ? Positioned(top: 0, right: 0, child: Container(
-                                              height: 10, width: 10, decoration: BoxDecoration(
-                                              color: Theme.of(context).primaryColor, shape: BoxShape.circle,
-                                              border: Border.all(width: 1, color: Theme.of(context).cardColor),
-                                            ),
-                                            )) : const SizedBox(),
-                                          ]),
-                                        );
-                                      }),
-                                      onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                ]),
+                                  ]),
+                                ),
                               ),
-                            ));
+                            );
                           },
                         )
                     ),
