@@ -897,131 +897,132 @@ class OrderInfoSection extends StatelessWidget {
       ]) : const SizedBox(),
       const SizedBox(height: Dimensions.paddingSizeSmall),
 
-      isDesktop ? Padding(
-        padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-        child: Text('restaurant_details'.tr, style: robotoMedium),
-      ) : const SizedBox(),
+      // Restaurant Details section commented out
+      // isDesktop ? Padding(
+      //   padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+      //   child: Text('restaurant_details'.tr, style: robotoMedium),
+      // ) : const SizedBox(),
 
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      // Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-        !isDesktop ? Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-          child: Text('restaurant_details'.tr, style: robotoMedium),
-        ) : const SizedBox(),
+      //   !isDesktop ? Padding(
+      //     padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
+      //     child: Text('restaurant_details'.tr, style: robotoMedium),
+      //   ) : const SizedBox(),
 
-        InkWell(
-          onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(order.restaurant?.id)),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(isDesktop ? Dimensions.radiusDefault : 0),
-              boxShadow: [BoxShadow(color: isDesktop ? Colors.black.withValues(alpha: 0.05) : Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      //   InkWell(
+      //     onTap: () => Get.toNamed(RouteHelper.getRestaurantRoute(order.restaurant?.id)),
+      //     child: Container(
+      //       decoration: BoxDecoration(
+      //         color: Theme.of(context).cardColor,
+      //         borderRadius: BorderRadius.circular(isDesktop ? Dimensions.radiusDefault : 0),
+      //         boxShadow: [BoxShadow(color: isDesktop ? Colors.black.withValues(alpha: 0.05) : Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
+      //       ),
+      //       padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
+      //       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-              order.restaurant != null ? Row(children: [
+      //         order.restaurant != null ? Row(children: [
 
-                ClipOval(child: CustomImageWidget(
-                  image: '${order.restaurant!.logoFullUrl}',
-                  height: 50, width: 50, fit: BoxFit.cover, isRestaurant: true,
-                )),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
+      //           ClipOval(child: CustomImageWidget(
+      //             image: '${order.restaurant!.logoFullUrl}',
+      //             height: 50, width: 50, fit: BoxFit.cover, isRestaurant: true,
+      //           )),
+      //           const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
-                    order.restaurant!.name!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: robotoMedium,
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+      //           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      //             Text(
+      //               order.restaurant!.name!, maxLines: 1, overflow: TextOverflow.ellipsis,
+      //               style: robotoMedium,
+      //             ),
+      //             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                  Text(
-                    order.restaurant!.address!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                  ),
+      //             Text(
+      //               order.restaurant!.address!, maxLines: 1, overflow: TextOverflow.ellipsis,
+      //               style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
+      //             ),
 
-                ])),
+      //           ])),
 
-                (takeAway && !isDineIn && (pending || accepted || confirmed || processing || order.orderStatus == 'handover'
-                || pickedUp)) ? TextButton.icon(
-                  onPressed: () async {
-                    String url ='https://www.google.com/maps/dir/?api=1&destination=${order.restaurant!.latitude}'
-                        ',${order.restaurant!.longitude}&mode=d';
-                    if (await canLaunchUrlString(url)) {
-                      await launchUrlString(url, mode: LaunchMode.externalApplication);
-                    }else {
-                      showCustomSnackBar('unable_to_launch_google_map'.tr);
-                    }
-                  },
-                  icon: const Icon(Icons.directions), label: Text('direction'.tr),
-                ) : const SizedBox(),
+      //           (takeAway && !isDineIn && (pending || accepted || confirmed || processing || order.orderStatus == 'handover'
+      //           || pickedUp)) ? TextButton.icon(
+      //             onPressed: () async {
+      //               String url ='https://www.google.com/maps/dir/?api=1&destination=${order.restaurant!.latitude}'
+      //                   ',${order.restaurant!.longitude}&mode=d';
+      //               if (await canLaunchUrlString(url)) {
+      //                 await launchUrlString(url, mode: LaunchMode.externalApplication);
+      //               }else {
+      //                 showCustomSnackBar('unable_to_launch_google_map'.tr);
+      //               }
+      //             },
+      //             icon: const Icon(Icons.directions), label: Text('direction'.tr),
+      //           ) : const SizedBox(),
 
-                isDineIn ? InkWell(
-                  onTap: ()=> Get.toNamed(RouteHelper.getMapRoute(
-                    AddressModel(
-                      id: order.restaurant!.id, address: order.restaurant!.address, latitude: order.restaurant!.latitude,
-                      longitude: order.restaurant!.longitude, contactPersonNumber: '', contactPersonName: '', addressType: '',
-                    ), 'order',
-                    restaurantName: order.restaurant!.name, restaurant: order.restaurant, isDineOrder: isDineIn,
-                  )),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(Images.restaurantIconMarker, height: 25, width: 25, fit: BoxFit.cover),
-                  ),
-                ) : const SizedBox(),
+      //           isDineIn ? InkWell(
+      //             onTap: ()=> Get.toNamed(RouteHelper.getMapRoute(
+      //               AddressModel(
+      //                 id: order.restaurant!.id, address: order.restaurant!.address, latitude: order.restaurant!.latitude,
+      //                 longitude: order.restaurant!.longitude, contactPersonNumber: '', contactPersonName: '', addressType: '',
+      //               ), 'order',
+      //               restaurantName: order.restaurant!.name, restaurant: order.restaurant, isDineOrder: isDineIn,
+      //             )),
+      //             child: Padding(
+      //               padding: const EdgeInsets.all(8.0),
+      //               child: Image.asset(Images.restaurantIconMarker, height: 25, width: 25, fit: BoxFit.cover),
+      //             ),
+      //           ) : const SizedBox(),
 
-                (showChatPermission && !delivered && order.orderStatus != 'failed' && !cancelled && order.orderStatus != 'refunded' && !isGuestLoggedIn) ? InkWell(
-                  onTap: () async {
-                    orderController.cancelTimer();
-                    await Get.toNamed(RouteHelper.getChatRoute(
-                      notificationBody: NotificationBodyModel(orderId: order.id, restaurantId: order.restaurant!.vendorId),
-                      user: User(id: order.restaurant!.vendorId, fName: order.restaurant!.name, lName: '', imageFullUrl: order.restaurant!.logoFullUrl, phone: order.restaurant!.phone),
-                    ));
-                    orderController.callTrackOrderApi(orderModel: order, orderId: order.id.toString());
-                  },
-                  child: Image.asset(Images.chatImageOrderDetails, height: 25, width: 25, fit: BoxFit.cover),
-                ) : const SizedBox(),
+      //           (showChatPermission && !delivered && order.orderStatus != 'failed' && !cancelled && order.orderStatus != 'refunded' && !isGuestLoggedIn) ? InkWell(
+      //             onTap: () async {
+      //               orderController.cancelTimer();
+      //               await Get.toNamed(RouteHelper.getChatRoute(
+      //                 notificationBody: NotificationBodyModel(orderId: order.id, restaurantId: order.restaurant!.vendorId),
+      //                 user: User(id: order.restaurant!.vendorId, fName: order.restaurant!.name, lName: '', imageFullUrl: order.restaurant!.logoFullUrl, phone: order.restaurant!.phone),
+      //               ));
+      //               orderController.callTrackOrderApi(orderModel: order, orderId: order.id.toString());
+      //             },
+      //             child: Image.asset(Images.chatImageOrderDetails, height: 25, width: 25, fit: BoxFit.cover),
+      //           ) : const SizedBox(),
 
-                SizedBox(width: order.restaurant!.phone != null ? Dimensions.paddingSizeDefault : 0),
+      //           SizedBox(width: order.restaurant!.phone != null ? Dimensions.paddingSizeDefault : 0),
 
-                order.restaurant!.phone != null ? InkWell(
-                  onTap: () async {
-                    if(await canLaunchUrlString('tel:${order.restaurant!.phone}')) {
-                      launchUrlString('tel:${order.restaurant!.phone}', mode: LaunchMode.externalApplication);
-                    }else {
-                      showCustomSnackBar('${'can_not_launch'.tr} ${order.restaurant!.phone}');
-                    }
-                  },
-                  child: Image.asset(Images.callImageOrderDetails, height: 25, width: 25, fit: BoxFit.cover),
-                ) : const SizedBox(),
+      //           order.restaurant!.phone != null ? InkWell(
+      //             onTap: () async {
+      //               if(await canLaunchUrlString('tel:${order.restaurant!.phone}')) {
+      //                 launchUrlString('tel:${order.restaurant!.phone}', mode: LaunchMode.externalApplication);
+      //               }else {
+      //                 showCustomSnackBar('${'can_not_launch'.tr} ${order.restaurant!.phone}');
+      //               }
+      //             },
+      //             child: Image.asset(Images.callImageOrderDetails, height: 25, width: 25, fit: BoxFit.cover),
+      //           ) : const SizedBox(),
 
-                SizedBox(width: (!subscription && Get.find<SplashController>().configModel!.refundStatus! && delivered && orderController.orderDetails![0].itemCampaignId == null && !isGuestLoggedIn)
-                    ? Dimensions.paddingSizeDefault : 0),
+      //           SizedBox(width: (!subscription && Get.find<SplashController>().configModel!.refundStatus! && delivered && orderController.orderDetails![0].itemCampaignId == null && !isGuestLoggedIn)
+      //               ? Dimensions.paddingSizeDefault : 0),
 
-                (!subscription && Get.find<SplashController>().configModel!.refundStatus! && delivered && orderController.orderDetails![0].itemCampaignId == null && !isGuestLoggedIn) ? InkWell(
-                  onTap: () => Get.toNamed(RouteHelper.getRefundRequestRoute(order.id.toString())),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).primaryColor, width: 1),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall, vertical: Dimensions.paddingSizeSmall),
-                    child: Text('request_for_refund'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)),
-                  ),
-                ) : const SizedBox(),
+      //           (!subscription && Get.find<SplashController>().configModel!.refundStatus! && delivered && orderController.orderDetails![0].itemCampaignId == null && !isGuestLoggedIn) ? InkWell(
+      //             onTap: () => Get.toNamed(RouteHelper.getRefundRequestRoute(order.id.toString())),
+      //             child: Container(
+      //               decoration: BoxDecoration(
+      //                 border: Border.all(color: Theme.of(context).primaryColor, width: 1),
+      //                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+      //               ),
+      //               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall, vertical: Dimensions.paddingSizeSmall),
+      //               child: Text('request_for_refund'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)),
+      //             ),
+      //           ) : const SizedBox(),
 
-              ]) : Center(child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Text(
-                  'no_restaurant_data_found'.tr, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
-                ),
-              )),
-            ]),
-          ),
-        ),
-      ]),
-      const SizedBox(height: Dimensions.paddingSizeSmall),
+      //         ]) : Center(child: Padding(
+      //           padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+      //           child: Text(
+      //             'no_restaurant_data_found'.tr, maxLines: 1, overflow: TextOverflow.ellipsis,
+      //             style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+      //           ),
+      //         )),
+      //       ]),
+      //     ),
+      //   ),
+      // ]),
+      // const SizedBox(height: Dimensions.paddingSizeSmall),
 
       order.deliveryMan != null ? Column(children: [
 
