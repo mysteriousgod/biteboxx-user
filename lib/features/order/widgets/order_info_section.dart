@@ -1249,21 +1249,26 @@ Widget offlineView(BuildContext context, OrderController orderController, Expans
     ),
   );
 }
+// int _getDeliveryDurationMinutes(OrderModel order) {
+//   // Get the base delivery time from deliveryTime range (e.g., '15-20' -> 15)
+//   int minTime = 0;
+//   if (order.restaurant?.deliveryTime != null &&
+//       order.restaurant!.deliveryTime!.isNotEmpty) {
+//     try {
+//       List<String> timeList = order.restaurant!.deliveryTime!.split('-');
+//       minTime = int.parse(timeList[0]);
+//     } catch (_) {}
+//   }
 
+//   // Add 10 minutes for delivery man timing (same logic as DateConverter.differenceInMinute)
+//   minTime = minTime + 10;
+
+//   return minTime;
+// }
 int _getDeliveryDurationMinutes(OrderModel order) {
-  // Get the base delivery time from deliveryTime range (e.g., '15-20' -> 15)
-  int minTime = 0;
-  if (order.restaurant?.deliveryTime != null && order.restaurant!.deliveryTime!.isNotEmpty) {
-    try {
-      List<String> timeList = order.restaurant!.deliveryTime!.split('-');
-      minTime = int.parse(timeList[0]);
-    } catch (_) {}
-  }
   
-  // Add 10 minutes for delivery man timing (same logic as DateConverter.differenceInMinute)
-  minTime = minTime + 10;
-  
-  return minTime;
+  // Hardcoded delivery duration of 35 minutes
+  return 35;
 }
 
 void openDialog(BuildContext context, String imageUrl) => showDialog(
