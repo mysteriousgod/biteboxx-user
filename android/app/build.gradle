@@ -67,10 +67,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias 'bitebox_user' // Replace with your actual key alias
-            keyPassword '@Anilch133'
-            storeFile file('keystore/keystore.jks') // Replace with the path to your keystore file
-            storePassword '@Anilch133'
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
         }
     }
 
