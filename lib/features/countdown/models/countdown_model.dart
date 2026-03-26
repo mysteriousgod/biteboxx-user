@@ -25,13 +25,13 @@ class CountdownModel {
     );
   }
 
-  // Default countdown configuration for April 8th launch
+  // Default countdown configuration for April 5th launch
   factory CountdownModel.defaultLaunch() {
     final now = DateTime.now();
-    // Set to April 8th, 12:00 PM (noon)
-    final launchDate = DateTime(now.year, 4, 8, 12, 0, 0);
+    // Set to April 5th, 12:00 PM (noon)
+    final launchDate = DateTime(now.year, 4, 5, 12, 0, 0);
     
-    // If April 8th has passed this year, set to next year
+    // If April 5th has passed this year, set to next year
     if (launchDate.isBefore(now)) {
       launchDate.add(Duration(days: 365));
     }
