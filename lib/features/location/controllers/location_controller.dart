@@ -164,6 +164,8 @@ class LocationController extends GetxController implements GetxService {
   }
 
   void saveAddressAndNavigate(AddressModel address, bool fromSignUp, String? route, bool canRoute, bool isDesktop) {
+    _isLoading = true;
+    update();
     _prepareZoneData(address, fromSignUp, route, canRoute, isDesktop);
   }
 
