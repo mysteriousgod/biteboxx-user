@@ -1,11 +1,57 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/countdown/controllers/countdown_controller.dart';
+import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 
-class CountdownView extends StatelessWidget {
+class CountdownView extends StatefulWidget {
   const CountdownView({super.key});
+
+  @override
+  State<CountdownView> createState() => _CountdownViewState();
+}
+
+class _CountdownViewState extends State<CountdownView> {
+  Timer? _launchTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkForLaunch();
+  }
+
+  @override
+  void dispose() {
+    _launchTimer?.cancel();
+    super.dispose();
+  }
+
+  void _checkForLaunch() {
+    final controller = Get.find<CountdownController>();
+    
+    // If already launched, navigate immediately
+    if (controller.isLaunched.value && mounted) {
+      _navigateAfterLaunch();
+      return;
+    }
+
+    // Check every 5 seconds if launch has occurred
+    _launchTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (controller.isLaunched.value && mounted) {
+        timer.cancel();
+        _navigateAfterLaunch();
+      }
+    });
+  }
+
+  void _navigateAfterLaunch() {
+    if (!mounted) return;
+    
+    // Navigate to initial route and clear countdown screen
+    Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +64,14 @@ class CountdownView extends StatelessWidget {
           );
         }
 
+        // Don't show anything if launched - navigation will handle it
         if (controller.isLaunched.value) {
-          return _buildLaunchedView();
+          return const Scaffold(
+            backgroundColor: Colors.black,
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          );
         }
 
         return Scaffold(

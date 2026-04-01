@@ -1,6 +1,9 @@
 import qrcode
 from PIL import Image, ImageDraw, ImageFilter
 
+# ⚠️ CHANGE THIS to your actual hosted redirect page URL
+REDIRECT_URL = "https://biteboxx.com/download"
+
 # Create the QR Code with optimal settings
 qr = qrcode.QRCode(
     version=10,
@@ -9,11 +12,11 @@ qr = qrcode.QRCode(
     border=5,
 )
 
-# Add your data
-qr.add_data("https://biteboxx.com")
+# Add your REDIRECT URL (not direct store links)
+qr.add_data(REDIRECT_URL)
 qr.make(fit=True)
 
-# Create the image with brand colors (dark navy blue for modern look)
+# Create the image with brand colors
 img = qr.make_image(fill_color="#1a1a2e", back_color="#FFFFFF")
 img = img.convert("RGBA")
 
@@ -59,7 +62,12 @@ pos = ((qr_width - (logo_size + 8)) // 2, (qr_height - (logo_size + 8)) // 2)
 img.paste(logo_bg, pos, logo_bg)
 
 # Save the file
-img.save("biteboxx_qr_code.png", "PNG")
-print("QR Code saved successfully as biteboxx_qr_code.png")
-print(f"QR Code size: {qr_width}x{qr_height}")
-print(f"Logo size: {logo_size}x{logo_size}")
+img.save("biteboxx_qr_code_smart.png", "PNG")
+print("✅ Smart QR Code saved successfully as biteboxx_qr_code_smart.png")
+print(f"📐 QR Code size: {qr_width}x{qr_height}")
+print(f"🖼️ Logo size: {logo_size}x{logo_size}")
+print(f"🔗 Redirect URL: {REDIRECT_URL}")
+print("\n📱 How it works:")
+print("   • iOS users → App Store")
+print("   • Android users → Google Play")
+print("   • Desktop/Other → Shows download options page")

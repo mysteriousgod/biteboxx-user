@@ -19,15 +19,19 @@ void route({required NotificationBodyModel? notificationBody, required DeepLinkB
   bool isInMaintenance = MaintenanceHelper.isMaintenanceEnable();
   if (needsUpdate || isInMaintenance) {
     Get.offNamed(RouteHelper.getUpdateRoute(needsUpdate));
-  } else if (!GetPlatform.isWeb) {
-    _handleNavigation(notificationBody, linkBody);
-  } else if (GetPlatform.isWeb && Get.currentRoute.contains(RouteHelper.update) && !isInMaintenance) {
+  } else if (Get.currentRoute.contains(RouteHelper.update) && !isInMaintenance) {
     Get.offNamed(RouteHelper.getInitialRoute());
-  } else if (GetPlatform.isWeb && !isInMaintenance) {
-    // Show countdown for web users
-    Get.off(() => const CountdownView());
-    // Initialize countdown controller
-    Get.put(CountdownController());
+  } else if (!isInMaintenance) {
+    // Check countdown launch status (for all platforms: web, iOS, Android)
+    final countdownController = Get.find<CountdownController>();
+    
+    // Show countdown if not yet launched
+    if (!countdownController.countdownModel.isLaunched) {
+      Get.off(() => const CountdownView());
+    } else {
+      // App has launched, proceed with normal navigation
+      _handleNavigation(notificationBody, linkBody);
+    }
   }
 }
 

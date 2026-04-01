@@ -18,6 +18,8 @@ import 'package:stackfood_multivendor/features/cart/domain/repositories/cart_rep
 import 'package:stackfood_multivendor/features/cart/domain/repositories/cart_repository_interface.dart';
 import 'package:stackfood_multivendor/features/cart/domain/services/cart_service.dart';
 import 'package:stackfood_multivendor/features/cart/domain/services/cart_service_interface.dart';
+import 'package:stackfood_multivendor/features/countdown/controllers/countdown_controller.dart';
+import 'package:stackfood_multivendor/features/countdown/models/countdown_model.dart';
 import 'package:stackfood_multivendor/features/chat/controllers/chat_controller.dart';
 import 'package:stackfood_multivendor/features/chat/domain/repositories/chat_repository.dart';
 import 'package:stackfood_multivendor/features/chat/domain/repositories/chat_repository_interface.dart';
@@ -318,6 +320,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => ThemeController(splashServiceInterface: Get.find()));
   Get.lazyPut(() => SplashController(splashServiceInterface: Get.find()));
   Get.lazyPut(() => LocalizationController(languageServiceInterface: Get.find()));
+  Get.lazyPut(() => CountdownController(countdownModel: CountdownModel.defaultLaunch()));
   Get.lazyPut(() => OnBoardingController(onboardServiceInterface: Get.find()));
   Get.lazyPut(() => AuthController(authServiceInterface: Get.find()));
   Get.lazyPut(() => AddressController(addressServiceInterface: Get.find()));

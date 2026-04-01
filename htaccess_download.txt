@@ -1,0 +1,52 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+    RewriteBase /
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # ===========================================
+    # DEVICE-BASED REDIRECTS FOR /download
+    # ===========================================
+    
+    # Android → Play Store
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/download
+    RewriteCond %{HTTP_USER_AGENT} ^.*Android.*$ [NC]
+    RewriteRule ^download$ https://play.google.com/store/apps/details?id=com.bitbox.user [R=301,L]
+
+    # iOS → App Store
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/download
+    RewriteCond %{HTTP_USER_AGENT} ^.*(iPad|iPhone|iPod).*
+    RewriteCond %{HTTP_USER_AGENT} !^.*MSStream.*$
+    RewriteRule ^download$ https://apps.apple.com/in/app/biteboxx-food-delivery/id6748221338 [R=301,L]
+
+    # Fallback: /download → download.html (for desktop/other)
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/download
+    RewriteRule ^download$ download.html [L]
+
+    # ===========================================
+    # END DEVICE-BASED REDIRECTS
+    # ===========================================
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+</IfModule>
+
+# Hide a specific file
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
