@@ -52,6 +52,7 @@ class _WalletScreenState extends State<WalletScreen> {
         Future.delayed(const Duration(seconds: 2), (){
 
           Get.showSnackbar(GetSnackBar(
+            snackPosition: SnackPosition.TOP,
             backgroundColor: widget.fundStatus == 'fail' ? Colors.red : Colors.green,
             message: widget.fundStatus == 'success' ? 'fund_successfully_added_to_wallet'.tr : 'fund_not_added_to_wallet'.tr,
             maxWidth: 500,

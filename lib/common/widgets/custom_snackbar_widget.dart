@@ -3,69 +3,165 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 Future<void> showCustomSnackBar(String? message, {bool isError = true}) async {
-  if(message != null && message.isNotEmpty) {
+  if (message == null || message.isEmpty) return;
 
+  try {
+    // Fix #1: wrap closeAllSnackbars in try/catch — it crashes if
+    // SnackbarController._controller was never initialized
     try {
-      try {
-        if(Get.isSnackbarOpen) {
-          Get.closeAllSnackbars();
-          await Future.delayed(const Duration(milliseconds: 200));
-        }
-      } catch(e) {
-        debugPrint('Failed to close existing snackbars: $e');
+      if (Get.isSnackbarOpen) {
+        Get.closeAllSnackbars();
+        await Future.delayed(const Duration(milliseconds: 300));
       }
-      if (Get.context == null || Get.overlayContext == null) {
-        debugPrint('Cannot show snackbar: No context/overlay available. Message: $message');
-        return;
-      }
-      // Verify overlay exists first
-      if (Get.overlayContext != null && Overlay.maybeOf(Get.overlayContext!) == null) {
-         debugPrint('Overlay.maybeOf returned null. Trying ScaffoldMessenger fallback.');
-         if (Get.context != null) {
-             ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-                content: Text(message, style: const TextStyle(color: Colors.white)),
-                backgroundColor: isError ? Colors.red : Colors.green,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(10),
-                duration: const Duration(seconds: 2),
-             ));
-         }
-         return;
-      }
-
-      // Ensure we are not building during a build phase
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          // if(Get.isSnackbarOpen) {
-          //   await Get.closeCurrentSnackbar(); 
-          //   // Add a small delay for safety
-          //   await Future.delayed(const Duration(milliseconds: 150));
-          // }
-          
-          Get.showSnackbar(GetSnackBar(
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.transparent,
-            duration: const Duration(seconds: 2),
-            overlayBlur: 0.0,
-            margin: const EdgeInsets.only(bottom: 40, left: 20, right: 20),
-            messageText: CustomToast(text: message, isError: isError),
-            borderRadius: 10,
-            padding: const EdgeInsets.all(0),
-            snackStyle: SnackStyle.FLOATING,
-            isDismissible: true,
-            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-            reverseAnimationCurve: Curves.fastEaseInToSlowEaseOut,
-            animationDuration: const Duration(milliseconds: 500),
-          ));
-        } catch(e) {
-             debugPrint('Failed to show snackbar: $e');
-        }
-      });
-    } catch(e) {
-      debugPrint('Failed to show snackbar: $e');
-      // Ensure the user sees the message even if UI fails
-      debugPrint('Snackbar Message ($isError): $message');
+    } catch (e) {
+      debugPrint('Failed to close existing snackbars: $e');
     }
 
+    // Fix #2: use Get.overlayContext instead of Get.context, and look
+    // up the overlay from the root navigator key to guarantee it exists
+    final BuildContext? ctx = Get.overlayContext ?? Get.context;
+    if (ctx == null) {
+      debugPrint('No context available for snackbar: $message');
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        // Walk up from overlayContext — this always finds the top-level Overlay
+        // inserted by MaterialApp/Navigator, never the bottom-sheet's Navigator
+        OverlayState? overlay;
+
+        // Try rootNavigator overlay first (most reliable)
+        final NavigatorState? navigator =
+            Navigator.maybeOf(ctx, rootNavigator: true);
+        if (navigator != null) {
+          overlay = navigator.overlay;
+        }
+
+        // Fallback to nearest overlay
+        overlay ??= Overlay.maybeOf(ctx);
+
+        if (overlay == null) {
+          debugPrint('No overlay found, falling back to ScaffoldMessenger');
+          if (Get.context != null) {
+            ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
+              content:
+                  Text(message, style: const TextStyle(color: Colors.white)),
+              backgroundColor: isError ? Colors.red : Colors.green,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(10),
+              duration: const Duration(seconds: 2),
+            ));
+          }
+          return;
+        }
+
+        late OverlayEntry entry;
+        entry = OverlayEntry(
+          builder: (overlayCtx) => Positioned(
+            // Respects status bar height on all devices
+            top: MediaQuery.of(overlayCtx).padding.top + 10,
+            left: 20,
+            right: 20,
+            child: _TopSnackBar(
+              message: message,
+              isError: isError,
+              onDismiss: () {
+                try {
+                  entry.remove();
+                } catch (_) {}
+              },
+            ),
+          ),
+        );
+
+        overlay.insert(entry);
+
+        // Safety removal after 3s in case animation callback is missed
+        Future.delayed(const Duration(milliseconds: 3000), () {
+          try {
+            entry.remove();
+          } catch (_) {}
+        });
+      } catch (e) {
+        debugPrint('Failed to show snackbar overlay: $e');
+      }
+    });
+  } catch (e) {
+    debugPrint('Failed to show snackbar: $e');
+  }
+}
+
+class _TopSnackBar extends StatefulWidget {
+  final String message;
+  final bool isError;
+  final VoidCallback onDismiss;
+
+  const _TopSnackBar({
+    required this.message,
+    required this.isError,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_TopSnackBar> createState() => _TopSnackBarState();
+}
+
+class _TopSnackBarState extends State<_TopSnackBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+
+    _slide = Tween<Offset>(
+      begin: const Offset(0, -1.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastLinearToSlowEaseIn,
+    ));
+
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+
+    _controller.forward();
+
+    // Begin slide-out before the safety removal fires
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (mounted) {
+        _controller.reverse().then((_) => widget.onDismiss());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _slide,
+      child: FadeTransition(
+        opacity: _fade,
+        child: Material(
+          color: Colors.transparent,
+          child: GestureDetector(
+            onTap: widget.onDismiss,
+            // Reuses your existing CustomToast widget unchanged
+            child: CustomToast(text: widget.message, isError: widget.isError),
+          ),
+        ),
+      ),
+    );
   }
 }

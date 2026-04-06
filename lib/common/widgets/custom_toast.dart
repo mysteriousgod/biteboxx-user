@@ -25,9 +25,9 @@ class CustomToast extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0),
+        padding: const EdgeInsets.only(top: 40.0),
         child: Align(
-          alignment: Alignment.bottomCenter,
+          alignment: Alignment.topCenter,
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xFF334257),
