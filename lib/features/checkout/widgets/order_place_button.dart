@@ -208,6 +208,15 @@ class OrderPlaceButton extends StatelessWidget {
     } else if(((isGuestLogIn && checkoutController.orderType == 'take_away') || checkoutController.orderType == 'dine_in') && guestNumberTextEditingController.text.isEmpty){
       showCustomSnackBar('please_enter_contact_person_number'.tr);
       return true;
+    } else if(checkoutController.orderType == 'delivery' && checkoutController.streetNumberController.text.trim().isEmpty){
+      showCustomSnackBar('please_enter_street_number'.tr);
+      return true;
+    } else if(checkoutController.orderType == 'delivery' && checkoutController.houseController.text.trim().isEmpty){
+      showCustomSnackBar('please_enter_house_number'.tr);
+      return true;
+    } else if(checkoutController.orderType == 'delivery' && checkoutController.floorController.text.trim().isEmpty){
+      showCustomSnackBar('please_enter_floor_number'.tr);
+      return true;
     } else if(!isCashOnDeliveryActive && !isDigitalPaymentActive && !isWalletActive) {
       showCustomSnackBar('no_payment_method_is_enabled'.tr);
       return true;

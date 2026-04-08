@@ -1300,5 +1300,8 @@
   "no_payment_method_has_been_selected_kindly_select_a_payment_method": "No payment method has been selected. Kindly select a payment method.",
   "search_by_category": "Search by category",
   "your_order_is_arriving_soon": "Your order is arriving soon",
-  "enter_your_mobile_number_to_continue": "Enter your mobile number to continue"
+  "enter_your_mobile_number_to_continue": "Enter your mobile number to continue",
+  "please_enter_street_number": "Please enter street number",
+  "please_enter_house_number": "Please enter house number",
+  "please_enter_floor_number": "Please enter floor number"
 }
