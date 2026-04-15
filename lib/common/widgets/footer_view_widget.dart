@@ -250,13 +250,13 @@ class _FooterViewWidgetState extends State<FooterViewWidget> {
                             }),
                             const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                            FooterButton(title: 'live_chat'.tr, route: RouteHelper.getConversationRoute()),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
+                             // FooterButton(title: 'live_chat'.tr, route: RouteHelper.getConversationRoute()),
+                             // const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                            FooterButton(title: 'my_orders'.tr, route: RouteHelper.getOrderRoute()),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
+                             FooterButton(title: 'my_orders'.tr, route: RouteHelper.getOrderRoute()),
+                             const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                            FooterButton(title: 'help_support'.tr, route: RouteHelper.getSupportRoute()),
+                             // FooterButton(title: 'help_support'.tr, route: RouteHelper.getSupportRoute()),
                             const SizedBox(height: Dimensions.paddingSizeSmall),
                           ],
                         ),

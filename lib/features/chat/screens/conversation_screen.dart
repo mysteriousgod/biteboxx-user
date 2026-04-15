@@ -1,3 +1,16 @@
+// ============================================================================
+// LIVE CHAT SCREEN - Conversation List
+// ============================================================================
+// Purpose: Displays all chat conversations for the user (customer)
+// Features:
+//   - Shows conversations with vendors (restaurants) and delivery personnel
+//   - Tab-based filtering between restaurant and delivery man chats
+//   - Search functionality to find specific conversations
+//   - Real-time message preview with unread message count
+//   - Floating action button for starting new chat with admin
+//   - Responsive design for mobile and desktop views
+// ============================================================================
+
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
 import 'package:stackfood_multivendor/features/chat/widgets/chat_serach_field_widget.dart';
 import 'package:stackfood_multivendor/features/chat/widgets/message_card_widget.dart';
@@ -25,24 +38,34 @@ import 'package:stackfood_multivendor/common/widgets/paginated_list_view_widget.
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// Live Chat Conversation Screen
+/// Main entry point for viewing and managing chat conversations
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
-
+ 
   @override
   State<ConversationScreen> createState() => _ConversationScreenState();
 }
 
+/// State management for ConversationScreen
+/// Handles tab switching, search, and conversation list rendering
 class _ConversationScreenState extends State<ConversationScreen>  with TickerProviderStateMixin{
+  // Scroll controller for managing conversation list scrolling
   final ScrollController _scrollController = ScrollController();
+  // Text controller for searching conversations
   final TextEditingController _searchController = TextEditingController();
+  // Tab controller for switching between vendor and delivery man tabs
   late TabController _tabController;
-
+ 
   @override
   void initState() {
     super.initState();
-
+ 
+    // Initialize tab controller with 2 tabs (Restaurants & Delivery Men)
     _tabController = TabController(length: 2, vsync: this);
     _initCall();
+    
+    // Scroll listener to show/hide floating action button
     _scrollController.addListener(() {
       if(_scrollController.offset < 105) {
         Get.find<ChatController>().canShowFloatingButton(false);
@@ -51,7 +74,11 @@ class _ConversationScreenState extends State<ConversationScreen>  with TickerPro
       }
     });
   }
-
+ 
+  /// Initialize chat functionality on screen load
+  /// - Fetches user profile information
+  /// - Sets default chat type to vendor
+  /// - Loads conversation list for the user
   void _initCall(){
     if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<ProfileController>().getUserInfo();
