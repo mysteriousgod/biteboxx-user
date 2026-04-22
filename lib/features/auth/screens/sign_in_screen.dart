@@ -30,10 +30,8 @@ class SignInScreenState extends State<SignInScreen> {
       onPopInvokedWithResult: (didPop, result) async {
         if(widget.exitFromApp) {
           if (_canExit) {
-            if (GetPlatform.isAndroid) {
+            if (GetPlatform.isAndroid || GetPlatform.isIOS) {
               SystemNavigator.pop();
-            } else if (GetPlatform.isIOS) {
-              exit(0);
             } else {
               Navigator.pushNamed(context, RouteHelper.getInitialRoute());
             }

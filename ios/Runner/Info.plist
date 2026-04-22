@@ -45,7 +45,7 @@
 	<key>FacebookDisplayName</key>
 	<string>BiteBoxx</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
+	<true/>
 	<key>GIDClientID</key>
 	<string>651863605412-isgics249n4024snpsqe3eknt5kelv9g.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
