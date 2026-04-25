@@ -133,11 +133,37 @@ class AuthRepo implements AuthRepoInterface<SignUpBodyModel> {
   @override
   Future<ResponseModel> guestLogin() async {
     Response response = await apiClient.postData(AppConstants.guestLoginUri, {}, handleError: false);
-    if (response.statusCode == 200) {
-      saveGuestId(response.body['guest_id'].toString());
-      return ResponseModel(true, '${response.body['guest_id']}');
+    if (response.statusCode == 200 && response.body != null) {
+      try {
+        dynamic body = response.body;
+        // Handle case where body is a JSON string that needs decoding
+        if (body is String) {
+          body = jsonDecode(body);
+        }
+        if (body is Map<String, dynamic> && body.containsKey('guest_id')) {
+          String guestId = body['guest_id'].toString();
+          saveGuestId(guestId);
+          return ResponseModel(true, guestId);
+        }
+      } catch (e) {
+        debugPrint('Error parsing guest login response: $e');
+      }
+      // Fallback: try using response.bodyString
+      if (response.bodyString != null && response.bodyString!.isNotEmpty) {
+        try {
+          dynamic body = jsonDecode(response.bodyString!);
+          if (body is Map<String, dynamic> && body.containsKey('guest_id')) {
+            String guestId = body['guest_id'].toString();
+            saveGuestId(guestId);
+            return ResponseModel(true, guestId);
+          }
+        } catch (e) {
+          debugPrint('Error parsing guest login response from bodyString: $e');
+        }
+      }
+      return ResponseModel(false, 'Failed to parse guest login response');
     } else {
-      return ResponseModel(false, response.statusText);
+      return ResponseModel(false, response.statusText ?? 'Guest login failed');
     }
   }
 

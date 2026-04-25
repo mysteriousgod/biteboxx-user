@@ -63,7 +63,9 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
   @override
   void initState() {
     super.initState();
-    _countryDialCode = _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+    _countryDialCode = Get.find<SplashController>().configModel?.country != null
+        ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode
+        : '+880';
   }
 
   @override
@@ -161,7 +163,10 @@ class _DeliverymanRegistrationWebScreenState extends State<DeliverymanRegistrati
                                       onCountryChanged: (CountryCode countryCode) {
                                         _countryDialCode = countryCode.dialCode;
                                       },
-                                      countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                      countryDialCode: _countryDialCode != null
+                                          ? (Get.find<SplashController>().configModel?.country != null
+                                              ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                              : Get.find<LocalizationController>().locale.countryCode)
                                           : Get.find<LocalizationController>().locale.countryCode,
                                       labelText: 'phone'.tr,
                                       required: true,

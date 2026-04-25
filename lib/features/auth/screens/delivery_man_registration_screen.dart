@@ -65,7 +65,9 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
   void initState() {
     super.initState();
 
-    _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+    _countryDialCode = Get.find<SplashController>().configModel?.country != null
+        ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode
+        : '+880';
     if(Get.find<DeliverymanRegistrationController>().showPassView){
       Get.find<DeliverymanRegistrationController>().showHidePassView();
     }
@@ -295,8 +297,11 @@ class _DeliveryManRegistrationScreenState extends State<DeliveryManRegistrationS
                                   onCountryChanged: (CountryCode countryCode) {
                                     _countryDialCode = countryCode.dialCode;
                                   },
-                                  countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
-                                      : Get.find<LocalizationController>().locale.countryCode,
+                                      countryDialCode: _countryDialCode != null
+                                          ? (Get.find<SplashController>().configModel?.country != null
+                                              ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                              : Get.find<LocalizationController>().locale.countryCode)
+                                          : Get.find<LocalizationController>().locale.countryCode,
                                   labelText: 'phone'.tr,
                                   required: true,
                                   validator: (value) => ValidateCheck.validatePhone(value, null),

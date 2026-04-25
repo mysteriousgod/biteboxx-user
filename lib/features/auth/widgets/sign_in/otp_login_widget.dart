@@ -54,7 +54,9 @@ class OtpLoginWidget extends StatelessWidget {
             inputType: TextInputType.phone,
             isPhone: true,
             onCountryChanged: onCountryChanged,
-            countryDialCode: CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code ?? Get.find<LocalizationController>().locale.countryCode,
+            countryDialCode: Get.find<SplashController>().configModel?.country != null
+                ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                : Get.find<LocalizationController>().locale.countryCode,
             labelText: 'phone'.tr,
             required: true,
             validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),

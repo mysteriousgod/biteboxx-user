@@ -84,7 +84,9 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
   void initState() {
     super.initState();
     _tabController = TabController(length: _languageList!.length, initialIndex: 0, vsync: this);
-    _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+    _countryDialCode = Get.find<SplashController>().configModel?.country != null
+        ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode
+        : '+880';
     for (var language in _languageList) {
       if (kDebugMode) {
         print(language);
@@ -780,7 +782,10 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       onCountryChanged: (CountryCode countryCode) {
                                         _countryDialCode = countryCode.dialCode;
                                       },
-                                      countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                      countryDialCode: _countryDialCode != null
+                                          ? (Get.find<SplashController>().configModel?.country != null
+                                              ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                              : Get.find<LocalizationController>().locale.countryCode)
                                           : Get.find<LocalizationController>().locale.countryCode,
                                       required: true,
                                       labelText: 'phone'.tr,

@@ -9,6 +9,7 @@ import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.
 import 'package:stackfood_multivendor/features/auth/widgets/sign_up_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_check_box_widget.dart';
+import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/verification/screens/forget_pass_screen.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
@@ -47,7 +48,11 @@ class ManualLoginWidget extends StatelessWidget {
 
         CustomTextFieldWidget(
           onCountryChanged: (countryCode) => authController.countryDialCode = countryCode.dialCode!,
-          countryDialCode: authController.isNumberLogin ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code : null,
+          countryDialCode: authController.isNumberLogin
+              ? (Get.find<SplashController>().configModel?.country != null
+                  ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                  : (Get.find<LocalizationController>().locale.countryCode ?? 'BD'))
+              : null,
           labelText: 'email_or_phone'.tr,
           hintText: 'enter_email_or_phone'.tr,
           controller: phoneController,
@@ -206,7 +211,11 @@ class ManualLoginWidget extends StatelessWidget {
 
             CustomTextFieldWidget(
               onCountryChanged: (countryCode) => authController.countryDialCode = countryCode.dialCode!,
-              countryDialCode: authController.isNumberLogin ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code : null,
+              countryDialCode: authController.isNumberLogin
+                  ? (Get.find<SplashController>().configModel?.country != null
+                      ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                      : (Get.find<LocalizationController>().locale.countryCode ?? 'BD'))
+                  : null,
               labelText: 'email_or_phone'.tr,
               hintText: 'enter_email_or_phone'.tr,
               controller: phoneController,

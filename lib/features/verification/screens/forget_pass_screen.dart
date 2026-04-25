@@ -34,7 +34,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
   final TextEditingController _emailController = TextEditingController();
   final FocusNode _numberFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
-  String? _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+  String? _countryDialCode;
   GlobalKey<FormState>? _formKeyLogin;
   bool isEmail = false;
   bool isPhone = false;
@@ -42,6 +42,11 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize country dial code from config or default
+    _countryDialCode = Get.find<SplashController>().configModel?.country != null
+        ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode
+        : '+880';
 
     // Always enable phone-based forgot password (Firebase handles OTP)
     isPhone = true;
@@ -121,7 +126,9 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       onCountryChanged: (CountryCode countryCode) {
                         _countryDialCode = countryCode.dialCode;
                       },
-                      countryDialCode: CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code ?? Get.find<LocalizationController>().locale.countryCode,
+                      countryDialCode: Get.find<SplashController>().configModel?.country != null
+                          ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                          : Get.find<LocalizationController>().locale.countryCode,
                       onSubmit: (text) => GetPlatform.isWeb ? _onPressedForgetPass(_countryDialCode!) : null,
                       labelText: 'phone'.tr,
                       validator: (value) => ValidateCheck.validateEmptyText(value, null),

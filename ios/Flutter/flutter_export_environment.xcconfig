@@ -1,0 +1,5 @@
+FLUTTER_ROOT=/opt/homebrew/Caskroom/flutter/3.41.6/flutter
+FLUTTER_EPHEMERAL_DIR=/Users/aniketsharma/Desktop/untitled folder 2/biteboxx-user/ios/Flutter/ephemeral
+FLUTTER_TARGET=/Users/aniketsharma/Desktop/untitled folder 2/biteboxx-user/lib/main.dart
+FLUTTER_BUILD_DIR=build
+FLUTTER_AOT=0

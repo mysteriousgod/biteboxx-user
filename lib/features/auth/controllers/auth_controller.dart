@@ -1,23 +1,20 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:stackfood_multivendor/common/models/response_model.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
+import 'package:stackfood_multivendor/features/auth/domain/models/signup_body_model.dart';
+import 'package:stackfood_multivendor/features/auth/domain/models/social_log_in_body_model.dart';
+import 'package:stackfood_multivendor/features/auth/domain/services/auth_service_interface.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/profile/domain/models/update_user_model.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/signup_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/models/social_log_in_body_model.dart';
-import 'package:stackfood_multivendor/features/auth/domain/services/auth_service_interface.dart';
-import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
+import 'package:stackfood_multivendor/helper/recaptcha_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
-
-// Global RecaptchaVerifier for web
-RecaptchaVerifier? _webRecaptchaVerifier;
 
 class AuthController extends GetxController implements GetxService {
   final AuthServiceInterface authServiceInterface;
@@ -49,25 +46,45 @@ class AuthController extends GetxController implements GetxService {
   bool _isNumberLogin = false;
   bool get isNumberLogin => _isNumberLogin;
 
-  var countryDialCode= "+880";
+  var countryDialCode = "+880";
 
   bool _isOtpViewEnable = false;
   bool get isOtpViewEnable => _isOtpViewEnable;
 
-  Future<ResponseModel> login({required String emailOrPhone, required String password, required String loginType, required String fieldType, bool alreadyInApp = false}) async {
+  Future<ResponseModel> login(
+          {required String emailOrPhone,
+          required String password,
+          required String loginType,
+          required String fieldType,
+          bool alreadyInApp = false}) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await authServiceInterface.login(emailOrPhone: emailOrPhone, password: password, loginType: loginType, fieldType: fieldType, alreadyInApp: alreadyInApp);
+    ResponseModel responseModel = await authServiceInterface.login(
+        emailOrPhone: emailOrPhone,
+        password: password,
+        loginType: loginType,
+        fieldType: fieldType,
+        alreadyInApp: alreadyInApp);
     _getUserAndCartData(responseModel);
     _isLoading = false;
     update();
     return responseModel;
   }
 
-  Future<ResponseModel> otpLogin({required String phone, required String loginType, required String otp, required String verified, bool alreadyInApp = false}) async {
+  Future<ResponseModel> otpLogin(
+          {required String phone,
+          required String loginType,
+          required String otp,
+          required String verified,
+          bool alreadyInApp = false}) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await authServiceInterface.otpLogin(phone: phone, otp: otp, loginType: loginType, verified: verified, alreadyInApp: alreadyInApp);
+    ResponseModel responseModel = await authServiceInterface.otpLogin(
+        phone: phone,
+        otp: otp,
+        loginType: loginType,
+        verified: verified,
+        alreadyInApp: alreadyInApp);
     _getUserAndCartData(responseModel);
     _isLoading = false;
     update();
@@ -76,15 +93,27 @@ class AuthController extends GetxController implements GetxService {
 
   void resetOtpView({bool isUpdate = true}) {
     _isOtpViewEnable = false;
-    if(isUpdate) {
+    if (isUpdate) {
       update();
     }
   }
 
-  Future<ResponseModel> updatePersonalInfo({required String name, required String? phone, required String loginType, required String? email, required String? referCode, bool alreadyInApp = false}) async {
+  Future<ResponseModel> updatePersonalInfo(
+          {required String name,
+          required String? phone,
+          required String loginType,
+          required String? email,
+          required String? referCode,
+          bool alreadyInApp = false}) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await authServiceInterface.updatePersonalInfo(name: name, phone: phone, email: email, loginType: loginType, referCode: referCode, alreadyInApp: alreadyInApp);
+    ResponseModel responseModel = await authServiceInterface.updatePersonalInfo(
+        name: name,
+        phone: phone,
+        email: email,
+        loginType: loginType,
+        referCode: referCode,
+        alreadyInApp: alreadyInApp);
     _getUserAndCartData(responseModel);
     _isLoading = false;
     update();
@@ -92,9 +121,12 @@ class AuthController extends GetxController implements GetxService {
   }
 
   void _getUserAndCartData(ResponseModel responseModel) {
-    if(responseModel.isSuccess && responseModel.authResponseModel != null && responseModel.authResponseModel!.isPhoneVerified!
-        && responseModel.authResponseModel!.isEmailVerified! && responseModel.authResponseModel!.isPersonalInfo!
-        && responseModel.authResponseModel!.isExistUser == null) {
+    if (responseModel.isSuccess &&
+        responseModel.authResponseModel != null &&
+        responseModel.authResponseModel!.isPhoneVerified! &&
+        responseModel.authResponseModel!.isEmailVerified! &&
+        responseModel.authResponseModel!.isPersonalInfo! &&
+        responseModel.authResponseModel!.isExistUser == null) {
       Get.find<ProfileController>().getUserInfo();
       Get.find<CartController>().getCartDataOnline();
     }
@@ -109,14 +141,14 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  void toggleIsNumberLogin({bool? value, bool willUpdate = true}){
-    if(value == null){
+  void toggleIsNumberLogin({bool? value, bool willUpdate = true}) {
+    if (value == null) {
       _isNumberLogin = !_isNumberLogin;
-    }else{
+    } else {
       _isNumberLogin = value;
     }
     initCountryCode();
-    if(willUpdate){
+    if (willUpdate) {
       update();
     }
   }
@@ -126,12 +158,24 @@ class AuthController extends GetxController implements GetxService {
     update();
   }
 
-  void initCountryCode({String? countryCode}){
-    countryDialCode = countryCode ?? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country ?? "BD").dialCode ?? "+880";
+  void initCountryCode({String? countryCode}) {
+    countryDialCode = countryCode ??
+        CountryCode.fromCountryCode(
+                Get.find<SplashController>().configModel!.country ?? "BD")
+            .dialCode ??
+        "+880";
   }
 
-  void saveUserNumberAndPassword({required String number, required String password, required String countryCode, required String otpPoneNumber}) {
-    authServiceInterface.saveUserNumberAndPassword(number: number, password: password, countryCode: countryCode, otpPoneNumber: otpPoneNumber);
+  void saveUserNumberAndPassword(
+      {required String number,
+      required String password,
+      required String countryCode,
+      required String otpPoneNumber}) {
+    authServiceInterface.saveUserNumberAndPassword(
+        number: number,
+        password: password,
+        countryCode: countryCode,
+        otpPoneNumber: otpPoneNumber);
   }
 
   Future<bool> clearUserNumberAndPassword() async {
@@ -178,10 +222,14 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  Future<ResponseModel> loginWithSocialMedia(SocialLogInBodyModel socialLogInBody) async {
+  Future<ResponseModel> loginWithSocialMedia(
+      SocialLogInBodyModel socialLogInBody) async {
     _isLoading = true;
     update();
-    ResponseModel responseModel = await authServiceInterface.loginWithSocialMedia(socialLogInBody, isCustomerVerificationOn: Get.find<SplashController>().configModel!.customerVerification!);
+    ResponseModel responseModel = await authServiceInterface.loginWithSocialMedia(
+        socialLogInBody,
+        isCustomerVerificationOn:
+            Get.find<SplashController>().configModel!.customerVerification!);
     _getUserAndCartData(responseModel);
     _isLoading = false;
     update();
@@ -236,35 +284,20 @@ class AuthController extends GetxController implements GetxService {
 
   int? _forceResendingToken;
 
-  /// Creates or returns a RecaptchaVerifier for web platform
-  RecaptchaVerifier _getRecaptchaVerifier() {
-    if (kIsWeb) {
-      _webRecaptchaVerifier ??= RecaptchaVerifier(
-        auth: FirebaseAuthPlatform.instance,
-        container: 'recaptcha-verifier',
-        size: RecaptchaVerifierSize.compact,
-        theme: RecaptchaVerifierTheme.light,
-        onSuccess: () {
-          debugPrint('===== reCAPTCHA verification successful =====');
-        },
-        onError: (FirebaseAuthException error) {
-          debugPrint('===== reCAPTCHA error: ${error.message} =====');
-        },
-        onExpired: () {
-          debugPrint('===== reCAPTCHA expired =====');
-        },
-      );
-      return _webRecaptchaVerifier!;
-    }
-    throw UnsupportedError('RecaptchaVerifier is only supported on web platform');
-  }
-
-  /// Clears the cached RecaptchaVerifier (call this when you need a fresh verifier)
-  void clearRecaptchaVerifier() {
-    _webRecaptchaVerifier = null;
-  }
-
-  Future<void> firebaseVerifyPhoneNumber(String phoneNumber, String? token, String loginType, {bool fromSignUp = true, bool canRoute = true, UpdateUserModel? updateUserModel})async {
+  /// Verifies phone number using Firebase Auth with proper reCAPTCHA handling.
+  ///
+  /// Firebase Auth handles reCAPTCHA automatically on all platforms:
+  /// - **Web**: Shows invisible reCAPTCHA v2 challenge automatically
+  /// - **iOS**: Uses invisible reCAPTCHA or App Attest internally
+  /// - **Android**: Uses visible/invisible reCAPTCHA internally
+  Future<void> firebaseVerifyPhoneNumber(
+    String phoneNumber,
+    String? token,
+    String loginType, {
+    bool fromSignUp = true,
+    bool canRoute = true,
+    UpdateUserModel? updateUserModel,
+  }) async {
     _isLoading = true;
     update();
 
@@ -274,165 +307,159 @@ class AuthController extends GetxController implements GetxService {
     debugPrint('FromSignUp: $fromSignUp');
     debugPrint('IsWeb: $kIsWeb');
 
+    // Log reCAPTCHA status for debugging
+    RecaptchaHelper.logStatus();
+
     try {
-      // For web, we need to use RecaptchaVerifier
-      if (kIsWeb) {
-        debugPrint('===== Using RecaptchaVerifier for web =====');
-        // Clear previous verifier to ensure fresh reCAPTCHA
-        clearRecaptchaVerifier();
-        
-        // Create RecaptchaVerifier for web
-        RecaptchaVerifier verifier = _getRecaptchaVerifier();
-        
-        await FirebaseAuth.instance.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          verificationCompleted: (PhoneAuthCredential credential) {
-            debugPrint('===== Auto-verification completed =====');
-          },
-          verificationFailed: (FirebaseAuthException e) {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _forceResendingToken,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          debugPrint('===== Auto-verification completed =====');
+          debugPrint('Credential received, signing in...');
+
+          try {
+            final userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
+            debugPrint(
+                '===== Auto-signed in: ${userCredential.user?.uid} =====');
+
             _isLoading = false;
             update();
 
-            debugPrint('===== Firebase Verification Failed =====');
-            debugPrint('Error code: ${e.code}');
-            debugPrint('Error message: ${e.message}');
-
-            String errorMessage;
-            switch(e.code) {
-              case 'invalid-phone-number':
-                errorMessage = 'please_submit_a_valid_phone_number'.tr;
-                break;
-              case 'too-many-requests':
-                errorMessage = 'Too many OTP requests. Please try again later.';
-                break;
-              case 'quota-exceeded':
-                errorMessage = 'SMS quota exceeded. Please try again later.';
-                break;
-              case 'app-not-authorized':
-                errorMessage = 'App not authorized for Firebase Phone Auth. Check Firebase Console settings.';
-                break;
-              case 'captcha-check-failed':
-                errorMessage = 'reCAPTCHA verification failed. Please try again.';
-                break;
-              case 'missing-client-identifier':
-                errorMessage = 'Missing client identifier. Please check Firebase configuration.';
-                break;
-              case 'web-reCAPTCHA-site-key-mismatch':
-                errorMessage = 'reCAPTCHA site key mismatch. Please check Firebase Console settings.';
-                break;
-              case 'unauthorized-domain':
-                errorMessage = 'This domain is not authorized for Firebase Auth. Add it in Firebase Console.';
-                break;
-              default:
-                errorMessage = e.message?.replaceAll('_', ' ') ?? 'Phone verification failed. Please try again.';
-            }
-            showCustomSnackBar(errorMessage);
-          },
-          codeSent: (String vId, int? resendToken) {
-            debugPrint('===== OTP Code Sent Successfully =====');
-            debugPrint('Verification ID: $vId');
-
+            // Navigate to home or next screen after auto-verification
+            // This handles the case where Firebase auto-verifies
+            // (e.g., iOS simulator with test numbers)
+          } catch (e) {
+            debugPrint('===== Auto-sign-in failed: $e =====');
             _isLoading = false;
-            _forceResendingToken = resendToken;
             update();
+          }
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          _isLoading = false;
+          update();
 
-            if(updateUserModel != null) {
-              updateUserModel.sessionInfo = vId;
-            }
+          debugPrint('===== Firebase Verification Failed =====');
+          debugPrint('Error code: ${e.code}');
+          debugPrint('Error message: ${e.message}');
 
-            if(canRoute) {
-              if(ResponsiveHelper.isDesktop(Get.context)) {
-                Get.back();
-                Get.dialog(VerificationScreen(
-                  number: phoneNumber, email: null, token: token, fromSignUp: fromSignUp, fromForgetPassword: !fromSignUp,
-                  loginType: loginType, password: '', firebaseSession: vId, userModel: updateUserModel,
-                ));
+          String errorMessage;
+          switch (e.code) {
+            case 'invalid-phone-number':
+              errorMessage = 'please_submit_a_valid_phone_number'.tr;
+              break;
+            case 'too-many-requests':
+              errorMessage = 'Too many OTP requests. Please try again later.';
+              break;
+            case 'quota-exceeded':
+              errorMessage = 'SMS quota exceeded. Please try again later.';
+              break;
+            case 'app-not-authorized':
+              if (kIsWeb) {
+                errorMessage =
+                    'App not authorized for Firebase Phone Auth. Add your domain to Authorized domains in Firebase Console.';
               } else {
-                Get.toNamed(RouteHelper.getVerificationRoute(
-                  phoneNumber, '', token, fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword, '', loginType,
-                  session: vId, updateUserModel: updateUserModel,
-                ));
+                errorMessage =
+                    'App not authorized for Firebase Phone Auth. Check SHA-1 fingerprint in Firebase Console.';
               }
+              break;
+            case 'captcha-check-failed':
+              errorMessage = 'reCAPTCHA verification failed. Please try again.';
+              break;
+            case 'missing-client-identifier':
+              errorMessage =
+                  'Missing client identifier. Please check Firebase configuration.';
+              break;
+            case 'unauthorized-domain':
+              errorMessage =
+                  'This domain is not authorized for Firebase Auth. Add it in Firebase Console > Authentication > Settings > Authorized domains.';
+              break;
+            case 'web-reCAPTCHA-site-key-mismatch':
+              errorMessage =
+                  'reCAPTCHA site key mismatch. Please check Firebase Console settings.';
+              break;
+            default:
+              errorMessage = e.message?.replaceAll('_', ' ') ??
+                  'Phone verification failed. Please try again.';
+          }
+          showCustomSnackBar(errorMessage);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          debugPrint('===== OTP Code Sent Successfully =====');
+          debugPrint('Verification ID: $verificationId');
+          debugPrint('Resend Token: $resendToken');
+
+          _isLoading = false;
+          _forceResendingToken = resendToken;
+          update();
+
+          if (updateUserModel != null) {
+            updateUserModel.sessionInfo = verificationId;
+          }
+
+          if (canRoute) {
+            if (ResponsiveHelper.isDesktop(Get.context)) {
+              Get.back();
+              Get.dialog(VerificationScreen(
+                number: phoneNumber,
+                email: null,
+                token: token,
+                fromSignUp: fromSignUp,
+                fromForgetPassword: !fromSignUp,
+                loginType: loginType,
+                password: '',
+                firebaseSession: verificationId,
+                userModel: updateUserModel,
+              ));
+            } else {
+              Get.toNamed(
+                RouteHelper.getVerificationRoute(
+                  phoneNumber,
+                  '',
+                  token,
+                  fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword,
+                  '',
+                  loginType,
+                  session: verificationId,
+                  updateUserModel: updateUserModel,
+                ),
+              );
             }
-          },
-          codeAutoRetrievalTimeout: (String verificationId) {
-            debugPrint('===== Auto retrieval timeout for: $verificationId =====');
-          },
-        );
-      } else {
-        // For mobile platforms (Android/iOS)
-        await FirebaseAuth.instance.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          timeout: const Duration(seconds: 60),
-          forceResendingToken: _forceResendingToken,
-          verificationCompleted: (PhoneAuthCredential credential) {
-            debugPrint('===== Auto-verification completed =====');
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            _isLoading = false;
-            update();
+          }
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          debugPrint(
+              '===== Auto retrieval timeout for: $verificationId =====');
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      _isLoading = false;
+      update();
+      debugPrint('===== Firebase Auth Exception =====');
+      debugPrint('Error code: ${e.code}');
+      debugPrint('Error message: ${e.message}');
 
-            debugPrint('===== Firebase Verification Failed =====');
-            debugPrint('Error code: ${e.code}');
-            debugPrint('Error message: ${e.message}');
-
-            String errorMessage;
-            switch(e.code) {
-              case 'invalid-phone-number':
-                errorMessage = 'please_submit_a_valid_phone_number'.tr;
-                break;
-              case 'too-many-requests':
-                errorMessage = 'Too many OTP requests. Please try again later.';
-                break;
-              case 'quota-exceeded':
-                errorMessage = 'SMS quota exceeded. Please try again later.';
-                break;
-              case 'app-not-authorized':
-                errorMessage = 'App not authorized for Firebase Phone Auth. Check SHA-1 fingerprint in Firebase Console.';
-                break;
-              case 'captcha-check-failed':
-                errorMessage = 'reCAPTCHA verification failed. Please try again.';
-                break;
-              case 'missing-client-identifier':
-                errorMessage = 'Missing client identifier. Please check Firebase configuration and SHA-1/SHA-256 fingerprints.';
-                break;
-              default:
-                errorMessage = e.message?.replaceAll('_', ' ') ?? 'Phone verification failed. Please try again.';
-            }
-            showCustomSnackBar(errorMessage);
-          },
-          codeSent: (String vId, int? resendToken) {
-            debugPrint('===== OTP Code Sent Successfully =====');
-            debugPrint('Verification ID: $vId');
-
-            _isLoading = false;
-            _forceResendingToken = resendToken;
-            update();
-
-            if(updateUserModel != null) {
-              updateUserModel.sessionInfo = vId;
-            }
-
-            if(canRoute) {
-              if(ResponsiveHelper.isDesktop(Get.context)) {
-                Get.back();
-                Get.dialog(VerificationScreen(
-                  number: phoneNumber, email: null, token: token, fromSignUp: fromSignUp, fromForgetPassword: !fromSignUp,
-                  loginType: loginType, password: '', firebaseSession: vId, userModel: updateUserModel,
-                ));
-              } else {
-                Get.toNamed(RouteHelper.getVerificationRoute(
-                  phoneNumber, '', token, fromSignUp ? RouteHelper.signUp : RouteHelper.forgotPassword, '', loginType,
-                  session: vId, updateUserModel: updateUserModel,
-                ));
-              }
-            }
-          },
-          codeAutoRetrievalTimeout: (String verificationId) {
-            debugPrint('===== Auto retrieval timeout for: $verificationId =====');
-          },
-        );
+      String errorMessage;
+      switch (e.code) {
+        case 'invalid-phone-number':
+          errorMessage = 'please_submit_a_valid_phone_number'.tr;
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many OTP requests. Please try again later.';
+          break;
+        case 'quota-exceeded':
+          errorMessage = 'SMS quota exceeded. Please try again later.';
+          break;
+        case 'captcha-check-failed':
+          errorMessage = 'reCAPTCHA verification failed. Please try again.';
+          break;
+        default:
+          errorMessage = e.message?.replaceAll('_', ' ') ??
+              'Phone verification failed. Please try again.';
       }
+      showCustomSnackBar(errorMessage);
     } catch (e) {
       _isLoading = false;
       update();
@@ -441,5 +468,4 @@ class AuthController extends GetxController implements GetxService {
       showCustomSnackBar('Failed to send OTP: ${e.toString()}');
     }
   }
-
 }

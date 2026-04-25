@@ -38,7 +38,9 @@ class _SignInViewState extends State<SignInView> {
 
     _countryDialCode = authController.getUserCountryCode().isNotEmpty
         ? authController.getUserCountryCode()
-        : CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
+        : Get.find<SplashController>().configModel?.country != null
+            ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode
+            : '+880';
     _otpPhoneController.text = authController.getUserOtpPhoneNumber();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
