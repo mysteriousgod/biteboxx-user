@@ -149,3 +149,16 @@ Temporary Items
 
 .env
 biteboxx-backend
+
+.claude/worktrees/
+/build/
+/linux/
+/macos/
+/windows/
+/metadata/
+/DerivedData/
+/logs/
+/locks/
+/imls/
+/xcuserdata/
+/vscode/
