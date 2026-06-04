@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
@@ -12,7 +13,14 @@ class ApiChecker {
         Get.offAllNamed(RouteHelper.getInitialRoute());
       });
     } else {
-      showCustomSnackBar(response.statusText);
+      if (response.statusCode != null && response.statusCode! >= 500) {
+        if (kDebugMode) {
+          print('Server Error ${response.statusCode}: ${response.statusText}');
+        }
+      } else {
+        showCustomSnackBar(response.statusText);
+      }
     }
   }
 }
+

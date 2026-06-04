@@ -206,7 +206,8 @@ class ApiClient extends GetxService {
     }
     if(kDebugMode) {
       if(response0.statusCode == 500) {
-        debugPrint('====> API Response: [${response0.statusCode}] $uri\n${(response0.body.toString().substring(0, 500))}');
+        String bodyStr = response0.body.toString();
+        debugPrint('====> API Response: [${response0.statusCode}] $uri\n${bodyStr.substring(0, bodyStr.length > 500 ? 500 : bodyStr.length)}');
       } else {
         debugPrint('====> API Response: [${response0.statusCode}] $uri\n${response0.body}');
       }
