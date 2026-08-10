@@ -37,12 +37,12 @@ class MenuDrawerWidgetState extends State<MenuDrawerWidget> with SingleTickerPro
     Menu(icon: Images.coupon, title: 'coupon'.tr, onTap: () {
       Get.offNamed(RouteHelper.getCouponRoute(fromCheckout: false));
     }),
-    // Menu(icon: Images.support, title: 'help_support'.tr, onTap: () {
-    //   Get.offNamed(RouteHelper.getSupportRoute());
-    // }),
-    // Menu(icon: Images.chat, title: 'live_chat'.tr, onTap: () {
-    //   Get.offNamed(RouteHelper.getConversationRoute());
-    // }),
+    Menu(icon: Images.chat, title: 'complaint_about_our_services'.tr, onTap: () {
+      Get.offNamed(RouteHelper.getConversationRoute());
+    }),
+    Menu(icon: Images.support, title: 'help_support'.tr, onTap: () {
+      Get.offNamed(RouteHelper.getSupportRoute());
+    }),
   ];
 
   static const _initialDelayTime = Duration(milliseconds: 200);
