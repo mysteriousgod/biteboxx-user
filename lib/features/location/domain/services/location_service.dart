@@ -22,14 +22,19 @@ class LocationService implements LocationServiceInterface{
     Position myPosition;
     try {
       await Geolocator.requestPermission();
-      Position newLocalData = await Geolocator.getCurrentPosition();
+      Position? newLocalData = await Geolocator.getLastKnownPosition();
+      newLocalData ??= await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 5),
+        ),
+      );
       myPosition = newLocalData;
-    }catch(e) {
+    } catch(e) {
       myPosition = Position(
         latitude: defaultLatLng != null ? defaultLatLng.latitude : configLatLng.latitude,
         longitude: defaultLatLng != null ? defaultLatLng.longitude : configLatLng.longitude,
         timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1, altitudeAccuracy: 1, headingAccuracy: 1,
-
       );
     }
     return myPosition;
