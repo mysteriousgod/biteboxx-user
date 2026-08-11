@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
 import 'package:stackfood_multivendor/features/home/screens/home_screen.dart';
@@ -61,6 +62,13 @@ class LocationController extends GetxController implements GetxService {
 
   bool _updateAddressData = true;
   bool _changeAddress = true;
+  Timer? _debounceTimer;
+
+  @override
+  void onClose() {
+    _debounceTimer?.cancel();
+    super.onClose();
+  }
 
   Future<AddressModel> getCurrentLocation(bool fromAddress, {GoogleMapController? mapController, LatLng? defaultLatLng, bool notify = true, bool showSnackBar = false}) async {
     _loading = true;
@@ -78,9 +86,16 @@ class LocationController extends GetxController implements GetxService {
     fromAddress ? _position = myPosition : _pickPosition = myPosition;
 
     locationServiceInterface.handleMapAnimation(mapController, myPosition);
-    String addressFromGeocode = await getAddressFromGeocode(LatLng(myPosition.latitude, myPosition.longitude));
+    
+    final results = await Future.wait([
+      getAddressFromGeocode(LatLng(myPosition.latitude, myPosition.longitude)),
+      getZone(myPosition.latitude.toString(), myPosition.longitude.toString(), true, showSnackBar: showSnackBar),
+    ]);
+
+    String addressFromGeocode = results[0] as String;
+    ZoneResponseModel responseModel = results[1] as ZoneResponseModel;
+
     fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;
-    ZoneResponseModel responseModel = await getZone(myPosition.latitude.toString(), myPosition.longitude.toString(), true, showSnackBar: showSnackBar);
     _buttonDisabled = !responseModel.isSuccess;
     addressModel = AddressModel(
       latitude: myPosition.latitude.toString(), longitude: myPosition.longitude.toString(), addressType: 'others',
@@ -97,12 +112,6 @@ class LocationController extends GetxController implements GetxService {
       _loading = true;
     }else {
       _isLoading = true;
-    }
-    if(!updateInAddress){
-      Future.delayed(Duration(seconds: 10), () {
-        update();
-      });
-
     }
     ZoneResponseModel responseModel = await locationServiceInterface.getZone(lat, long);
     _inZone = responseModel.isSuccess;
@@ -126,32 +135,48 @@ class LocationController extends GetxController implements GetxService {
     _isLoading = false;
   }
 
-  void updatePosition(CameraPosition? position, bool fromAddress) async {
-    if(_updateAddressData) {
-      _loading = true;
-      update();
-      if (fromAddress) {
-        _position = Position(
-          latitude: position!.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
-          heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
-        );
-      } else {
-        _pickPosition = Position(
-          latitude: position!.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
-          heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
-        );
-      }
-      ZoneResponseModel responseModel = await getZone(position.target.latitude.toString(), position.target.longitude.toString(), true);
-      _buttonDisabled = !responseModel.isSuccess;
-      if (_changeAddress) {
-        String addressFromGeocode = await getAddressFromGeocode(LatLng(position.target.latitude, position.target.longitude));
-        fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;
-      } else {
-        _changeAddress = true;
-      }
-      _loading = false;
-      update();
-    }else {
+  void updatePosition(CameraPosition? position, bool fromAddress) {
+    if (_updateAddressData) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(const Duration(milliseconds: 350), () async {
+        _loading = true;
+        update();
+
+        if (position != null) {
+          if (fromAddress) {
+            _position = Position(
+              latitude: position.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
+              heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
+            );
+          } else {
+            _pickPosition = Position(
+              latitude: position.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
+              heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1, altitudeAccuracy: 1, headingAccuracy: 1,
+            );
+          }
+
+          final results = await Future.wait([
+            locationServiceInterface.getZone(position.target.latitude.toString(), position.target.longitude.toString()),
+            if (_changeAddress) getAddressFromGeocode(LatLng(position.target.latitude, position.target.longitude))
+            else Future.value(''),
+          ]);
+
+          ZoneResponseModel responseModel = results[0] as ZoneResponseModel;
+          _inZone = responseModel.isSuccess;
+          _zoneID = responseModel.zoneIds.isNotEmpty ? responseModel.zoneIds[0] : 0;
+          _buttonDisabled = !responseModel.isSuccess;
+
+          if (_changeAddress) {
+            String addressFromGeocode = results[1] as String;
+            fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;
+          } else {
+            _changeAddress = true;
+          }
+        }
+        _loading = false;
+        update();
+      });
+    } else {
       _updateAddressData = true;
     }
   }
