@@ -551,28 +551,6 @@ class CheckoutController extends GetxController implements GetxService {
         )));
         setAddressIndex(_address.length- 1);
       }
-
-      _addressList.add(
-          DropdownItem<int>(value: -2, child: SizedBox(
-            width: context.width > Dimensions.webMaxWidth ? Dimensions.webMaxWidth-50 : context.width-50,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-              child: Row(children: [
-                const Expanded(child: SizedBox()),
-
-                Icon(Icons.my_location_sharp, size: 20, color: Theme.of(context).primaryColor),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                Text(
-                  'use_my_current_location'.tr,
-                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor),
-                ),
-                const Expanded(child: SizedBox()),
-
-              ]),
-            ),
-          ))
-      );
     }
     if(notify) {
       update();

@@ -462,6 +462,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         CustomTextFieldWidget(
           hintText: "ex_02".tr,
           labelText: 'street_number'.tr,
+          required: true,
           inputType: TextInputType.streetAddress,
           focusNode: _streetNode,
           nextFocus: _houseNode,
@@ -474,6 +475,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             child: CustomTextFieldWidget(
               hintText: 'ex_1005/2'.tr,
               labelText: 'house'.tr,
+              required: true,
               inputType: TextInputType.text,
               focusNode: _houseNode,
               nextFocus: _floorNode,
@@ -486,6 +488,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             child: CustomTextFieldWidget(
               hintText: 'ex_02'.tr,
               labelText: 'floor'.tr,
+              required: true,
               inputType: TextInputType.text,
               focusNode: _floorNode,
               inputAction: TextInputAction.done,
@@ -548,15 +551,21 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   AddressModel? _prepareAddressModel(LocationController locationController, bool isValid, String numberWithCountryCode) {
-    if (_contactPersonNameController.text.isEmpty) {
+    if (_contactPersonNameController.text.trim().isEmpty) {
       showCustomSnackBar('please_provide_contact_person_name'.tr);
     } else if (!isValid) {
       showCustomSnackBar('invalid_phone_number'.tr);
+    } else if (_streetNumberController.text.trim().isEmpty) {
+      showCustomSnackBar('please_enter_street_number'.tr);
+    } else if (_houseController.text.trim().isEmpty) {
+      showCustomSnackBar('please_enter_house_number'.tr);
+    } else if (_floorController.text.trim().isEmpty) {
+      showCustomSnackBar('please_enter_floor_number'.tr);
     } else {
       AddressModel addressModel = AddressModel(
         id: widget.address?.id,
         addressType: _otherSelect ? _levelController.text : locationController.addressTypeList[locationController.addressTypeIndex],
-        contactPersonName: _contactPersonNameController.text,
+        contactPersonName: _contactPersonNameController.text.trim(),
         contactPersonNumber: numberWithCountryCode,
         address: _addressController.text,
         latitude: locationController.position.latitude.toString(),

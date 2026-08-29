@@ -256,6 +256,75 @@ class SplashController extends GetxController implements GetxService {
     }
   }
 
+  Future<void> autoCheckLocationAndNavigate(String page, {bool offNamed = false, bool offAll = false}) async {
+    if(GetPlatform.isWeb) {
+      if(AddressHelper.getAddressFromSharedPref() != null) {
+        if(offAll) {
+          Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
+        } else if(offNamed) {
+          Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
+        } else {
+          Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
+        }
+      } else {
+        if(offNamed) {
+          Get.offNamed(RouteHelper.getAccessLocationRoute(page));
+        } else {
+          Get.toNamed(RouteHelper.getAccessLocationRoute(page));
+        }
+      }
+      return;
+    }
+
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if(permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if(permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        Location location = Location();
+        bool serviceEnabled = await location.serviceEnabled();
+        if (!serviceEnabled) {
+          serviceEnabled = await location.requestService();
+        }
+
+        if(serviceEnabled) {
+          AddressModel address = await Get.find<LocationController>().getCurrentLocation(false);
+          if(address.latitude != null && address.zoneIds != null && address.zoneIds!.isNotEmpty) {
+            AddressHelper.saveAddressInSharedPref(address);
+            if(offAll) {
+              Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
+            } else if(offNamed) {
+              Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
+            } else {
+              Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
+            }
+            return;
+          }
+        }
+      }
+    } catch(e) {
+      debugPrint('Auto location check error: $e');
+    }
+
+    if(AddressHelper.getAddressFromSharedPref() != null) {
+      if(offAll) {
+        Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
+      } else if(offNamed) {
+        Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
+      } else {
+        Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
+      }
+    } else {
+      if(offNamed) {
+        Get.offNamed(RouteHelper.getAccessLocationRoute(page));
+      } else {
+        Get.toNamed(RouteHelper.getAccessLocationRoute(page));
+      }
+    }
+  }
+
   void _checkPermission(String page) async {
 
     LocationPermission permission = await Geolocator.checkPermission();
@@ -280,11 +349,6 @@ class SplashController extends GetxController implements GetxService {
   }
 
   Future<bool> _locationCheck() async {
-    // bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    // if(!serviceEnabled) {
-    //   await Geolocator.openLocationSettings();
-    //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    // }
     Location location = Location();
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {

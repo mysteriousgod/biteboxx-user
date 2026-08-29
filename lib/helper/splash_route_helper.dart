@@ -7,7 +7,6 @@ import 'package:stackfood_multivendor/features/favourite/controllers/favourite_c
 import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/deep_link_body.dart';
-import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/maintance_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
@@ -77,11 +76,7 @@ void _forNotificationRouteProcess(NotificationBodyModel? notificationBody) {
 Future<void> _forLoggedInUserRouteProcess() async {
   Get.find<AuthController>().updateToken();
   await Get.find<FavouriteController>().getFavouriteList();
-  if (AddressHelper.getAddressFromSharedPref() != null) {
-    Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true ));
-  } else {
-    Get.offNamed(RouteHelper.getAccessLocationRoute('splash'));
-  }
+  await Get.find<SplashController>().autoCheckLocationAndNavigate('splash', offNamed: true);
 }
 
 void _newlyRegisteredRouteProcess() {
@@ -92,10 +87,6 @@ void _newlyRegisteredRouteProcess() {
   }
 }
 
-void _forGuestUserRouteProcess() {
-  if (AddressHelper.getAddressFromSharedPref() != null) {
-    Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-  } else {
-    Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
-  }
+Future<void> _forGuestUserRouteProcess() async {
+  await Get.find<SplashController>().autoCheckLocationAndNavigate('splash', offNamed: true);
 }

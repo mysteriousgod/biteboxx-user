@@ -196,16 +196,19 @@ class OrderPlaceButton extends StatelessWidget {
     if(isGuestLogIn && checkoutController.guestAddress == null && checkoutController.orderType != 'take_away'&& checkoutController.orderType != 'dine_in'){
       showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
       return true;
+    } else if(!isGuestLogIn && checkoutController.orderType == 'delivery' && checkoutController.address.isEmpty) {
+      showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
+      return true;
     } else if(checkoutController.orderType == 'dine_in' && checkoutController.selectedDineInDate == null){
       showCustomSnackBar('please_select_your_dine_in_date'.tr);
       return true;
     } else if(checkoutController.orderType == 'dine_in' && checkoutController.estimateDineInTime == null){
       showCustomSnackBar('please_select_your_dine_in_time'.tr);
       return true;
-    } else if(((isGuestLogIn && checkoutController.orderType == 'take_away') || checkoutController.orderType == 'dine_in') && guestNameTextEditingController.text.isEmpty){
+    } else if(((isGuestLogIn && checkoutController.orderType == 'take_away') || checkoutController.orderType == 'dine_in') && guestNameTextEditingController.text.trim().isEmpty){
       showCustomSnackBar('please_enter_contact_person_name'.tr);
       return true;
-    } else if(((isGuestLogIn && checkoutController.orderType == 'take_away') || checkoutController.orderType == 'dine_in') && guestNumberTextEditingController.text.isEmpty){
+    } else if(((isGuestLogIn && checkoutController.orderType == 'take_away') || checkoutController.orderType == 'dine_in') && guestNumberTextEditingController.text.trim().isEmpty){
       showCustomSnackBar('please_enter_contact_person_number'.tr);
       return true;
     } else if(checkoutController.orderType == 'delivery' && checkoutController.streetNumberController.text.trim().isEmpty){
@@ -280,9 +283,16 @@ class OrderPlaceButton extends StatelessWidget {
   }
 
   AddressModel? _processFinalAddress(bool isGuestLogIn) {
-    AddressModel? finalAddress = isGuestLogIn ? checkoutController.guestAddress : checkoutController.address[checkoutController.addressIndex];
+    AddressModel? finalAddress;
+    if(isGuestLogIn) {
+      finalAddress = checkoutController.guestAddress;
+    } else if(checkoutController.address.isNotEmpty && checkoutController.address.length > checkoutController.addressIndex) {
+      finalAddress = checkoutController.address[checkoutController.addressIndex];
+    } else if(checkoutController.address.isNotEmpty) {
+      finalAddress = checkoutController.address[0];
+    }
 
-    if(isGuestLogIn && checkoutController.orderType == 'take_away' || checkoutController.orderType == 'dine_in') {
+    if(isGuestLogIn && (checkoutController.orderType == 'take_away' || checkoutController.orderType == 'dine_in')) {
       String number = checkoutController.countryDialCode! + guestNumberTextEditingController.text;
       finalAddress = AddressModel(contactPersonName: guestNameTextEditingController.text, contactPersonNumber: number,
         address: AddressHelper.getAddressFromSharedPref()!.address!, latitude: AddressHelper.getAddressFromSharedPref()!.latitude,
@@ -291,8 +301,11 @@ class OrderPlaceButton extends StatelessWidget {
       );
     }
 
-    if(!isGuestLogIn && finalAddress!.contactPersonNumber == 'null'){
-      finalAddress.contactPersonNumber = Get.find<ProfileController>().userInfoModel!.phone;
+    if(!isGuestLogIn && finalAddress != null && (finalAddress.contactPersonNumber == null || finalAddress.contactPersonNumber == 'null' || finalAddress.contactPersonNumber!.isEmpty)){
+      finalAddress.contactPersonNumber = Get.find<ProfileController>().userInfoModel?.phone;
+    }
+    if(!isGuestLogIn && finalAddress != null && (finalAddress.contactPersonName == null || finalAddress.contactPersonName!.isEmpty)){
+      finalAddress.contactPersonName = '${Get.find<ProfileController>().userInfoModel?.fName ?? ''} ${Get.find<ProfileController>().userInfoModel?.lName ?? ''}'.trim();
     }
     return finalAddress;
   }

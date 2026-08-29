@@ -1301,5 +1301,8 @@
   "no_payment_method_has_been_selected_kindly_select_a_payment_method": "कोई भुगतान विधि चयनित नहीं की गई है। कृपया एक भुगतान विधि चुनें।",
   "search_by_category": "श्रेणी द्वारा खोजें",
   "your_order_is_arriving_soon": "आपका ऑर्डर जल्द ही आ रहा है",
-  "enter_your_mobile_number_to_continue": "जारी रखने के लिए अपना मोबाइल नंबर दर्ज करें"
+  "enter_your_mobile_number_to_continue": "जारी रखने के लिए अपना मोबाइल नंबर दर्ज करें",
+  "please_enter_street_number": "कृपया सड़क/गली संख्या दर्ज करें",
+  "please_enter_house_number": "कृपया मकान/फ्लैट संख्या दर्ज करें",
+  "please_enter_floor_number": "कृपया मंजिल/ब्लॉक दर्ज करें"
 }

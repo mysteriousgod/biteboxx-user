@@ -5,16 +5,13 @@ import 'package:stackfood_multivendor/features/address/widgets/address_card_widg
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/delivery_info_fields.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
-import 'package:stackfood_multivendor/features/location/widgets/permission_dialog.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_dropdown_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -37,7 +34,6 @@ class DeliverySection extends StatelessWidget {
     bool isDineIn = (checkoutController.orderType == 'dine_in');
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     GlobalKey<CustomDropdownState> dropDownKey = GlobalKey<CustomDropdownState>();
-    AddressModel addressModel;
 
     return Column(children: [
       isGuestLoggedIn || isDineIn ? DeliveryInfoFields(
@@ -95,27 +91,10 @@ class DeliverySection extends StatelessWidget {
                       LatLng(double.parse(checkoutController.restaurant!.latitude!), double.parse(checkoutController.restaurant!.longitude!)),
                     );
                   }
-                } else if(value == -2) {
-                  _checkPermission(() async {
-                    addressModel = await locationController.getCurrentLocation(true, mapController: null, showSnackBar: true);
-
-                    if(addressModel.zoneIds!.isNotEmpty) {
-
-                      checkoutController.insertAddresses(Get.context!, addressModel, notify: true);
-
-                      checkoutController.getDistanceInKM(
-                        LatLng(
-                          locationController.position.latitude, locationController.position.longitude,
-                        ),
-                        LatLng(double.parse(checkoutController.restaurant!.latitude!), double.parse(checkoutController.restaurant!.longitude!)),
-                      );
-                    }
-                  });
-
-                } else{
+                } else if(value != null && value >= 0 && value < checkoutController.address.length) {
                   checkoutController.getDistanceInKM(
                     LatLng(
-                      double.parse(checkoutController.address[value!].latitude!),
+                      double.parse(checkoutController.address[value].latitude!),
                       double.parse(checkoutController.address[value].longitude!),
                     ),
                     LatLng(double.parse(checkoutController.restaurant!.latitude!), double.parse(checkoutController.restaurant!.longitude!)),
@@ -152,7 +131,11 @@ class DeliverySection extends StatelessWidget {
               border: Border.all(color: Theme.of(context).primaryColor, width: 0.3),
             ),
             child: AddressCardWidget(
-              address: (checkoutController.address.length-1) >= checkoutController.addressIndex ? checkoutController.address[checkoutController.addressIndex] : checkoutController.address[0],
+              address: checkoutController.address.isNotEmpty
+                  ? ((checkoutController.address.length - 1) >= checkoutController.addressIndex
+                      ? checkoutController.address[checkoutController.addressIndex]
+                      : checkoutController.address[0])
+                  : AddressModel(address: 'no_address_found'.tr),
               fromAddress: false, fromCheckout: true,
             ),
           ),
@@ -215,19 +198,5 @@ class DeliverySection extends StatelessWidget {
         ]),
       ) : const SizedBox(),
     ]);
-  }
-
-  void _checkPermission(Function onTap) async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if(permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if(permission == LocationPermission.denied) {
-      showCustomSnackBar('you_have_to_allow'.tr);
-    }else if(permission == LocationPermission.deniedForever) {
-      Get.dialog(const PermissionDialog());
-    }else {
-      onTap();
-    }
   }
 }

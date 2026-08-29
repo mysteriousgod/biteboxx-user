@@ -144,7 +144,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     _isOfflinePaymentActive = Get.find<SplashController>().configModel!.offlinePaymentStatus!;
     _isWalletActive = Get.find<SplashController>().configModel!.customerWalletStatus == 1;
 
-    if(_isCashOnDeliveryActive ?? false){
+    if((_isDigitalPaymentActive ?? false) && (Get.find<SplashController>().configModel!.activePaymentMethodList?.isNotEmpty ?? false)){
+      checkoutController.setPaymentMethod(2, willUpdate: false);
+      checkoutController.changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![0].getWay!);
+    } else if(_isCashOnDeliveryActive ?? false){
       checkoutController.setPaymentMethod(0, willUpdate: false);
     }
 
