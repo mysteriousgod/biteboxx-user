@@ -24,6 +24,11 @@ import 'package:stackfood_multivendor/features/home/widgets/popular_foods_nearby
 import 'package:stackfood_multivendor/features/home/widgets/popular_restaurants_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/refer_banner_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/screens/theme1_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/neumorphic_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/glassmorphic_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/brutalist_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/cyberpunk_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/minimalist_home_screen.dart';
 import 'package:stackfood_multivendor/features/home/widgets/today_trends_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
@@ -167,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
           endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: SafeArea(
-            top: (Get.find<SplashController>().configModel!.theme == 2),
+            top: (Get.find<SplashController>().configModel!.theme != 1),
             child: RefreshIndicator(
               onRefresh: () async {
                 await Get.find<HomeController>().getBannerList(true);
@@ -191,6 +196,20 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ResponsiveHelper.isDesktop(context) ? WebHomeScreen(
                 scrollController: _scrollController,
               ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 3) ? NeumorphicHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 4) ? GlassmorphicHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 5) ? BrutalistHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 6 || Get.find<SplashController>().configModel!.theme == 8) ? CyberpunkHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 7) ? MinimalistHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 9) ? GlassmorphicHomeScreen(
+                scrollController: _scrollController,
+              ) : (Get.find<SplashController>().configModel!.theme == 10) ? NeumorphicHomeScreen(
                 scrollController: _scrollController,
               ) : CustomScrollView(
                 controller: _scrollController,
