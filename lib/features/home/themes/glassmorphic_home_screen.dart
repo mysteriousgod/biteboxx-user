@@ -1,25 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/common/widgets/paginated_list_view_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/product_view_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/home/screens/home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
 import 'package:stackfood_multivendor/features/home/themes/theme_tokens.dart';
 import 'package:stackfood_multivendor/features/home/widgets/bad_weather_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/highlight_widget_view.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/banner_view_widget1.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/category_widget1.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/cuisine_widget1.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/item_campaign_widget1.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/popular_item_widget1.dart';
-import 'package:stackfood_multivendor/features/home/widgets/theme1/popular_store_widget1.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/features/notification/controllers/notification_controller.dart';
 import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/auth_helper.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
@@ -32,18 +25,8 @@ class GlassmorphicHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final configModel = Get.find<SplashController>().configModel!;
     final isLogin = Get.find<AuthController>().isLoggedIn();
-    final bool isDark = Get.isDarkMode;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [const Color(0xFF0F172A), const Color(0xFF1E1B4B), const Color(0xFF0F172A)]
-              : [const Color(0xFFEEF2FF), const Color(0xFFF5F3FF), const Color(0xFFFAF5FF)],
-        ),
-      ),
+    return GlassAuroraBackground(
       child: CustomScrollView(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -59,7 +42,8 @@ class GlassmorphicHomeScreen extends StatelessWidget {
                 width: Dimensions.webMaxWidth,
                 child: GlassContainer(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  radius: 18,
+                  radius: 20,
+                  blur: 16,
                   child: Row(
                     children: [
                       Expanded(
@@ -70,17 +54,21 @@ class GlassmorphicHomeScreen extends StatelessWidget {
                           }),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       InkWell(
                         onTap: () => Get.toNamed(RouteHelper.getNotificationRoute()),
                         child: GetBuilder<NotificationController>(builder: (notificationController) {
                           return Stack(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Icon(Icons.notifications_none_rounded, size: 20, color: Theme.of(context).primaryColor),
                               ),
@@ -109,13 +97,14 @@ class GlassmorphicHomeScreen extends StatelessWidget {
           SliverPersistentHeader(
             pinned: true,
             delegate: SliverDelegate(
-              height: 66,
+              height: 68,
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: GlassContainer(
-                    radius: 25,
+                    radius: 26,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
+                    blur: 18,
                     child: InkWell(
                       onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
                       child: Row(
@@ -126,12 +115,19 @@ class GlassmorphicHomeScreen extends StatelessWidget {
                             child: Text(
                               'search_food_or_restaurant'.tr,
                               style: robotoRegular.copyWith(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.65),
                                 fontSize: Dimensions.fontSizeSmall,
                               ),
                             ),
                           ),
-                          Icon(Icons.mic_none_rounded, color: Theme.of(context).primaryColor.withValues(alpha: 0.8), size: 20),
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.tune_rounded, color: Theme.of(context).primaryColor, size: 16),
+                          ),
                         ],
                       ),
                     ),
@@ -141,7 +137,7 @@ class GlassmorphicHomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Body Elements wrapped with frosted glass feel
+          // Main Glass Feed Content
           SliverToBoxAdapter(
             child: Center(
               child: SizedBox(
@@ -149,43 +145,57 @@ class GlassmorphicHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
-                    const BannerViewWidget1(),
+                    const SizedBox(height: 6),
+                    const GlassBannerView(),
                     const BadWeatherWidget(),
                     const HighlightWidgetView(),
-                    const CategoryWidget1(),
-                    const ItemCampaignWidget1(),
-                    if (isLogin) const PopularStoreWidget1(isOrderAgainViewed: true, isPopular: false),
-                    const CuisinesWidget1(),
-                    if (configModel.popularRestaurant == 1) const PopularStoreWidget1(isPopular: true),
-                    if (configModel.popularFood == 1) const PopularItemWidget1(isPopular: true),
-                    if (configModel.newRestaurant == 1) const PopularStoreWidget1(isPopular: false),
+                    const GlassCategorySection(),
+                    const GlassItemCampaignSection(),
+                    if (isLogin)
+                      const GlassPopularStoreSection(isOrderAgainViewed: true, isPopular: false),
+                    const GlassCuisineSection(),
+                    if (configModel.popularRestaurant == 1)
+                      const GlassPopularStoreSection(isPopular: true),
+                    if (configModel.popularFood == 1)
+                      const GlassPopularFoodSection(isPopular: true),
+                    if (configModel.newRestaurant == 1)
+                      const GlassPopularStoreSection(isPopular: false),
+                    if (configModel.mostReviewedFoods == 1)
+                      const GlassPopularFoodSection(isPopular: false),
                     const SizedBox(height: 16),
+
                     ThemedSectionHeader(
                       title: 'all_restaurants'.tr,
                       subtitle: 'Freshly prepared dishes delivered right to you',
                     ),
                     GetBuilder<RestaurantController>(builder: (restaurantController) {
+                      final restaurants = restaurantController.restaurantModel?.restaurants;
                       return PaginatedListViewWidget(
                         scrollController: scrollController,
                         totalSize: restaurantController.restaurantModel?.totalSize,
                         offset: restaurantController.restaurantModel?.offset,
                         onPaginate: (int? offset) async => await restaurantController.getRestaurantList(offset!, false),
-                        productView: ProductViewWidget(
-                          isRestaurant: true,
-                          products: null,
-                          showTheme1Restaurant: true,
-                          restaurants: restaurantController.restaurantModel?.restaurants,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: ResponsiveHelper.isDesktop(context)
-                                ? Dimensions.paddingSizeExtraSmall
-                                : Dimensions.paddingSizeSmall,
-                            vertical: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraSmall : 0,
-                          ),
-                        ),
+                        productView: restaurants != null
+                            ? ListView.builder(
+                                itemCount: restaurants.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemBuilder: (context, index) {
+                                  return GlassRestaurantCard(
+                                    restaurant: restaurants[index],
+                                  );
+                                },
+                              )
+                            : const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(Dimensions.paddingSizeLarge),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
                       );
                     }),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 35),
                   ],
                 ),
               ),
@@ -227,3 +237,4 @@ class GlassmorphicHomeScreen extends StatelessWidget {
     );
   }
 }
+

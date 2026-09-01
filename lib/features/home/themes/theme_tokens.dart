@@ -51,22 +51,43 @@ class ThemeTokens {
   }
 
   // Glassmorphism
-  static BoxDecoration glassBox({double radius = 16, Color? tintColor}) {
+  static BoxDecoration glassBox({
+    double radius = 16,
+    Color? tintColor,
+    Color? borderColor,
+    double borderWidth = 1.2,
+    bool isDark = false,
+    List<BoxShadow>? customShadow,
+  }) {
+    final Color base = tintColor ?? (isDark ? const Color(0xFF1E293B) : Colors.white);
     return BoxDecoration(
-      color: (tintColor ?? Colors.white).withValues(alpha: 0.18),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDark
+            ? [
+                base.withValues(alpha: 0.22),
+                base.withValues(alpha: 0.08),
+              ]
+            : [
+                base.withValues(alpha: 0.35),
+                base.withValues(alpha: 0.12),
+              ],
+      ),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.35),
-        width: 1.2,
+        color: (borderColor ?? (isDark ? const Color(0xFF94A3B8) : Colors.white)).withValues(alpha: isDark ? 0.22 : 0.45),
+        width: borderWidth,
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.08),
-          blurRadius: 20,
-          spreadRadius: 1,
-          offset: const Offset(0, 8),
-        ),
-      ],
+      boxShadow: customShadow ??
+          [
+            BoxShadow(
+              color: isDark ? Colors.black.withValues(alpha: 0.35) : const Color(0xFF64748B).withValues(alpha: 0.10),
+              blurRadius: 24,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+          ],
     );
   }
 
@@ -149,7 +170,11 @@ class GlassContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Color? tintColor;
+  final Color? borderColor;
+  final double borderWidth;
   final double blur;
+  final VoidCallback? onTap;
+  final List<BoxShadow>? customShadow;
 
   const GlassContainer({
     super.key,
@@ -158,12 +183,17 @@ class GlassContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.tintColor,
-    this.blur = 12,
+    this.borderColor,
+    this.borderWidth = 1.2,
+    this.blur = 14,
+    this.onTap,
+    this.customShadow,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final bool isDark = Get.isDarkMode;
+    Widget content = Container(
       margin: margin,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -171,8 +201,122 @@ class GlassContainer extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
           child: Container(
             padding: padding,
-            decoration: ThemeTokens.glassBox(radius: radius, tintColor: tintColor),
+            decoration: ThemeTokens.glassBox(
+              radius: radius,
+              tintColor: tintColor,
+              borderColor: borderColor,
+              borderWidth: borderWidth,
+              isDark: isDark,
+              customShadow: customShadow,
+            ),
             child: child,
+          ),
+        ),
+      ),
+    );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
+        child: content,
+      );
+    }
+    return content;
+  }
+}
+
+/// Frosted Glass Pill for ratings, badges, tags, and small chips
+class GlassPill extends StatelessWidget {
+  final Widget child;
+  final Color? tintColor;
+  final Color? borderColor;
+  final EdgeInsetsGeometry padding;
+  final double blur;
+  final double radius;
+
+  const GlassPill({
+    super.key,
+    required this.child,
+    this.tintColor,
+    this.borderColor,
+    this.padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    this.blur = 10,
+    this.radius = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Get.isDarkMode;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: (tintColor ?? (isDark ? Colors.black : Colors.white)).withValues(alpha: isDark ? 0.35 : 0.40),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: (borderColor ?? Colors.white).withValues(alpha: isDark ? 0.25 : 0.50),
+              width: 1,
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Frosted circular glass icon button
+class GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? iconColor;
+  final double size;
+  final double iconSize;
+
+  const GlassIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.iconColor,
+    this.size = 38,
+    this.iconSize = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Get.isDarkMode;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(size / 2),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size / 2),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: size,
+            width: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: (isDark ? Colors.black : Colors.white).withValues(alpha: isDark ? 0.35 : 0.45),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: isDark ? 0.25 : 0.60),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: iconSize),
+            ),
           ),
         ),
       ),
