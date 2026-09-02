@@ -1,7 +1,11 @@
+import 'package:stackfood_multivendor/common/widgets/custom_loader_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/not_logged_in_screen.dart';
 import 'package:stackfood_multivendor/features/address/controllers/address_controller.dart';
+import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
 import 'package:stackfood_multivendor/features/address/widgets/address_confirmation_dialogue_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
+import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
+import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
@@ -37,6 +41,26 @@ class _AddressScreenState extends State<AddressScreen> {
   void _initCall(){
     if(Get.find<AuthController>().isLoggedIn()) {
       Get.find<AddressController>().getAddressList();
+    }
+  }
+
+  bool _isAddressActive(AddressModel address, AddressModel? active) {
+    if (active == null) return false;
+    if (address.id != null && active.id != null) {
+      return address.id == active.id;
+    }
+    return address.latitude == active.latitude && address.longitude == active.longitude;
+  }
+
+  Future<void> _setActiveAddress(AddressModel address) async {
+    Get.dialog(const CustomLoaderWidget(), barrierDismissible: false);
+    bool success = await Get.find<LocationController>().setActiveAddress(address);
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+    if (success) {
+      showCustomSnackBar('Active address updated successfully', isError: false);
+      setState(() {});
     }
   }
 
@@ -92,8 +116,8 @@ class _AddressScreenState extends State<AddressScreen> {
                           child: GridView.builder(
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisSpacing: Dimensions.paddingSizeLarge,
-                              mainAxisSpacing: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeSmall : 0.01,
-                              childAspectRatio: ResponsiveHelper.isDesktop(context) ? 4 : 5,
+                              mainAxisSpacing: Dimensions.paddingSizeSmall,
+                              mainAxisExtent: ResponsiveHelper.isDesktop(context) ? 90 : 85,
                               crossAxisCount: ResponsiveHelper.isMobile(context) ? 1 : ResponsiveHelper.isTab(context) ? 2 : 3,
                             ),
                             physics: const NeverScrollableScrollPhysics(),
@@ -101,52 +125,75 @@ class _AddressScreenState extends State<AddressScreen> {
                             shrinkWrap: true,
                             itemCount: ResponsiveHelper.isDesktop(context) ? (addressController.addressList!.length + 1)  : addressController.addressList!.length,
                             itemBuilder: (context, index) {
-                              return (ResponsiveHelper.isDesktop(context) && (index == addressController.addressList!.length)) ? Padding(
-                                padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                                child: InkWell(
-                                  onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(false, 0)),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                    decoration:  BoxDecoration(
-                                      color: Theme.of(context).cardColor,
-                                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                      boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                              if (ResponsiveHelper.isDesktop(context) && (index == addressController.addressList!.length)) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
+                                  child: InkWell(
+                                    onTap: () => Get.toNamed(RouteHelper.getAddAddressRoute(false, 0)),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                      decoration:  BoxDecoration(
+                                        color: Theme.of(context).cardColor,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                                      ),
+                                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+                                        Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
+                                        const SizedBox(height: Dimensions.paddingSizeSmall),
+
+                                        Text('add_new_address'.tr, style: robotoRegular.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall)),
+
+                                      ]),
                                     ),
-                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                      Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                      Text('add_new_address'.tr, style: robotoRegular.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall)),
-
-                                    ]),
                                   ),
-                                ),
-                              ) : AddressCardWidget(
-                                address: addressController.addressList![index], fromAddress: true,
+                                );
+                              }
+
+                              final address = addressController.addressList![index];
+                              final activeAddress = AddressHelper.getAddressFromSharedPref();
+                              final isSelected = _isAddressActive(address, activeAddress);
+
+                              return AddressCardWidget(
+                                address: address,
+                                fromAddress: true,
+                                isSelected: isSelected,
                                 onTap: () {
-                                  Get.toNamed(RouteHelper.getMapRoute(
-                                    addressController.addressList![index], 'address',
-                                  ));
+                                  if (!isSelected) {
+                                    _setActiveAddress(address);
+                                  } else {
+                                    showCustomSnackBar('This is already your active address', isError: false);
+                                  }
                                 },
                                 onEditPressed: () {
-                                  Get.toNamed(RouteHelper.getEditAddressRoute(addressController.addressList![index]));
+                                  Get.toNamed(RouteHelper.getEditAddressRoute(address));
                                 },
                                 onRemovePressed: () {
                                   if(Get.isSnackbarOpen) {
                                     Get.back();
                                   }
-                                Get.dialog(AddressConfirmDialogueWidget(
-                                  icon: Images.locationConfirm,
-                                  title: 'are_you_sure'.tr,
-                                  description: 'you_want_to_delete_this_location'.tr,
-                                  onYesPressed: () {
-                                    addressController.deleteAddress(addressController.addressList![index].id, index).then((response) {
-                                      Get.back();
-                                      showCustomSnackBar(response.message, isError: !response.isSuccess);
-                                    });
-                                  },
-                                ));
+                                  Get.dialog(AddressConfirmDialogueWidget(
+                                    icon: Images.locationConfirm,
+                                    title: 'are_you_sure'.tr,
+                                    description: 'you_want_to_delete_this_location'.tr,
+                                    onYesPressed: () {
+                                      addressController.deleteAddress(address.id, index).then((response) {
+                                        Get.back();
+                                        if (response.isSuccess) {
+                                          final currentActive = AddressHelper.getAddressFromSharedPref();
+                                          if (_isAddressActive(address, currentActive)) {
+                                            if (addressController.addressList != null && addressController.addressList!.isNotEmpty) {
+                                              _setActiveAddress(addressController.addressList!.first);
+                                            } else {
+                                              AddressHelper.clearAddressFromSharedPref();
+                                            }
+                                          }
+                                          setState(() {});
+                                        }
+                                        showCustomSnackBar(response.message, isError: !response.isSuccess);
+                                      });
+                                    },
+                                  ));
                                 },
                               );
                             },

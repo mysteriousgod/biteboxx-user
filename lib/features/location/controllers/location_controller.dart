@@ -229,6 +229,40 @@ class LocationController extends GetxController implements GetxService {
     locationServiceInterface.handleRoute(fromSignUp, route, canRoute);
   }
 
+  Future<bool> setActiveAddress(AddressModel address) async {
+    _isLoading = true;
+    update();
+    ZoneResponseModel response = await getZone(address.latitude, address.longitude, false);
+    if (response.isSuccess) {
+      Get.find<CartController>().getCartDataOnline();
+      address.zoneId = response.zoneIds[0];
+      address.zoneIds = [];
+      address.zoneIds!.addAll(response.zoneIds);
+      address.zoneData = [];
+      address.zoneData!.addAll(response.zoneData);
+
+      AddressModel? oldAddress = AddressHelper.getAddressFromSharedPref();
+      locationServiceInterface.handleTopicSubscription(oldAddress, address);
+      await AddressHelper.saveAddressInSharedPref(address);
+
+      if (AuthHelper.isLoggedIn() && !AuthHelper.isGuestLoggedIn()) {
+        await Get.find<FavouriteController>().getFavouriteList();
+        updateZone();
+      }
+
+      HomeScreen.loadData(true);
+      Get.find<CheckoutController>().clearPrevData();
+      _isLoading = false;
+      update();
+      return true;
+    } else {
+      _isLoading = false;
+      update();
+      showCustomSnackBar(response.message);
+      return false;
+    }
+  }
+
   Future<Position> setLocation(String placeID, String? address, GoogleMapController? mapController) async {
     _loading = true;
     update();
