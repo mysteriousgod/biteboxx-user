@@ -143,8 +143,9 @@ class DeliverySection extends StatelessWidget {
           SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraLarge : Dimensions.paddingSizeLarge),
 
           !ResponsiveHelper.isDesktop(context) ? CustomTextFieldWidget(
-            hintText: 'write_street_number'.tr,
-            labelText: 'street_number'.tr,
+            hintText: 'write_street_number'.tr == 'write_street_number' ? 'Enter your address' : 'write_street_number'.tr,
+            labelText: 'street_number'.tr == 'street_number' || 'street_number'.tr == 'Add Locality' ? 'Your Address' : 'street_number'.tr,
+            required: true,
             inputType: TextInputType.streetAddress,
             focusNode: checkoutController.streetNode,
             nextFocus: checkoutController.houseNode,
@@ -156,8 +157,9 @@ class DeliverySection extends StatelessWidget {
             children: [
               ResponsiveHelper.isDesktop(context) ? Expanded(
                 child: CustomTextFieldWidget(
-                  hintText: 'write_street_number'.tr,
-                  labelText: 'street_number'.tr,
+                  hintText: 'write_street_number'.tr == 'write_street_number' ? 'Enter your address' : 'write_street_number'.tr,
+                  labelText: 'street_number'.tr == 'street_number' || 'street_number'.tr == 'Add Locality' ? 'Your Address' : 'street_number'.tr,
+                  required: true,
                   inputType: TextInputType.streetAddress,
                   focusNode: checkoutController.streetNode,
                   nextFocus: checkoutController.houseNode,
@@ -171,6 +173,7 @@ class DeliverySection extends StatelessWidget {
                 child: CustomTextFieldWidget(
                   hintText: 'write_house_number'.tr,
                   labelText: 'house'.tr,
+                  required: false,
                   inputType: TextInputType.text,
                   focusNode: checkoutController.houseNode,
                   nextFocus: checkoutController.floorNode,
@@ -184,6 +187,7 @@ class DeliverySection extends StatelessWidget {
                 child: CustomTextFieldWidget(
                   hintText: 'write_floor_number'.tr,
                   labelText: 'floor'.tr,
+                  required: false,
                   inputType: TextInputType.text,
                   focusNode: checkoutController.floorNode,
                   inputAction: TextInputAction.done,

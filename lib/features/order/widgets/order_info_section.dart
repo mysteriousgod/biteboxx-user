@@ -209,17 +209,47 @@ class OrderInfoSection extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  order.scheduled == 1 && order.scheduleAt != null && DateConverter.isBeforeTime(order.scheduleAt)
-                      ? Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor))
-                      : Text('your_order_is_arriving_soon'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
-                const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                  order.orderStatus == 'pending'
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'your_order_is_pending_to_confirm'.tr == 'your_order_is_pending_to_confirm'
+                                  ? 'Your order is pending to confirm'
+                                  : 'your_order_is_pending_to_confirm'.tr,
+                              style: robotoBold.copyWith(
+                                fontSize: Dimensions.fontSizeExtraLarge,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                            Text(
+                              'Waiting for restaurant confirmation',
+                              style: robotoRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: Theme.of(context).disabledColor,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            order.scheduled == 1 && order.scheduleAt != null && DateConverter.isBeforeTime(order.scheduleAt)
+                                ? Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor))
+                                : Text('your_order_is_arriving_soon'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
+                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                  CountdownTimerWidget(
-                    startTime: DateTime.parse(order.createdAt!),
-                    durationMinutes: _getDeliveryDurationMinutes(order),
-                    textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
-                    showMessageOnTimeUp: false,
-                  ),
+                            CountdownTimerWidget(
+                              startTime: DateTime.parse(order.createdAt!),
+                              durationMinutes: _getDeliveryDurationMinutes(order),
+                              textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
+                              showMessageOnTimeUp: false,
+                            ),
+                          ],
+                        ),
                 ],
               ),
             ),

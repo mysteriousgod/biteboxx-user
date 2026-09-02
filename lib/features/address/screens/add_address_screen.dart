@@ -460,8 +460,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         SizedBox(height: widget.forGuest ? Dimensions.paddingSizeOverLarge : 0),
         
         CustomTextFieldWidget(
-          hintText: "ex_02".tr,
-          labelText: 'street_number'.tr,
+          hintText: 'write_street_number'.tr == 'write_street_number' ? 'Enter your address' : 'write_street_number'.tr,
+          labelText: 'street_number'.tr == 'street_number' || 'street_number'.tr == 'Add Locality' ? 'Your Address' : 'street_number'.tr,
           required: true,
           inputType: TextInputType.streetAddress,
           focusNode: _streetNode,
@@ -475,7 +475,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             child: CustomTextFieldWidget(
               hintText: 'ex_1005/2'.tr,
               labelText: 'house'.tr,
-              required: true,
+              required: false,
               inputType: TextInputType.text,
               focusNode: _houseNode,
               nextFocus: _floorNode,
@@ -488,7 +488,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             child: CustomTextFieldWidget(
               hintText: 'ex_02'.tr,
               labelText: 'floor'.tr,
-              required: true,
+              required: false,
               inputType: TextInputType.text,
               focusNode: _floorNode,
               inputAction: TextInputAction.done,
@@ -556,11 +556,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     } else if (!isValid) {
       showCustomSnackBar('invalid_phone_number'.tr);
     } else if (_streetNumberController.text.trim().isEmpty) {
-      showCustomSnackBar('please_enter_street_number'.tr);
-    } else if (_houseController.text.trim().isEmpty) {
-      showCustomSnackBar('please_enter_house_number'.tr);
-    } else if (_floorController.text.trim().isEmpty) {
-      showCustomSnackBar('please_enter_floor_number'.tr);
+      showCustomSnackBar('Please enter your address');
     } else {
       AddressModel addressModel = AddressModel(
         id: widget.address?.id,
