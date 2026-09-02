@@ -19,6 +19,7 @@ import 'package:stackfood_multivendor/features/product/controllers/product_contr
 import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:stackfood_multivendor/features/restaurant/screens/restaurant_screen.dart';
 import 'package:stackfood_multivendor/features/review/controllers/review_controller.dart';
+import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
 import 'package:stackfood_multivendor/helper/product_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
@@ -711,7 +712,7 @@ class GlassPopularStoreSection extends StatelessWidget {
                                             size: 28,
                                             iconSize: 15,
                                             onTap: () {
-                                              if (Get.find<RestaurantController>().isLoggedIn) {
+                                              if (AuthHelper.isLoggedIn()) {
                                                 isFav
                                                     ? favController.removeFromFavouriteList(restaurant.id, true)
                                                     : favController.addToFavouriteList(null, restaurant.id, true);
@@ -945,7 +946,7 @@ class GlassRestaurantCard extends StatelessWidget {
                         size: 32,
                         iconSize: 18,
                         onTap: () {
-                          if (Get.find<RestaurantController>().isLoggedIn) {
+                          if (AuthHelper.isLoggedIn()) {
                             isFav
                                 ? favController.removeFromFavouriteList(restaurant!.id, true)
                                 : favController.addToFavouriteList(null, restaurant!.id, true);
