@@ -68,6 +68,7 @@ class _BottomNavItemState extends State<BottomNavItem>
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
 
     return Expanded(
@@ -87,11 +88,13 @@ class _BottomNavItemState extends State<BottomNavItem>
                   if (!widget.isSelected)
                     Icon(
                       widget.iconData,
-                      color: Colors.grey.shade400,
+                      color: isDark
+                          ? Theme.of(context).disabledColor
+                          : Colors.grey.shade400,
                       size: 22,
                     ),
 
-                  // ── Floating white circle (active state) ─────────────────
+                  // ── Floating circle (active state) ─────────────────
                   if (widget.isSelected)
                     Positioned(
                       // Sits centred on the top edge of the bar — half in, half out
@@ -103,11 +106,20 @@ class _BottomNavItemState extends State<BottomNavItem>
                           height: 46,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white,
+                            color: isDark
+                                ? Theme.of(context).colorScheme.surface
+                                : Colors.white,
+                            border: isDark
+                                ? Border.all(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                    width: 1,
+                                  )
+                                : null,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(
-                                    alpha: 0.10 * _opacityAnimation.value),
+                                    alpha: (isDark ? 0.40 : 0.10) *
+                                        _opacityAnimation.value),
                                 blurRadius: 10,
                                 spreadRadius: 1,
                                 offset: const Offset(0, 3),

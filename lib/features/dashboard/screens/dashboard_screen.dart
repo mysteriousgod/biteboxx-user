@@ -19,7 +19,6 @@ import 'package:stackfood_multivendor/features/favourite/screens/favourite_scree
 import 'package:stackfood_multivendor/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_dialog_widget.dart';
 import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
@@ -134,6 +133,8 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvokedWithResult: (didPop, result) async {
@@ -179,8 +180,12 @@ class DashboardScreenState extends State<DashboardScreen> {
                     : BottomAppBar(
                         elevation: 4,
                         clipBehavior: Clip.none,
-                        shadowColor: Colors.black.withValues(alpha: 0.08),
-                        color: Colors.grey[100],
+                        shadowColor: isDark
+                            ? Colors.black.withValues(alpha: 0.4)
+                            : Colors.black.withValues(alpha: 0.08),
+                        color: isDark
+                            ? Theme.of(context).cardColor
+                            : Colors.grey[100],
                         height: 56,
                         child: Row(
                           children: [
