@@ -25,8 +25,8 @@ class ProfileButtonWidget extends StatelessWidget {
           vertical: isButtonActive != null ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeDefault,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          color: isThemeSwitchButton ? Colors.transparent : Theme.of(context).cardColor,
+          borderRadius: isThemeSwitchButton ? null : BorderRadius.circular(Dimensions.radiusDefault),
           border: ResponsiveHelper.isDesktop(context) || isThemeSwitchButton ? null : Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.1), width: 1.5),
           boxShadow: isThemeSwitchButton ? null : [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.05), spreadRadius: 0, blurRadius: 4)],
         ),

@@ -9,6 +9,8 @@ import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/not_logged_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 
 class FavouriteScreen extends StatefulWidget {
   const FavouriteScreen({super.key});
@@ -36,16 +38,16 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBarWidget(title: 'favourite'.tr, isBackButtonExist: false),
-      endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-      body: Get.find<AuthController>().isLoggedIn() ? SafeArea(child: Column(children: [
+    return GetBuilder<SplashController>(builder: (splashController) {
+      final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      Widget content = Get.find<AuthController>().isLoggedIn() ? SafeArea(child: Column(children: [
 
         WebScreenTitleWidget(title: 'favourite'.tr),
 
         Container(
           width: Dimensions.webMaxWidth,
-          color: Theme.of(context).cardColor,
+          color: isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,
           child: TabBar(
             controller: _tabController,
             indicatorColor: Theme.of(context).primaryColor,
@@ -72,7 +74,14 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
       ])) : NotLoggedInScreen(callBack: (value){
         _initCall();
         setState(() {});
-      }),
-    );
+      });
+
+      return Scaffold(
+        backgroundColor: isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,
+        appBar: CustomAppBarWidget(title: 'favourite'.tr, isBackButtonExist: false),
+        endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
+        body: isGlassmorphic ? GlassAuroraBackground(child: content) : content,
+      );
+    });
   }
 }

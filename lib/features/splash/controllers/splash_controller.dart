@@ -28,7 +28,21 @@ class SplashController extends GetxController implements GetxService {
   SplashController({required this.splashServiceInterface});
 
   ConfigModel? _configModel;
-  ConfigModel? get configModel => _configModel;
+  ConfigModel? get configModel => _configModel ?? safeConfigModel;
+
+  ConfigModel get safeConfigModel => ConfigModel(
+    businessName: 'BiteBoxx',
+    theme: _configModel?.theme ?? 1,
+    popularRestaurant: 1,
+    popularFood: 1,
+    mostReviewedFoods: 1,
+    newRestaurant: 1,
+    maintenanceMode: false,
+    dineInOrderOption: false,
+    currencySymbol: '\$',
+  );
+
+  int get activeTheme => _configModel?.theme ?? 1;
 
   bool _firstTimeConnectionCheck = true;
   bool get firstTimeConnectionCheck => _firstTimeConnectionCheck;

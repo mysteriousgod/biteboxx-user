@@ -1,7 +1,6 @@
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
-import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/profile/widgets/account_deletion_bottom_sheet.dart';
@@ -163,7 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Theme.of(context).cardColor,
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeLarge),
-                          child: Column(children: [
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Column(children: [
 
                             (showWalletCard && isLoggedIn) ? Row(children: [
 
@@ -238,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ) : const SizedBox(),
                             SizedBox(height: isLoggedIn ? Dimensions.paddingSizeLarge : 0),
 
-                            const Expanded(child: SizedBox()),
+                            const SizedBox(height: Dimensions.paddingSizeLarge),
                             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                               Text('${'version'.tr}:', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall)),
                               const SizedBox(width: Dimensions.paddingSizeExtraSmall),
@@ -247,6 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ]),
                           ]),
                         ),
+                      ),
                       ),
 
                     ]),

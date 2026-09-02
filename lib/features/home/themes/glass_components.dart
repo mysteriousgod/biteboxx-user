@@ -21,7 +21,6 @@ import 'package:stackfood_multivendor/features/restaurant/screens/restaurant_scr
 import 'package:stackfood_multivendor/features/review/controllers/review_controller.dart';
 import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
-import 'package:stackfood_multivendor/helper/product_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
@@ -39,7 +38,7 @@ class GlassAuroraBackground extends StatelessWidget {
 
     return Stack(
       children: [
-        // Base canvas gradient
+        // Base canvas gradient with warm brand undertones
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
@@ -48,67 +47,67 @@ class GlassAuroraBackground extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF090D16),
-                        const Color(0xFF10172A),
-                        const Color(0xFF18152E),
-                        const Color(0xFF0C101C),
+                        const Color(0xFF0C0D10),
+                        const Color(0xFF141210),
+                        const Color(0xFF191410),
+                        const Color(0xFF0D0E11),
                       ]
                     : [
-                        const Color(0xFFF1F5F9),
-                        const Color(0xFFE8EDFB),
-                        const Color(0xFFF3E8FF),
-                        const Color(0xFFFAFAFC),
+                        const Color(0xFFFAF7F4),
+                        const Color(0xFFFFF4EC),
+                        const Color(0xFFFDF0E5),
+                        const Color(0xFFF6F3EE),
                       ],
               ),
             ),
           ),
         ),
 
-        // Glowing Orb 1: Violet/Purple (Top-Right)
+        // Glowing Orb 1: BiteBoxx Signature Brand Orange (Top-Right)
         Positioned(
           top: -40,
           right: -30,
-          width: 320,
-          height: 320,
+          width: 330,
+          height: 330,
           child: _buildGlowOrb(
-            color: isDark ? const Color(0xFF7C3AED) : const Color(0xFFA78BFA),
+            color: const Color(0xFFFF7918),
             opacity: isDark ? 0.38 : 0.28,
           ),
         ),
 
-        // Glowing Orb 2: Ocean Cyan/Electric Blue (Center-Left)
+        // Glowing Orb 2: Golden Amber / Honey Glow (Center-Left)
         Positioned(
           top: 360,
           left: -60,
           width: 300,
           height: 300,
           child: _buildGlowOrb(
-            color: isDark ? const Color(0xFF06B6D4) : const Color(0xFF38BDF8),
-            opacity: isDark ? 0.30 : 0.22,
+            color: const Color(0xFFFFA000),
+            opacity: isDark ? 0.32 : 0.22,
           ),
         ),
 
-        // Glowing Orb 3: Radiant Rose/Coral (Mid-Right)
+        // Glowing Orb 3: Radiant Sunset Coral (Mid-Right)
         Positioned(
           top: 780,
           right: -40,
           width: 310,
           height: 310,
           child: _buildGlowOrb(
-            color: isDark ? const Color(0xFFF43F5E) : const Color(0xFFFB7185),
-            opacity: isDark ? 0.28 : 0.18,
+            color: const Color(0xFFFF5722),
+            opacity: isDark ? 0.30 : 0.20,
           ),
         ),
 
-        // Glowing Orb 4: Amber/Sunlight (Bottom-Left)
+        // Glowing Orb 4: Warm Tangerine Glow (Bottom-Left)
         Positioned(
           top: 1250,
           left: -50,
           width: 290,
           height: 290,
           child: _buildGlowOrb(
-            color: isDark ? const Color(0xFFF59E0B) : const Color(0xFFFBBF24),
-            opacity: isDark ? 0.25 : 0.18,
+            color: const Color(0xFFFFB300),
+            opacity: isDark ? 0.26 : 0.18,
           ),
         ),
 
@@ -153,100 +152,118 @@ class GlassBannerView extends StatelessWidget {
       List<String?>? bannerList = homeController.bannerImageList;
       List<dynamic>? bannerDataList = homeController.bannerDataList;
 
-      if (bannerList != null && bannerList.isEmpty) return const SizedBox();
+      if (bannerList == null || bannerList.isEmpty) {
+        return const SizedBox();
+      }
+
+      final List<String?> displayBanners = bannerList;
 
       return Container(
         width: MediaQuery.of(context).size.width,
         height: ResponsiveHelper.isDesktop(context) ? 360 : MediaQuery.of(context).size.width * 0.48,
         padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-        child: bannerList != null
-            ? Column(
-                children: [
-                  Expanded(
-                    child: CarouselSlider.builder(
-                      options: CarouselOptions(
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                        disableCenter: true,
-                        viewportFraction: 0.92,
-                        autoPlayInterval: const Duration(seconds: 6),
-                        onPageChanged: (index, reason) {
-                          homeController.setCurrentIndex(index, true);
-                        },
-                      ),
-                      itemCount: bannerList.isEmpty ? 1 : bannerList.length,
-                      itemBuilder: (context, index, _) {
-                        return InkWell(
-                          onTap: () {
-                            if (bannerDataList?[index] is Product) {
-                              Product? product = bannerDataList?[index];
-                              ResponsiveHelper.isMobile(context)
-                                  ? showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (con) => ProductBottomSheetWidget(product: product),
-                                    )
-                                  : showDialog(
-                                      context: context,
-                                      builder: (con) => Dialog(child: ProductBottomSheetWidget(product: product)),
-                                    );
-                            } else if (bannerDataList?[index] is Restaurant) {
-                              Restaurant restaurant = bannerDataList?[index];
-                              Get.toNamed(
-                                RouteHelper.getRestaurantRoute(restaurant.id),
-                                arguments: RestaurantScreen(restaurant: restaurant),
-                              );
-                            }
-                          },
-                          child: GlassContainer(
-                            radius: 20,
-                            padding: const EdgeInsets.all(4),
-                            blur: 16,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: CustomImageWidget(
-                                image: '${bannerList[index]}',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Frosted glass indicator dots
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(bannerList.length, (index) {
-                      bool isCurrent = homeController.currentIndex == index;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        height: 6,
-                        width: isCurrent ? 22 : 6,
-                        decoration: BoxDecoration(
-                          color: isCurrent
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).disabledColor.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: isCurrent
-                              ? [
-                                  BoxShadow(
-                                    color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
-                                    blurRadius: 6,
-                                  )
-                                ]
-                              : null,
+        child: Column(
+          children: [
+            Expanded(
+              child: CarouselSlider.builder(
+                options: CarouselOptions(
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                  disableCenter: true,
+                  viewportFraction: 0.92,
+                  autoPlayInterval: const Duration(seconds: 6),
+                  onPageChanged: (index, reason) {
+                    homeController.setCurrentIndex(index, true);
+                  },
+                ),
+                itemCount: displayBanners.length,
+                itemBuilder: (context, index, _) {
+                  return InkWell(
+                    onTap: () {
+                      if (bannerDataList != null && index < bannerDataList.length) {
+                        if (bannerDataList[index] is Product) {
+                          Product? product = bannerDataList[index];
+                          ResponsiveHelper.isMobile(context)
+                              ? showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (con) => ProductBottomSheetWidget(product: product),
+                                )
+                              : showDialog(
+                                  context: context,
+                                  builder: (con) => Dialog(child: ProductBottomSheetWidget(product: product)),
+                                );
+                        } else if (bannerDataList[index] is Restaurant) {
+                          Restaurant restaurant = bannerDataList[index];
+                          Get.toNamed(
+                            RouteHelper.getRestaurantRoute(restaurant.id),
+                            arguments: RestaurantScreen(restaurant: restaurant),
+                          );
+                        }
+                      }
+                    },
+                    child: GlassContainer(
+                      radius: 20,
+                      padding: const EdgeInsets.all(4),
+                      blur: 16,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CustomImageWidget(
+                          image: '${displayBanners[index]}',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
                         ),
-                      );
-                    }),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Frosted glass indicator pill (Theme 1 style)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 5,
+                  width: 5,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.45),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              )
-            : const SizedBox(height: 160),
+                ),
+                const SizedBox(width: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.35),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '${(homeController.currentIndex % displayBanners.length) + 1}/${displayBanners.length}',
+                    style: robotoBold.copyWith(fontSize: 10, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Container(
+                  height: 5,
+                  width: 5,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.45),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     });
   }
@@ -260,19 +277,44 @@ class GlassCategorySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CategoryController>(builder: (categoryController) {
       final categories = categoryController.categoryList;
-      if (categories != null && categories.isEmpty) return const SizedBox();
+      if (categories == null || categories.isEmpty) {
+        return const SizedBox();
+      }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ThemedSectionHeader(
-            title: 'categories'.tr,
-            subtitle: 'Browse by culinary specialty',
-            onViewAll: () => Get.toNamed(RouteHelper.getCategoryRoute()),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'whats_on_your_mind'.tr,
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeLarge + 1,
+                      color: Get.isDarkMode ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () => Get.toNamed(RouteHelper.getCategoryRoute()),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.18),
+                      border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Icon(Icons.arrow_forward_rounded, size: 16, color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(
             height: 100,
-            child: categories != null
+            child: categories.isNotEmpty
                 ? ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
@@ -345,7 +387,9 @@ class GlassItemCampaignSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CampaignController>(builder: (campaignController) {
       final campaigns = campaignController.itemCampaignList;
-      if (campaigns != null && campaigns.isEmpty) return const SizedBox();
+      if (campaigns == null || campaigns.isEmpty) {
+        return const SizedBox();
+      }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +402,7 @@ class GlassItemCampaignSection extends StatelessWidget {
           ),
           SizedBox(
             height: 180,
-            child: campaigns != null
+            child: campaigns.isNotEmpty
                 ? ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
@@ -461,11 +505,13 @@ class GlassPopularFoodSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ReviewController>(builder: (reviewController) {
       return GetBuilder<ProductController>(builder: (productController) {
-        List<Product>? productList = isPopular
+        final productList = isPopular
             ? productController.popularProductList
             : reviewController.reviewedProductList;
 
-        if (productList != null && productList.isEmpty) return const SizedBox();
+        if (productList == null || productList.isEmpty) {
+          return const SizedBox();
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,7 +524,7 @@ class GlassPopularFoodSection extends StatelessWidget {
             ),
             SizedBox(
               height: 105,
-              child: productList != null
+              child: productList.isNotEmpty
                   ? ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
@@ -606,7 +652,7 @@ class GlassPopularStoreSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<RestaurantController>(builder: (restaurantController) {
-      List<Restaurant>? restaurantList = isPopular
+      final restaurantList = isPopular
           ? restaurantController.popularRestaurantList
           : isRecentlyViewed
               ? restaurantController.recentlyViewedRestaurantList
@@ -614,7 +660,9 @@ class GlassPopularStoreSection extends StatelessWidget {
                   ? restaurantController.orderAgainRestaurantList
                   : restaurantController.latestRestaurantList;
 
-      if (restaurantList != null && restaurantList.isEmpty) return const SizedBox();
+      if (restaurantList == null || restaurantList.isEmpty) {
+        return const SizedBox();
+      }
 
       String title = isPopular
           ? 'popular_restaurants'.tr
@@ -643,7 +691,7 @@ class GlassPopularStoreSection extends StatelessWidget {
           ),
           SizedBox(
             height: 185,
-            child: restaurantList != null
+            child: restaurantList.isNotEmpty
                 ? ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
@@ -784,7 +832,9 @@ class GlassCuisineSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CuisineController>(builder: (cuisineController) {
       final cuisines = cuisineController.cuisineModel?.cuisines;
-      if (cuisines != null && cuisines.isEmpty) return const SizedBox();
+      if (cuisines == null || cuisines.isEmpty) {
+        return const SizedBox();
+      }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,7 +847,7 @@ class GlassCuisineSection extends StatelessWidget {
           ),
           SizedBox(
             height: 95,
-            child: cuisines != null
+            child: cuisines.isNotEmpty
                 ? ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,

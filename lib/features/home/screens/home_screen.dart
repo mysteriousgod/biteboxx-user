@@ -167,51 +167,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GetBuilder<HomeController>(builder: (homeController) {
       return GetBuilder<LocalizationController>(builder: (localizationController) {
-        return Scaffold(
-          appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
-          endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          body: SafeArea(
-            top: (Get.find<SplashController>().configModel!.theme != 1),
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await Get.find<HomeController>().getBannerList(true);
-                await Get.find<CategoryController>().getCategoryList(true, search: '');
-                await Get.find<CuisineController>().getCuisineList();
-                Get.find<AdvertisementController>().getAdvertisementList();
-                await Get.find<RestaurantController>().getPopularRestaurantList(true, 'all', false);
-                await Get.find<CampaignController>().getItemCampaignList(true);
-                await Get.find<ProductController>().getPopularProductList(true, 'all', false);
-                await Get.find<RestaurantController>().getLatestRestaurantList(true, 'all', false);
-                await Get.find<ReviewController>().getReviewedProductList(true, 'all', false);
-                await Get.find<RestaurantController>().getRestaurantList(1, true);
-                if(Get.find<AuthController>().isLoggedIn()) {
-                  await Get.find<ProfileController>().getUserInfo();
-                  await Get.find<NotificationController>().getNotificationList(true);
-                  await Get.find<RestaurantController>().getRecentlyViewedRestaurantList(true, 'all', false);
-                  await Get.find<RestaurantController>().getOrderAgainRestaurantList(true);
+        return GetBuilder<SplashController>(builder: (splashController) {
+          final int activeTheme = splashController.activeTheme;
 
-                }
-              },
-              child: ResponsiveHelper.isDesktop(context) ? WebHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 2) ? Theme1HomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 3) ? NeumorphicHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 4) ? GlassmorphicHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 5) ? BrutalistHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 6 || Get.find<SplashController>().configModel!.theme == 8) ? CyberpunkHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 7) ? MinimalistHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 9) ? GlassmorphicHomeScreen(
-                scrollController: _scrollController,
-              ) : (Get.find<SplashController>().configModel!.theme == 10) ? NeumorphicHomeScreen(
-                scrollController: _scrollController,
-              ) : CustomScrollView(
+          return Scaffold(
+            appBar: ResponsiveHelper.isDesktop(context) ? const WebMenuBar() : null,
+            endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            body: Stack(
+              children: [
+                SafeArea(
+                  top: (activeTheme != 1),
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await Get.find<HomeController>().getBannerList(true);
+                      await Get.find<CategoryController>().getCategoryList(true, search: '');
+                      await Get.find<CuisineController>().getCuisineList();
+                      Get.find<AdvertisementController>().getAdvertisementList();
+                      await Get.find<RestaurantController>().getPopularRestaurantList(true, 'all', false);
+                      await Get.find<CampaignController>().getItemCampaignList(true);
+                      await Get.find<ProductController>().getPopularProductList(true, 'all', false);
+                      await Get.find<RestaurantController>().getLatestRestaurantList(true, 'all', false);
+                      await Get.find<ReviewController>().getReviewedProductList(true, 'all', false);
+                      await Get.find<RestaurantController>().getRestaurantList(1, true);
+                      if(Get.find<AuthController>().isLoggedIn()) {
+                        await Get.find<ProfileController>().getUserInfo();
+                        await Get.find<NotificationController>().getNotificationList(true);
+                        await Get.find<RestaurantController>().getRecentlyViewedRestaurantList(true, 'all', false);
+                        await Get.find<RestaurantController>().getOrderAgainRestaurantList(true);
+
+                      }
+                    },
+                    child: ResponsiveHelper.isDesktop(context) ? WebHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 2) ? Theme1HomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 3) ? NeumorphicHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 4) ? GlassmorphicHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 5) ? BrutalistHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 6 || activeTheme == 8) ? CyberpunkHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 7) ? MinimalistHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 9) ? GlassmorphicHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 10) ? NeumorphicHomeScreen(
+                      scrollController: _scrollController,
+                    ) : CustomScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
@@ -393,17 +398,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+        ],
+      ),
 
-          floatingActionButton: AuthHelper.isLoggedIn() && homeController.cashBackOfferList != null && homeController.cashBackOfferList!.isNotEmpty ?
-          homeController.showFavButton ? Padding(
-            padding: EdgeInsets.only(bottom: ResponsiveHelper.isDesktop(context) ? 50 : 0, right: ResponsiveHelper.isDesktop(context) ? 20 : 0),
-            child: InkWell(
-              onTap: () => Get.dialog(const CashBackDialogWidget()),
-              child: const CashBackLogoWidget(),
-            ),
-          ) : null : null,
+      floatingActionButton: AuthHelper.isLoggedIn() && homeController.cashBackOfferList != null && homeController.cashBackOfferList!.isNotEmpty ?
+      homeController.showFavButton ? Padding(
+        padding: EdgeInsets.only(bottom: ResponsiveHelper.isDesktop(context) ? 50 : 0, right: ResponsiveHelper.isDesktop(context) ? 20 : 0),
+        child: InkWell(
+          onTap: () => Get.dialog(const CashBackDialogWidget()),
+          child: const CashBackLogoWidget(),
+        ),
+      ) : null : null,
 
-        );
+    );
+        });
       });
     });
   }

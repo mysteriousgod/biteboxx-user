@@ -9,6 +9,8 @@ import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart'
 import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -40,10 +42,10 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     bool isLoggedIn = AuthHelper.isLoggedIn();
-    return Scaffold(
-      appBar: CustomAppBarWidget(title: 'my_orders'.tr, isBackButtonExist: ResponsiveHelper.isDesktop(context)),
-      endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-      body: isLoggedIn ? GetBuilder<OrderController>(
+    return GetBuilder<SplashController>(builder: (splashController) {
+      final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      Widget content = isLoggedIn ? GetBuilder<OrderController>(
         builder: (orderController) {
           return Column(children: [
 
@@ -63,7 +65,7 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
                       alignment: ResponsiveHelper.isDesktop(context) ? Alignment.centerLeft : Alignment.center,
                       child: Container(
                         width: ResponsiveHelper.isDesktop(context) ? 350 : Dimensions.webMaxWidth,
-                        color: ResponsiveHelper.isDesktop(context) ? Colors.transparent : Theme.of(context).cardColor,
+                        color: ResponsiveHelper.isDesktop(context) ? Colors.transparent : isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,
                         child: TabBar(
                           controller: _tabController,
                           indicatorColor: Theme.of(context).primaryColor,
@@ -97,7 +99,14 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
 
           ]);
         },
-      ) : const GuestTrackOrderInputViewWidget(),
-    );
+      ) : const GuestTrackOrderInputViewWidget();
+
+      return Scaffold(
+        backgroundColor: isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,
+        appBar: CustomAppBarWidget(title: 'my_orders'.tr, isBackButtonExist: ResponsiveHelper.isDesktop(context)),
+        endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
+        body: isGlassmorphic ? GlassAuroraBackground(child: content) : content,
+      );
+    });
   }
 }

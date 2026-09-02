@@ -28,6 +28,8 @@ import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart'
 import 'package:stackfood_multivendor/features/restaurant/screens/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 
 class CartScreen extends StatefulWidget {
   final bool fromNav;
@@ -108,10 +110,10 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    return Scaffold(
-      appBar: CustomAppBarWidget(title: 'my_cart'.tr, isBackButtonExist: (isDesktop || !widget.fromNav)),
-      endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
-      body: GetBuilder<RestaurantController>(builder: (restaurantController) {
+    return GetBuilder<SplashController>(builder: (splashController) {
+      final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      Widget content = GetBuilder<RestaurantController>(builder: (restaurantController) {
         return GetBuilder<CartController>(builder: (cartController) {
 
           bool isRestaurantOpen = true;
@@ -481,8 +483,15 @@ class _CartScreenState extends State<CartScreen> {
           ) : SingleChildScrollView(child: FooterViewWidget(child: NoDataScreen(isEmptyCart: true, title: 'you_have_not_add_to_cart_yet'.tr)));
         },
         );
-      }),
-    );
+      });
+
+      return Scaffold(
+        backgroundColor: isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,
+        appBar: CustomAppBarWidget(title: 'my_cart'.tr, isBackButtonExist: (isDesktop || !widget.fromNav)),
+        endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
+        body: isGlassmorphic ? GlassAuroraBackground(child: content) : content,
+      );
+    });
   }
 
   Future<void> showReferAndEarnSnackBar() async {

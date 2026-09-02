@@ -303,7 +303,7 @@ class WebRestaurantShimmer extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                     child: Shimmer(
-                      child: Container(height: 15, width: 170, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
+                      child: Container(height: 15, width: 140, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -311,37 +311,39 @@ class WebRestaurantShimmer extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                     child: Shimmer(
-                      child: Container(height: 10, width: 220, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
+                      child: Container(height: 10, width: 170, decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.radiusSmall), color: Theme.of(context).shadowColor)),
                     ),
                   ),
                   const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconWithTextRowWidget(
-                        icon: Icons.star_border, text: '0.0',
-                        color: Theme.of(context).shadowColor,
-                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
-                      ),
+                  FittedBox(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconWithTextRowWidget(
+                          icon: Icons.star_border, text: '0.0',
+                          color: Theme.of(context).shadowColor,
+                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
+                        ),
 
-                      Padding(
-                        padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                        child: ImageWithTextRowWidget(
-                          widget: Image.asset(Images.deliveryIcon, height: 20, width: 20, color: Theme.of(context).shadowColor),
-                          text: 'free'.tr,
+                        Padding(
+                          padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+                          child: ImageWithTextRowWidget(
+                            widget: Image.asset(Images.deliveryIcon, height: 20, width: 20, color: Theme.of(context).shadowColor),
+                            text: 'free'.tr,
+                            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
+                          ),
+                        ),
+                        const SizedBox(width: Dimensions.paddingSizeDefault),
+
+                        IconWithTextRowWidget(
+                          icon: Icons.access_time_outlined, text: '10-30 min',
+                          color: Theme.of(context).shadowColor,
                           style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
                         ),
-                      ),
-                      const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                      IconWithTextRowWidget(
-                        icon: Icons.access_time_outlined, text: '10-30 min',
-                        color: Theme.of(context).shadowColor,
-                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).shadowColor),
-                      ),
-
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

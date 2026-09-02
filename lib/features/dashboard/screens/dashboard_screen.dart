@@ -171,58 +171,110 @@ class DashboardScreenState extends State<DashboardScreen> {
         floatingActionButton: const SizedBox.shrink(),
         bottomNavigationBar: ResponsiveHelper.isDesktop(context)
             ? const SizedBox()
-            : GetBuilder<OrderController>(builder: (orderController) {
-                return (orderController.showBottomSheet &&
-                        (orderController.runningOrderList != null &&
-                            orderController.runningOrderList!.isNotEmpty &&
-                            _isLogin))
-                    ? const SizedBox()
-                    : BottomAppBar(
-                        elevation: 4,
-                        clipBehavior: Clip.none,
-                        shadowColor: isDark
-                            ? Colors.black.withValues(alpha: 0.4)
-                            : Colors.black.withValues(alpha: 0.08),
-                        color: isDark
-                            ? Theme.of(context).cardColor
-                            : Colors.grey[100],
-                        height: 56,
-                        child: Row(
-                          children: [
-                            BottomNavItem(
-                              iconData: Icons.home,
-                              isSelected: _pageIndex == 0,
-                              onTap: () => _setPage(0),
-                            ),
-                            BottomNavItem(
-                              iconData: Icons.favorite,
-                              isSelected: _pageIndex == 1,
-                              onTap: () => _setPage(1),
-                            ),
-                            GetBuilder<CartController>(
-                                builder: (cartController) {
-                              return BottomNavItem(
-                                iconData: Icons.shopping_cart,
-                                isSelected: _pageIndex == 2,
-                                onTap: () => _setPage(2),
-                                badge: cartController.cartList.isNotEmpty
-                                    ? cartController.cartList.length
-                                    : null,
-                              );
-                            }),
-                            BottomNavItem(
-                              iconData: Icons.shopping_bag,
-                              isSelected: _pageIndex == 3,
-                              onTap: () => _setPage(3),
-                            ),
-                            BottomNavItem(
-                              iconData: Icons.menu,
-                              isSelected: _pageIndex == 4,
-                              onTap: () => _setPage(4),
-                            ),
-                          ],
+            : GetBuilder<SplashController>(builder: (splashController) {
+                final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+                return GetBuilder<OrderController>(builder: (orderController) {
+                  if (orderController.showBottomSheet &&
+                      (orderController.runningOrderList != null &&
+                          orderController.runningOrderList!.isNotEmpty &&
+                          _isLogin)) {
+                    return const SizedBox();
+                  }
+
+                  if (isGlassmorphic) {
+                    return BottomAppBar(
+                      elevation: 0,
+                      clipBehavior: Clip.none,
+                      color: isDark
+                          ? const Color(0xFF141416).withValues(alpha: 0.85)
+                          : Colors.white.withValues(alpha: 0.90),
+                      height: 56,
+                      child: Row(
+                        children: [
+                          BottomNavItem(
+                            iconData: Icons.home,
+                            isSelected: _pageIndex == 0,
+                            onTap: () => _setPage(0),
+                          ),
+                          BottomNavItem(
+                            iconData: Icons.favorite,
+                            isSelected: _pageIndex == 1,
+                            onTap: () => _setPage(1),
+                          ),
+                          GetBuilder<CartController>(
+                              builder: (cartController) {
+                            return BottomNavItem(
+                              iconData: Icons.shopping_cart,
+                              isSelected: _pageIndex == 2,
+                              onTap: () => _setPage(2),
+                              badge: cartController.cartList.isNotEmpty
+                                  ? cartController.cartList.length
+                                  : null,
+                            );
+                          }),
+                          BottomNavItem(
+                            iconData: Icons.shopping_bag,
+                            isSelected: _pageIndex == 3,
+                            onTap: () => _setPage(3),
+                          ),
+                          BottomNavItem(
+                            iconData: Icons.menu,
+                            isSelected: _pageIndex == 4,
+                            onTap: () => _setPage(4),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return BottomAppBar(
+                    elevation: 4,
+                    clipBehavior: Clip.none,
+                    shadowColor: isDark
+                        ? Colors.black.withValues(alpha: 0.4)
+                        : Colors.black.withValues(alpha: 0.08),
+                    color: isDark
+                        ? Theme.of(context).cardColor
+                        : Colors.grey[100],
+                    height: 56,
+                    child: Row(
+                      children: [
+                        BottomNavItem(
+                          iconData: Icons.home,
+                          isSelected: _pageIndex == 0,
+                          onTap: () => _setPage(0),
                         ),
-                      );
+                        BottomNavItem(
+                          iconData: Icons.favorite,
+                          isSelected: _pageIndex == 1,
+                          onTap: () => _setPage(1),
+                        ),
+                        GetBuilder<CartController>(
+                            builder: (cartController) {
+                          return BottomNavItem(
+                            iconData: Icons.shopping_cart,
+                            isSelected: _pageIndex == 2,
+                            onTap: () => _setPage(2),
+                            badge: cartController.cartList.isNotEmpty
+                                ? cartController.cartList.length
+                                : null,
+                          );
+                        }),
+                        BottomNavItem(
+                          iconData: Icons.shopping_bag,
+                          isSelected: _pageIndex == 3,
+                          onTap: () => _setPage(3),
+                        ),
+                        BottomNavItem(
+                          iconData: Icons.menu,
+                          isSelected: _pageIndex == 4,
+                          onTap: () => _setPage(4),
+                        ),
+                      ],
+                    ),
+                  );
+                });
               }),
         body: GetBuilder<OrderController>(builder: (orderController) {
           List<OrderModel> runningOrder =

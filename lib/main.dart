@@ -14,6 +14,7 @@ import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/theme/dark_theme.dart';
 import 'package:stackfood_multivendor/theme/light_theme.dart';
+import 'package:stackfood_multivendor/theme/glass_theme.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
 import 'package:stackfood_multivendor/util/messages.dart';
 import 'package:stackfood_multivendor/common/widgets/cookies_view_widget.dart';
@@ -162,7 +163,9 @@ class _MyAppState extends State<MyApp> {
             scrollBehavior: const MaterialScrollBehavior().copyWith(
               dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
             ),
-            theme: themeController.darkTheme ? dark : light,
+            theme: (splashController.activeTheme == 4 || splashController.activeTheme == 9)
+                ? (themeController.darkTheme ? glassDarkTheme : glassLightTheme)
+                : (themeController.darkTheme ? dark : light),
             locale: localizeController.locale,
             translations: Messages(languages: widget.languages),
             fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),
