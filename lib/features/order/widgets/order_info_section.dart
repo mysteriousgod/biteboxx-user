@@ -8,6 +8,7 @@ import 'package:stackfood_multivendor/features/order/widgets/offline_info_edit_d
 import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/order/widgets/delivery_details.dart';
+import 'package:stackfood_multivendor/features/order/widgets/delivered_success_banner_widget.dart';
 import 'package:stackfood_multivendor/features/order/widgets/order_product_widget.dart';
 import 'package:stackfood_multivendor/features/review/widgets/review_dialog_widget.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
@@ -257,19 +258,39 @@ class OrderInfoSection extends StatelessWidget {
 
           ]) : const SizedBox() : const SizedBox(),
 
-          (pastOrder) ? CustomImageWidget(
-            image: '${order.restaurant!.coverPhotoFullUrl}',
-            height: 160, width: double.infinity,
-            isRestaurant: true,
-          ): const SizedBox(),
+          delivered
+              ? DeliveredSuccessBannerWidget(order: order)
+              : (pastOrder)
+                  ? CustomImageWidget(
+                      image: '${order.restaurant!.coverPhotoFullUrl}',
+                      height: 160,
+                      width: double.infinity,
+                      isRestaurant: true,
+                    )
+                  : const SizedBox(),
 
           Container(
-            decoration: !isDesktop ? BoxDecoration(
+            margin: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 0 : Dimensions.paddingSizeDefault,
+              vertical: Dimensions.paddingSizeExtraSmall,
+            ),
+            decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(isDesktop ? Dimensions.radiusDefault : 0),
-              boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
-            ) : null,
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              boxShadow: [
+                BoxShadow(
+                  color: isDesktop
+                      ? Colors.black.withValues(alpha: 0.05)
+                      : Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: Dimensions.paddingSizeDefault,
+              vertical: Dimensions.paddingSizeDefault,
+            ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
               !isDesktop ? Text(subscription ? 'subscription_details'.tr : 'general_info'.tr, style: robotoMedium) : const SizedBox(),
@@ -349,12 +370,12 @@ class OrderInfoSection extends StatelessWidget {
               ]) : const SizedBox(),
               order.scheduled == 1 ? const Divider(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
-              Get.find<SplashController>().configModel!.orderDeliveryVerification! ? Row(children: [
+              (Get.find<SplashController>().configModel!.orderDeliveryVerification! && !delivered) ? Row(children: [
                 Text('${order.orderType == 'delivery' ? 'delivery_verification_code'.tr : 'order_verification_code'.tr}:', style: robotoRegular),
                 const Expanded(child: SizedBox()),
                 Text(order.otp!, style: robotoMedium),
               ]) : const SizedBox(),
-              Get.find<SplashController>().configModel!.orderDeliveryVerification! ?const Divider(height: Dimensions.paddingSizeLarge) : const SizedBox(),
+              (Get.find<SplashController>().configModel!.orderDeliveryVerification! && !delivered) ? const Divider(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
               Row(children: [
                 Text(order.orderType!.tr, style: robotoRegular),
@@ -883,12 +904,27 @@ class OrderInfoSection extends StatelessWidget {
         ) : const SizedBox(),
 
         Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 0 : Dimensions.paddingSizeDefault,
+            vertical: Dimensions.paddingSizeExtraSmall,
+          ),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(isDesktop ? Dimensions.radiusDefault : 0),
-            boxShadow: [BoxShadow(color: isDesktop ? Colors.black.withValues(alpha: 0.05) : Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
+            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+            boxShadow: [
+              BoxShadow(
+                color: isDesktop
+                    ? Colors.black.withValues(alpha: 0.05)
+                    : Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Dimensions.paddingSizeDefault,
+            vertical: Dimensions.paddingSizeDefault,
+          ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
             InkWell(

@@ -49,19 +49,29 @@ class OrderProductWidget extends StatelessWidget {
     }
     
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 4),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeLarge),
+      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
 
           orderDetails.foodDetails!.imageFullUrl != null && orderDetails.foodDetails!.imageFullUrl!.isNotEmpty ? Padding(
             padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
               child: CustomImageWidget(
-                height: 70, width: 70, fit: BoxFit.cover,
+                height: 60, width: 60, fit: BoxFit.cover,
                 image: '${orderDetails.foodDetails!.imageFullUrl}',
                 isFood: true,
               ),
@@ -70,70 +80,72 @@ class OrderProductWidget extends StatelessWidget {
 
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Row(children: [
                 Expanded(child: Text(
                   orderDetails.foodDetails!.name!,
-                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
                 )),
                 const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                Text('${'quantity'.tr}: ', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                Text(
-                  orderDetails.quantity.toString(),
-                  style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall),
-                ),
-              ]),
-              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-              Row(children: [
-
-                Expanded(child: Text(
-                  PriceConverter.convertPrice(orderDetails.price),
-                  style: robotoMedium, textDirection: TextDirection.ltr,
-                )),
 
                 Get.find<SplashController>().configModel!.toggleVegNonVeg! ? CustomAssetImageWidget(
                   orderDetails.foodDetails!.veg == 0 ? Images.nonVegImage : Images.vegImage,
-                  height: 11, width: 11,
+                  height: 12, width: 12,
                 ) : const SizedBox(),
 
                 SizedBox(width: orderDetails.foodDetails!.isRestaurantHalalActive! && orderDetails.foodDetails!.isHalalFood! ? Dimensions.paddingSizeExtraSmall : 0),
 
                 orderDetails.foodDetails!.isRestaurantHalalActive! && orderDetails.foodDetails!.isHalalFood! ? const CustomAssetImageWidget(
-                 Images.halalIcon, height: 13, width: 13) : const SizedBox(),
+                  Images.halalIcon, height: 13, width: 13) : const SizedBox(),
+              ]),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
+              Row(children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  ),
+                  child: Text(
+                    '${'qty'.tr == 'qty' ? 'Qty' : 'quantity'.tr}: ${orderDetails.quantity}',
+                    style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeExtraSmall),
+                  ),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                Text(
+                  PriceConverter.convertPrice(orderDetails.price),
+                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall),
+                  textDirection: TextDirection.ltr,
+                ),
               ]),
 
               addOnText.isNotEmpty ? Padding(
                 padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  //SizedBox(width: orderDetails.foodDetails!.imageFullUrl != null && orderDetails.foodDetails!.imageFullUrl!.isNotEmpty ? 80 : 0),
-                  Text('${'addons'.tr}: ', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
+                  Text('${'addons'.tr}: ', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
                   Flexible(child: Text(
                       addOnText,
-                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor,
-                      ))),
+                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
+                  )),
                 ]),
               ) : const SizedBox(),
 
               variationText != '' ? (orderDetails.foodDetails!.variations != null && orderDetails.foodDetails!.variations!.isNotEmpty) ? Padding(
                 padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  //SizedBox(width: orderDetails.foodDetails!.imageFullUrl != null && orderDetails.foodDetails!.imageFullUrl!.isNotEmpty ? 80 : 0),
-                  Text('${'variations'.tr}: ', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
+                  Text('${'variations'.tr}: ', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
                   Flexible(child: Text(
                       variationText!,
-                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor,
-                      ))),
+                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor),
+                  )),
                 ]),
               ) : const SizedBox() : const SizedBox(),
 
             ]),
           ),
         ]),
-
-        (!ResponsiveHelper.isDesktop(context) && index == itemLength! - 1) ? const SizedBox() : const Divider(height: Dimensions.paddingSizeLarge),
-        SizedBox(height: (!ResponsiveHelper.isDesktop(context) && index == itemLength! - 1) ? 0 : Dimensions.paddingSizeSmall),
-
       ]),
     );
   }
