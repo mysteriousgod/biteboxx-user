@@ -87,6 +87,16 @@ class SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: Dimensions.paddingSizeLarge),
 
               Image.asset(Images.logoName, width: 150),
+              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                ),
+              ),
             ],
           ) : NoInternetScreen(child: SplashScreen(notificationBody: widget.notificationBody, linkBody: widget.linkBody)),
         );

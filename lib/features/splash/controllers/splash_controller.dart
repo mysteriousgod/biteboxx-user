@@ -271,71 +271,66 @@ class SplashController extends GetxController implements GetxService {
   }
 
   Future<void> autoCheckLocationAndNavigate(String page, {bool offNamed = false, bool offAll = false}) async {
-    if(GetPlatform.isWeb) {
-      if(AddressHelper.getAddressFromSharedPref() != null) {
-        if(offAll) {
-          Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
-        } else if(offNamed) {
-          Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-        } else {
-          Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
-        }
-      } else {
-        if(offNamed) {
-          Get.offNamed(RouteHelper.getAccessLocationRoute(page));
-        } else {
-          Get.toNamed(RouteHelper.getAccessLocationRoute(page));
-        }
-      }
-      return;
-    }
-
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if(permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if(permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-        Location location = Location();
-        bool serviceEnabled = await location.serviceEnabled();
-        if (!serviceEnabled) {
-          serviceEnabled = await location.requestService();
-        }
-
-        if(serviceEnabled) {
-          AddressModel address = await Get.find<LocationController>().getCurrentLocation(false);
-          if(address.latitude != null && address.zoneIds != null && address.zoneIds!.isNotEmpty) {
-            AddressHelper.saveAddressInSharedPref(address);
-            if(offAll) {
-              Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
-            } else if(offNamed) {
-              Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
-            } else {
-              Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
-            }
-            return;
-          }
-        }
-      }
-    } catch(e) {
-      debugPrint('Auto location check error: $e');
-    }
-
-    if(AddressHelper.getAddressFromSharedPref() != null) {
-      if(offAll) {
+    void navigateToInitial() {
+      if (offAll) {
         Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
-      } else if(offNamed) {
+      } else if (offNamed) {
         Get.offNamed(RouteHelper.getInitialRoute(fromSplash: true));
       } else {
         Get.toNamed(RouteHelper.getInitialRoute(fromSplash: true));
       }
-    } else {
-      if(offNamed) {
+    }
+
+    void navigateToAccessLocation() {
+      if (offNamed || offAll) {
         Get.offNamed(RouteHelper.getAccessLocationRoute(page));
       } else {
         Get.toNamed(RouteHelper.getAccessLocationRoute(page));
       }
+    }
+
+    // 1. Fast-path: If an address is already saved, navigate immediately without waiting for GPS or permissions
+    if (AddressHelper.getAddressFromSharedPref() != null) {
+      navigateToInitial();
+      return;
+    }
+
+    if (GetPlatform.isWeb) {
+      navigateToAccessLocation();
+      return;
+    }
+
+    // 2. Wrap startup location resolution in a strict 3-second safety timeout
+    try {
+      await Future(() async {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          // On Android fresh install, silently requesting permissions during splash creates an OS window
+          // race condition/freeze. Don't block splash; route to AccessLocationScreen where user taps deliberately.
+          return;
+        }
+
+        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+          if (serviceEnabled) {
+            AddressModel address = await Get.find<LocationController>().getCurrentLocation(false);
+            if (address.latitude != null && address.zoneIds != null && address.zoneIds!.isNotEmpty) {
+              AddressHelper.saveAddressInSharedPref(address);
+              navigateToInitial();
+              return;
+            }
+          }
+        }
+      }).timeout(const Duration(seconds: 3));
+    } catch (e) {
+      debugPrint('Auto location check error / timeout: $e');
+    }
+
+    // 3. If an address was successfully obtained, go to initial; otherwise smoothly fall back to AccessLocationScreen
+    if (AddressHelper.getAddressFromSharedPref() != null) {
+      navigateToInitial();
+    } else {
+      navigateToAccessLocation();
     }
   }
 
