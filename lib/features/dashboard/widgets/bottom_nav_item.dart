@@ -1,6 +1,194 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 
-class BottomNavItem extends StatefulWidget {
+class SmoothBottomNavBar extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+  final bool isGlassmorphic;
+
+  const SmoothBottomNavBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onTap,
+    this.isGlassmorphic = false,
+  });
+
+  static const List<IconData> _navIcons = [
+    Icons.home,
+    Icons.favorite,
+    Icons.shopping_cart,
+    Icons.shopping_bag,
+    Icons.menu,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color primaryColor = Theme.of(context).primaryColor;
+    const double circleSize = 48.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double totalWidth = constraints.maxWidth;
+        final double itemWidth = totalWidth / _navIcons.length;
+        final double bubbleLeft =
+            (selectedIndex * itemWidth) + (itemWidth - circleSize) / 2;
+
+        return SizedBox(
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              // ── Smooth Gliding Floating Bubble (Active Indicator) ─────────
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 320),
+                curve: Curves.easeOutCubic,
+                left: bubbleLeft,
+                bottom: 14,
+                child: Container(
+                  width: circleSize,
+                  height: circleSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark
+                        ? Theme.of(context).colorScheme.surface
+                        : Colors.white,
+                    border: isDark
+                        ? Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            width: 1,
+                          )
+                        : (isGlassmorphic
+                            ? Border.all(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                width: 1,
+                              )
+                            : null),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black
+                            .withValues(alpha: isDark ? 0.40 : 0.12),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOutBack,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, animation) {
+                        return ScaleTransition(
+                          scale: animation,
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        _navIcons[selectedIndex],
+                        key: ValueKey<int>(selectedIndex),
+                        color: primaryColor,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── 5 Tab Touch Targets & Inactive Icons ────────────────────────
+              Row(
+                children: List.generate(_navIcons.length, (index) {
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onTap(index);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: SizedBox(
+                        height: 56,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Inactive icon fades out when this tab is selected
+                            AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOut,
+                              opacity: selectedIndex == index ? 0.0 : 1.0,
+                              child: Icon(
+                                _navIcons[index],
+                                color: isDark
+                                    ? Theme.of(context).disabledColor
+                                    : Colors.grey.shade400,
+                                size: 22,
+                              ),
+                            ),
+
+                            // Cart Badge (at index 2)
+                            if (index == 2)
+                              GetBuilder<CartController>(
+                                builder: (cartController) {
+                                  final int count =
+                                      cartController.cartList.length;
+                                  if (count == 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Positioned(
+                                    right: itemWidth * 0.12,
+                                    top: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: primaryColor,
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: primaryColor
+                                                .withValues(alpha: 0.35),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        count.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class BottomNavItem extends StatelessWidget {
   final IconData iconData;
   final Function? onTap;
   final bool isSelected;
@@ -15,151 +203,87 @@ class BottomNavItem extends StatefulWidget {
   });
 
   @override
-  State<BottomNavItem> createState() => _BottomNavItemState();
-}
-
-class _BottomNavItemState extends State<BottomNavItem>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _floatAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-
-    // Only lifts slightly — just enough to peek above the bar
-    _floatAnimation = Tween<double>(begin: 0, end: 10).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-
-    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-
-    if (widget.isSelected) {
-      _controller.forward();
-    }
-  }
-
-  @override
-  void didUpdateWidget(BottomNavItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isSelected != oldWidget.isSelected) {
-      widget.isSelected ? _controller.forward() : _controller.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => widget.onTap?.call(),
+        onTap: () => onTap?.call(),
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
           height: 56,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              return Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  // ── Icon (inactive state, fades out) ─────────────────────
-                  if (!widget.isSelected)
-                    Icon(
-                      widget.iconData,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isSelected ? 0.0 : 1.0,
+                child: Icon(
+                  iconData,
+                  color: isDark
+                      ? Theme.of(context).disabledColor
+                      : Colors.grey.shade400,
+                  size: 22,
+                ),
+              ),
+              if (isSelected)
+                Positioned(
+                  bottom: 14,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: isDark
-                          ? Theme.of(context).disabledColor
-                          : Colors.grey.shade400,
+                          ? Theme.of(context).colorScheme.surface
+                          : Colors.white,
+                      border: isDark
+                          ? Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              width: 1,
+                            )
+                          : null,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.40 : 0.12),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      iconData,
+                      color: primaryColor,
                       size: 22,
                     ),
-
-                  // ── Floating circle (active state) ─────────────────
-                  if (widget.isSelected)
-                    Positioned(
-                      // Sits centred on the top edge of the bar — half in, half out
-                      bottom: 7 + _floatAnimation.value,
-                      child: Transform.scale(
-                        scale: _scaleAnimation.value,
-                        child: Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isDark
-                                ? Theme.of(context).colorScheme.surface
-                                : Colors.white,
-                            border: isDark
-                                ? Border.all(
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                    width: 1,
-                                  )
-                                : null,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(
-                                    alpha: (isDark ? 0.40 : 0.10) *
-                                        _opacityAnimation.value),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            widget.iconData,
-                            color: primaryColor,
-                            size: 22,
-                          ),
-                        ),
+                  ),
+                ),
+              if (badge != null && badge! > 0)
+                Positioned(
+                  right: 6,
+                  top: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      badge.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                  // ── Badge ────────────────────────────────────────────────
-                  if (widget.badge != null && widget.badge! > 0)
-                    Positioned(
-                      right: 6,
-                      top: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          widget.badge.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
+                  ),
+                ),
+            ],
           ),
         ),
       ),
