@@ -144,12 +144,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     _isOfflinePaymentActive = Get.find<SplashController>().configModel!.offlinePaymentStatus!;
     _isWalletActive = Get.find<SplashController>().configModel!.customerWalletStatus == 1;
 
-    if((_isDigitalPaymentActive ?? false) && (Get.find<SplashController>().configModel!.activePaymentMethodList?.isNotEmpty ?? false)){
-      checkoutController.setPaymentMethod(2, willUpdate: false);
-      checkoutController.changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![0].getWay!);
-    } else if(_isCashOnDeliveryActive ?? false){
-      checkoutController.setPaymentMethod(0, willUpdate: false);
-    }
+    // Do not auto-select payment method; user must explicitly select one
+    checkoutController.setPaymentMethod(-1, willUpdate: false);
 
     checkoutController.updateTips(
       checkoutController.getDmTipIndex().isNotEmpty ? int.parse(checkoutController.getDmTipIndex()) : 0, notify: false,
@@ -219,10 +215,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void setSinglePaymentActive() {
-    if(!_isCashOnDeliveryActive! && _isDigitalPaymentActive! && Get.find<SplashController>().configModel!.activePaymentMethodList!.length == 1 && !_isWalletActive) {
-      Get.find<CheckoutController>().setPaymentMethod(2, willUpdate: false);
-      Get.find<CheckoutController>().changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![0].getWay!);
-    }
+    // User must explicitly select the payment method
   }
 
   @override

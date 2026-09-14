@@ -14,7 +14,7 @@ class AppConstants {
   );
 
   static const String fontFamily = 'Roboto';
-  static const bool payInWevView = false;
+  static const bool payInWevView = true;
   static String webHostedUrl = dotenv.env['WEB_HOSTED_URL']!;
   static const bool useReactWebsite = false;
 

@@ -1,3 +1,5 @@
+import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
+import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
@@ -56,7 +58,12 @@ class PaymentFailedDialog extends StatelessWidget {
                 onPressed: () {
                   if(maxCodOrderAmount == null || orderAmount! < maxCodOrderAmount!){
                     double total = ((orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
-                    orderController.switchToCOD(orderID, contactPersonNumber, points: total);
+                    orderController.switchToCOD(orderID, contactPersonNumber, points: total).then((success) {
+                      if (success && orderID != null) {
+                        Get.find<CheckoutController>().sendCheckoutNotification(orderID!);
+                        Get.find<CartController>().clearCartList();
+                      }
+                    });
                   }else{
                     if(Get.isDialogOpen!) {
                       Get.back();

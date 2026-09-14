@@ -613,11 +613,13 @@ class CheckoutController extends GetxController implements GetxService {
       orderID = response.body['order_id'].toString();
       noteController.clear();
 
-      Response notificationResponse = await checkoutServiceInterface.sendNotificationRequest(orderID, Get.find<AuthController>().isLoggedIn() ? null : Get.find<AuthController>().getGuestId());
-      bool reloadHome = notificationResponse.body['reload_home'];
+      if (paymentMethodIndex != 2) {
+        Response notificationResponse = await checkoutServiceInterface.sendNotificationRequest(orderID, Get.find<AuthController>().isLoggedIn() ? null : Get.find<AuthController>().getGuestId());
+        bool reloadHome = notificationResponse.body != null && notificationResponse.body['reload_home'] == true;
 
-      if(reloadHome) {
-        await HomeScreen.loadData(true);
+        if(reloadHome) {
+          await HomeScreen.loadData(true);
+        }
       }
 
       if(!isOfflinePay) {
@@ -639,11 +641,25 @@ class CheckoutController extends GetxController implements GetxService {
     return orderID;
   }
 
+  Future<void> sendCheckoutNotification(String orderId) async {
+    try {
+      Response notificationResponse = await checkoutServiceInterface.sendNotificationRequest(orderId, Get.find<AuthController>().isLoggedIn() ? null : Get.find<AuthController>().getGuestId());
+      bool reloadHome = notificationResponse.body != null && notificationResponse.body['reload_home'] == true;
+      if(reloadHome) {
+        await HomeScreen.loadData(true);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error sending checkout notification: $e');
+      }
+    }
+  }
+
   void _callback(bool isSuccess, String? message, String orderID, int? zoneID, double amount, double? maximumCodOrderAmount, bool fromCart, bool isCashOnDeliveryActive,
       String? contactNumber, bool isDineInOrder, bool isDeliveryOrder) async {
     if(isSuccess) {
       // Get.find<OrderController>().getRunningOrders(1, notify: false);
-      if(fromCart) {
+      if(fromCart && paymentMethodIndex != 2) {
         Get.find<CartController>().clearCartList();
       }
       _setGuestAddress(null);

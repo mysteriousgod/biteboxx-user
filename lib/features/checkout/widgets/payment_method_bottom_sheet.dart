@@ -43,12 +43,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
   void initState() {
     super.initState();
     CheckoutController checkoutController = Get.find<CheckoutController>();
-    if(widget.isDigitalPaymentActive && (Get.find<SplashController>().configModel!.activePaymentMethodList?.isNotEmpty ?? false)) {
-      checkoutController.setPaymentMethod(2, willUpdate: false);
-      checkoutController.changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![0].getWay!);
-    } else if(widget.isCashOnDeliveryActive) {
-      checkoutController.setPaymentMethod(0, willUpdate: false);
-    }
+    // User selects payment method manually; do not auto-select default
 
     if(checkoutController.exchangeAmount > 0) {
       showChangeAmount = true;
