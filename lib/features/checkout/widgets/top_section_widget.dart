@@ -19,7 +19,10 @@ import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
+import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
+import 'package:stackfood_multivendor/util/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
@@ -100,63 +103,96 @@ class TopSectionWidget extends StatelessWidget {
         ) : const SizedBox(),
         SizedBox(height: isGuestLoggedIn ? Dimensions.paddingSizeSmall : 0),
 
-        SizedBox(height: !isDesktop && isCashOnDeliveryActive && restaurantSubscriptionActive ? Dimensions.paddingSizeSmall : 0),
+        Builder(
+          builder: (context) {
+            bool hasSubscriptionOnlyItem = Get.isRegistered<CartController>() &&
+                Get.find<CartController>().cartList.any((cart) => cart.product?.isSubscriptionOnly == true);
+            bool isSubscriptionAvailable = AppConstants.enableSubscriptionFeature && (restaurantSubscriptionActive || hasSubscriptionOnlyItem);
 
-        isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? Container(
-          width: context.width,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-            boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-          ),
-          margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : Dimensions.fontSizeDefault),
-          padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('order_type'.tr, style: robotoMedium),
-            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-            Row(children: [
-              Expanded(child: OrderTypeWidget(
-                title: 'regular'.tr,
-                icon: Images.regularOrder,
-                isSelected: !checkoutController.subscriptionOrder,
-                onTap: () {
-                  checkoutController.setSubscription(false);
-                  if(checkoutController.isPartialPay){
-                    checkoutController.changePartialPayment();
-                  } else {
-                    checkoutController.setPaymentMethod(-1);
-                  }
-                  checkoutController.updateTips(
-                    checkoutController.getDmTipIndex().isNotEmpty ? int.parse(checkoutController.getDmTipIndex()) : 1, notify: false,
-                  );
-                },
-              )),
-              SizedBox(width: isCashOnDeliveryActive ? Dimensions.paddingSizeSmall : 0),
+            if (!isSubscriptionAvailable || !isLoggedIn || (!isCashOnDeliveryActive && !isDigitalPaymentActive)) {
+              return const SizedBox();
+            }
 
-              Expanded(child: OrderTypeWidget(
-                title: 'subscription'.tr,
-                icon: Images.subscriptionOrder,
-                isSelected: checkoutController.subscriptionOrder,
-                onTap: () {
-                  checkoutController.setSubscription(true);
-                  checkoutController.addTips(0);
-                  if(checkoutController.isPartialPay){
-                    checkoutController.changePartialPayment();
-                  } else {
-                    checkoutController.setPaymentMethod(-1);
-                  }
-                },
-              )),
-            ]),
-            const SizedBox(height: Dimensions.paddingSizeLarge),
+            if (hasSubscriptionOnlyItem && !checkoutController.subscriptionOrder) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                checkoutController.setSubscription(true);
+              });
+            }
 
-            checkoutController.subscriptionOrder ? SubscriptionView(
-              checkoutController: checkoutController,
-            ) : const SizedBox(),
-            SizedBox(height: checkoutController.subscriptionOrder ? Dimensions.paddingSizeLarge : 0),
-          ]),
-        ) : const SizedBox(),
-        SizedBox(height: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeSmall : isCashOnDeliveryActive && restaurantSubscriptionActive && isLoggedIn ? Dimensions.paddingSizeSmall : 0),
+            return Column(
+              children: [
+                SizedBox(height: !isDesktop ? Dimensions.paddingSizeSmall : 0),
+                Container(
+                  width: context.width,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                    boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: isDesktop ? 0 : Dimensions.fontSizeDefault),
+                  padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('order_type'.tr, style: robotoMedium),
+                    if (hasSubscriptionOnlyItem)
+                      Padding(
+                        padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, bottom: Dimensions.paddingSizeExtraSmall),
+                        child: Text(
+                          'cart_has_subscription_only_item_note'.tr,
+                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                        ),
+                      ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                    Row(children: [
+                      Expanded(child: OrderTypeWidget(
+                        title: 'regular'.tr,
+                        icon: Images.regularOrder,
+                        isSelected: !checkoutController.subscriptionOrder,
+                        onTap: () {
+                          if (hasSubscriptionOnlyItem) {
+                            showCustomSnackBar('this_cart_contains_subscription_only_items'.tr);
+                            return;
+                          }
+                          checkoutController.setSubscription(false);
+                          if(checkoutController.isPartialPay){
+                            checkoutController.changePartialPayment();
+                          } else {
+                            checkoutController.setPaymentMethod(-1);
+                          }
+                          checkoutController.updateTips(
+                            checkoutController.getDmTipIndex().isNotEmpty ? int.parse(checkoutController.getDmTipIndex()) : 1, notify: false,
+                          );
+                        },
+                      )),
+                      SizedBox(width: (isCashOnDeliveryActive || isDigitalPaymentActive) ? Dimensions.paddingSizeSmall : 0),
+
+                      Expanded(child: OrderTypeWidget(
+                        title: 'subscription'.tr,
+                        icon: Images.subscriptionOrder,
+                        isSelected: checkoutController.subscriptionOrder,
+                        onTap: () {
+                          checkoutController.setSubscription(true);
+                          checkoutController.addTips(0);
+                          if(checkoutController.isPartialPay){
+                            checkoutController.changePartialPayment();
+                          } else {
+                            checkoutController.setPaymentMethod(-1);
+                          }
+                        },
+                      )),
+                    ]),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
+
+                    checkoutController.subscriptionOrder ? SubscriptionView(
+                      checkoutController: checkoutController,
+                    ) : const SizedBox(),
+                    SizedBox(height: checkoutController.subscriptionOrder ? Dimensions.paddingSizeLarge : 0),
+                  ]),
+                ),
+                SizedBox(height: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeSmall : 0),
+              ],
+            );
+          }
+        ),
 
         checkoutController.restaurant != null ? Container(
           width: context.width,

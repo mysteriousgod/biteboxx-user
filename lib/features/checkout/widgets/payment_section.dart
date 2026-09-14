@@ -40,8 +40,8 @@ class PaymentSection extends StatelessWidget {
       bool isGuest = Get.find<AuthController>().isGuestLoggedIn();
 
       bool showCod = isCashOnDeliveryActive;
-      bool showDigital = isDigitalPaymentActive && !checkoutController.subscriptionOrder;
-      bool showWallet = isWalletActive && !checkoutController.subscriptionOrder && !isGuest && (walletBalance > 0);
+      bool showDigital = isDigitalPaymentActive;
+      bool showWallet = isWalletActive && !isGuest && (walletBalance > 0);
       bool showOffline = isOfflinePaymentActive && !checkoutController.subscriptionOrder && !checkoutController.isPartialPay;
 
       if (checkoutController.isPartialPay) {

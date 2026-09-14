@@ -57,9 +57,11 @@ class OrderViewWidget extends StatelessWidget {
 
         return orderList != null ? orderList.isNotEmpty ? RefreshIndicator(
           onRefresh: () async {
-            if(isRunning) {
+            if(isSubscription) {
+              await orderController.getRunningSubscriptionOrders(1);
+            } else if(isRunning) {
               await orderController.getRunningOrders(1);
-            }else {
+            } else {
               await orderController.getHistoryOrders(1);
             }
           },

@@ -97,7 +97,8 @@ class CheckoutButtonWidget extends StatelessWidget {
   }
 
   void _processToCheckoutButtonPressed(RestaurantController restaurantController) {
-    if(!cartController.cartList.first.product!.scheduleOrder! && cartController.availableList.contains(false)) {
+    bool hasSubscriptionOnly = cartController.cartList.any((c) => c.product?.isSubscriptionOnly == true);
+    if(!cartController.cartList.first.product!.scheduleOrder! && !hasSubscriptionOnly && cartController.availableList.contains(false)) {
       showCustomSnackBar('one_or_more_product_unavailable'.tr);
     } else if(restaurantController.restaurant!.freeDelivery == null || restaurantController.restaurant!.cutlery == null) {
       showCustomSnackBar('restaurant_is_unavailable'.tr);

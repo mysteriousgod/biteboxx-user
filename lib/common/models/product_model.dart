@@ -67,6 +67,7 @@ class Product {
   int? cartQuantityLimit;
   bool? isRestaurantHalalActive;
   bool? isHalalFood;
+  bool? isSubscriptionOnly;
   String? stockType;
   int? itemStock;
   List<String>? nutritionsName;
@@ -103,6 +104,7 @@ class Product {
     this.cartQuantityLimit,
     this.isRestaurantHalalActive,
     this.isHalalFood,
+    this.isSubscriptionOnly,
     this.stockType,
     this.itemStock,
     this.nutritionsName,
@@ -166,6 +168,7 @@ class Product {
     cartQuantityLimit = json['maximum_cart_quantity'];
     isRestaurantHalalActive = json['halal_tag_status'] == 1;
     isHalalFood = json['is_halal'] == 1;
+    isSubscriptionOnly = json['is_subscription_only'] == 1 || json['is_subscription_only'] == '1' || json['is_subscription_only'] == true;
     stockType = json['stock_type'];
     itemStock = int.tryParse(json['item_stock'].toString());
     nutritionsName = json['nutritions_name']?.cast<String>();
@@ -235,6 +238,7 @@ class Product {
     data['maximum_cart_quantity'] = cartQuantityLimit;
     data['halal_tag_status'] = isRestaurantHalalActive;
     data['is_halal'] = isHalalFood;
+    data['is_subscription_only'] = isSubscriptionOnly;
     data['stock_type'] = stockType;
     data['item_stock'] = itemStock;
     data['nutritions_name'] = nutritionsName;

@@ -351,7 +351,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
               ConfigModel? configModel = Get.find<SplashController>().configModel;
 
-              restaurantSubscriptionActive =  checkoutController.restaurant!.orderSubscriptionActive! && widget.fromCart;
+              restaurantSubscriptionActive = (AppConstants.enableSubscriptionFeature && ((checkoutController.restaurant?.orderSubscriptionActive == true) || (_cartList != null && _cartList!.any((c) => c.product?.isSubscriptionOnly == true)))) && widget.fromCart;
 
               subscriptionQty = _getSubscriptionQty(checkoutController: checkoutController, restaurantSubscriptionActive: restaurantSubscriptionActive);
 

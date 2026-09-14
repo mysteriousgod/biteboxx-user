@@ -95,6 +95,8 @@ class OrderPlaceButton extends StatelessWidget {
             List<place_order_model.SubscriptionDays> days = _generateSubscriptionDays();
             PlaceOrderBodyModel placeOrderBody = _preparePlaceOrderModel(carts, scheduleStartDate, finalAddress, isGuestLogIn, days);
 
+            double calculatedTotal = checkoutController.subscriptionOrder ? (total * (subscriptionQty == 0 ? 1 : subscriptionQty)) : total;
+
             if(checkoutController.paymentMethodIndex == 3){
 
               Map<String, dynamic> data = {
@@ -106,11 +108,11 @@ class OrderPlaceButton extends StatelessWidget {
 
               checkoutController.checkRestaurantValidation(data: data).then((response) {
                 if(response) {
-                  Get.toNamed(RouteHelper.getOfflinePaymentScreen(placeOrderBody: placeOrderBody, zoneId: checkoutController.restaurant!.zoneId!, total: total, maxCodOrderAmount: maxCodOrderAmount,
+                  Get.toNamed(RouteHelper.getOfflinePaymentScreen(placeOrderBody: placeOrderBody, zoneId: checkoutController.restaurant!.zoneId!, total: calculatedTotal, maxCodOrderAmount: maxCodOrderAmount,
                     fromCart: fromCart, isCodActive: isCashOnDeliveryActive,
                     pricingView: PricingViewModel(
                       subTotal: subTotal, subscriptionQty: subscriptionQty, discount: discount!, taxIncluded: taxIncluded,
-                      tax: tax, deliveryCharge: deliveryCharge!, total: total, taxPercent: taxPercent,
+                      tax: tax, deliveryCharge: deliveryCharge!, total: calculatedTotal, taxPercent: taxPercent,
                     ),
                   ));
                 }else{
@@ -118,7 +120,7 @@ class OrderPlaceButton extends StatelessWidget {
                 }
               });
             }else{
-              checkoutController.placeOrder(placeOrderBody, checkoutController.restaurant!.zoneId!, total, maxCodOrderAmount, fromCart, isCashOnDeliveryActive);
+              checkoutController.placeOrder(placeOrderBody, checkoutController.restaurant!.zoneId!, calculatedTotal, maxCodOrderAmount, fromCart, isCashOnDeliveryActive);
             }
 
           }
@@ -362,7 +364,7 @@ class OrderPlaceButton extends StatelessWidget {
       scheduleAt: checkoutController.orderType == 'dine_in' ? checkoutController.orderPlaceDineInDateTime.toString()
           : !checkoutController.restaurant!.scheduleOrder! ? null : (checkoutController.selectedDateSlot == 0
           && checkoutController.selectedTimeSlot == 0) ? null : DateConverter.dateToDateAndTime(scheduleStartDate),
-      orderAmount: total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
+      orderAmount: checkoutController.subscriptionOrder ? (total * (subscriptionQty == 0 ? 1 : subscriptionQty)) : total, orderNote: checkoutController.noteController.text, orderType: checkoutController.orderType,
       paymentMethod: checkoutController.paymentMethodIndex == 0 ? 'cash_on_delivery'
           : checkoutController.paymentMethodIndex == 1 ? 'wallet'
           : checkoutController.paymentMethodIndex == 2 ? 'digital_payment' : 'offline_payment',

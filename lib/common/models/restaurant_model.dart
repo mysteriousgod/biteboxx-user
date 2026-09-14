@@ -214,7 +214,7 @@ class Restaurant {
         cuisineNames!.add(Cuisines.fromJson(v));
       });
     }
-    orderSubscriptionActive = json['order_subscription_active'];
+    orderSubscriptionActive = json['order_subscription_active'] == 1 || json['order_subscription_active'] == '1' || json['order_subscription_active'] == true;
     cutlery = json['cutlery'];
     slug = json['slug'];
     foodsCount = json['foods_count'];

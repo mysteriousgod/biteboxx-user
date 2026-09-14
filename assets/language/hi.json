@@ -1304,5 +1304,10 @@
   "enter_your_mobile_number_to_continue": "जारी रखने के लिए अपना मोबाइल नंबर दर्ज करें",
   "please_enter_street_number": "कृपया सड़क/गली संख्या दर्ज करें",
   "please_enter_house_number": "कृपया मकान/फ्लैट संख्या दर्ज करें",
-  "please_enter_floor_number": "कृपया मंजिल/ब्लॉक दर्ज करें"
+  "please_enter_floor_number": "कृपया मंजिल/ब्लॉक दर्ज करें",
+  "this_cart_contains_subscription_only_items": "इस कार्ट में केवल सदस्यता पर उपलब्ध खाद्य सामग्री शामिल है",
+  "cart_has_subscription_only_item_note": "आपके कार्ट में केवल सदस्यता वाले आइटम हैं। कृपया नीचे अपना डिलीवरी शेड्यूल चुनें।",
+  "subscription_only": "केवल सदस्यता",
+  "subscription_only_product": "केवल सदस्यता उत्पाद",
+  "subscription_only_item_description": "यह खाद्य पदार्थ केवल आवर्ती सदस्यता (दैनिक / साप्ताहिक / मासिक) के आधार पर उपलब्ध है।"
 }

@@ -151,6 +151,26 @@ class ProductWidget extends StatelessWidget {
                           !isRestaurant && product!.isRestaurantHalalActive! && product!.isHalalFood! ? const CustomAssetImageWidget(
                             Images.halalIcon, height: 13, width: 13) : const SizedBox(),
 
+                          if (!isRestaurant && product?.isSubscriptionOnly == true) ...[
+                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), width: 0.5),
+                              ),
+                              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                Icon(Icons.autorenew_rounded, size: 10, color: Theme.of(context).primaryColor),
+                                const SizedBox(width: 2),
+                                Text(
+                                  'subscription_only'.tr,
+                                  style: robotoMedium.copyWith(fontSize: 8, color: Theme.of(context).primaryColor),
+                                ),
+                              ]),
+                            ),
+                          ],
+
                           const SizedBox(width: Dimensions.paddingSizeLarge),
                         ]),
 

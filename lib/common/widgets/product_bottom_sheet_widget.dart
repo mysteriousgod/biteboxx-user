@@ -253,6 +253,36 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                               ]),
                             ]),
 
+                            if (product?.isSubscriptionOnly == true) ...[
+                              Container(
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                  border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.2)),
+                                ),
+                                child: Row(children: [
+                                  Icon(Icons.autorenew_rounded, color: Theme.of(context).primaryColor, size: 20),
+                                  const SizedBox(width: Dimensions.paddingSizeSmall),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('subscription_only_product'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'subscription_only_item_description'.tr,
+                                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ]),
+                              ),
+                            ],
+
                             const SizedBox(height: Dimensions.paddingSizeDefault),
 
                             (product!.description != null && product!.description!.isNotEmpty) ? Column(
@@ -701,9 +731,9 @@ class _ProductBottomSheetWidgetState extends State<ProductBottomSheetWidget> {
                                       radius : Dimensions.paddingSizeDefault,
                                       width: ResponsiveHelper.isDesktop(context) ? MediaQuery.of(context).size.width / 2.0 : null,
                                       isLoading: cartController.isLoading,
-                                      buttonText: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
+                                      buttonText: ((!product!.scheduleOrder! && product!.isSubscriptionOnly != true && !isAvailable) || (widget.isCampaign && !isAvailable)) ? 'not_available_now'.tr
                                           : widget.isCampaign ? 'order_now'.tr : (widget.cart != null || productController.cartIndex != -1) ? 'update_in_cart'.tr : 'add_to_cart'.tr,
-                                      onPressed: ((!product!.scheduleOrder! && !isAvailable) || (widget.isCampaign && !isAvailable)) || (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null) ? null : () async {
+                                      onPressed: ((!product!.scheduleOrder! && product!.isSubscriptionOnly != true && !isAvailable) || (widget.isCampaign && !isAvailable)) || (widget.cart != null && productController.checkOutOfStockVariationSelected(product?.variations) != null) ? null : () async {
 
                                         _onButtonPressed(productController, cartController, priceWithVariation, priceWithDiscount, price, discount, discountType, addOnIdList, addOnsList, priceWithAddonsVariation);
 

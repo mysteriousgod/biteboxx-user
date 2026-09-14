@@ -1,4 +1,6 @@
 
+Set-Location $PSScriptRoot
+
 Write-Host "=== STARTING DEEP CLEAN & BUILD ===" -ForegroundColor Green
 
 # 1. Kill potentially stuck processes

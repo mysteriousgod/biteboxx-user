@@ -105,6 +105,27 @@ class ItemCardWidget extends StatelessWidget {
                   fromTop: isCampaignItem ? 7 : 10, fontSize: Dimensions.fontSizeExtraSmall, paddingVertical: 7, fromLeft: isCampaignItem ? -7 : -2,
                 ),
 
+                if (product.isSubscriptionOnly == true)
+                  Positioned(
+                    top: (discount != null && discount! > 0) ? 38 : 10, left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, spreadRadius: 1)],
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.autorenew_rounded, size: 11, color: Colors.white),
+                        const SizedBox(width: 3),
+                        Text(
+                          'subscription_only'.tr,
+                          style: robotoMedium.copyWith(fontSize: 8, color: Colors.white),
+                        ),
+                      ]),
+                    ),
+                  ),
+
                 Positioned(
                   bottom: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
                   child: GetBuilder<ProductController>(builder: (productController) {

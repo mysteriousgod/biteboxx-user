@@ -150,7 +150,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
 
                       changeAmountView(checkoutController),
 
-                      widget.isDigitalPaymentActive && notHideDigital && !checkoutController.subscriptionOrder ? Container(
+                      widget.isDigitalPaymentActive && notHideDigital ? Container(
                         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(Dimensions.radiusSmall),

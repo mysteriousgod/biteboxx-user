@@ -17,7 +17,6 @@ import 'package:stackfood_multivendor/features/home/widgets/banner_view_widget.d
 import 'package:stackfood_multivendor/features/home/widgets/best_review_item_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/cuisine_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/enjoy_off_banner_view_widget.dart';
-import 'package:stackfood_multivendor/features/home/widgets/location_banner_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/new_on_stackfood_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/order_again_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/popular_foods_nearby_view_widget.dart';
@@ -349,8 +348,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         const WhatOnYourMindViewWidget(),
 
                         const TodayTrendsViewWidget(),
-
-                        const LocationBannerViewWidget(),
 
                         const HighlightWidgetView(),
 
