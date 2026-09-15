@@ -36,13 +36,13 @@ class TrackingStepperWidget extends StatelessWidget {
           title: 'order_placed'.tr, isActive: state > -1, haveLeftBar: false, haveRightBar: true, rightActive: state > 0,
         ),
         CustomStepper(
-          title: 'order_confirmed'.tr, isActive: state > 0, haveLeftBar: true, haveRightBar: true, rightActive: state > 1,
+          title: 'confirmed'.tr == 'confirmed' ? 'Confirmed' : 'confirmed'.tr, isActive: state > 0, haveLeftBar: true, haveRightBar: true, rightActive: state > 1,
         ),
         CustomStepper(
-          title: 'preparing_food'.tr, isActive: state > 1, haveLeftBar: true, haveRightBar: true, rightActive: state > 2,
+          title: 'cooking'.tr == 'cooking' ? 'Cooking' : 'cooking'.tr, isActive: state > 1, haveLeftBar: true, haveRightBar: true, rightActive: state > 2,
         ),
         CustomStepper(
-          title: takeAway ? 'ready_for_handover'.tr : 'food_on_the_way'.tr, isActive: state > 2, haveLeftBar: true, haveRightBar: true, rightActive: state > 3,
+          title: takeAway ? ('ready'.tr == 'ready' ? 'Ready' : 'ready'.tr) : ('out_for_delivery'.tr == 'out_for_delivery' ? 'Out for Delivery' : 'out_for_delivery'.tr), isActive: state > 2, haveLeftBar: true, haveRightBar: true, rightActive: state > 3,
         ),
         CustomStepper(
           title: 'delivered'.tr, isActive: state > 3, haveLeftBar: true, haveRightBar: false, rightActive: state > 4,

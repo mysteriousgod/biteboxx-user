@@ -41,21 +41,15 @@ class TrackDetailsView extends StatelessWidget {
         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
         child: Column(children: [
 
-          Text('estimate_delivery_time'.tr, style: robotoRegular),
+          Text('order_status'.tr == 'order_status' ? 'Order Status' : 'order_status'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
+          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
           Center(
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-
-              Text(
-                DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt) < 5 ? '1 - 5'
-                    : '${DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt)-5} '
-                    '- ${DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt)}',
-                style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge), textDirection: TextDirection.ltr,
-              ),
-              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-              Text('min'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge)),
-            ]),
+            child: Text(
+              _getTrackStatusTitle(track.orderStatus, takeAway),
+              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Theme.of(context).primaryColor),
+              textAlign: TextAlign.center,
+            ),
           ),
 
         ]),
@@ -70,21 +64,15 @@ class TrackDetailsView extends StatelessWidget {
         ),
         const SizedBox(height: Dimensions.paddingSizeLarge),
 
-        Text('estimate_delivery_time'.tr, style: robotoRegular),
+        Text('order_status'.tr == 'order_status' ? 'Order Status' : 'order_status'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
+        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
         Center(
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-
-            Text(
-              DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt) < 5 ? '1 - 5'
-                  : '${DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt)-5} '
-                  '- ${DateConverter.differenceInMinute(track.restaurant!.deliveryTime, track.createdAt, track.processingTime, track.scheduleAt)}',
-              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge), textDirection: TextDirection.ltr,
-            ),
-            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-            Text('min'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge)),
-          ]),
+          child: Text(
+            _getTrackStatusTitle(track.orderStatus, takeAway),
+            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Theme.of(context).primaryColor),
+            textAlign: TextAlign.center,
+          ),
         ),
 
         Divider(color: Theme.of(context).disabledColor.withValues(alpha: 0.3), thickness: 1, height: 30),
@@ -230,5 +218,24 @@ class TrackDetailsView extends StatelessWidget {
 
       ]),
     );
+  }
+
+  String _getTrackStatusTitle(String? status, bool takeAway) {
+    if (status == 'pending') {
+      return 'Order Placed';
+    } else if (status == 'accepted' || status == 'confirmed') {
+      return 'Confirmed';
+    } else if (status == 'processing') {
+      return 'Cooking';
+    } else if (status == 'handover') {
+      return takeAway ? 'Ready for Pickup' : 'Food Ready';
+    } else if (status == 'picked_up') {
+      return 'Out for Delivery';
+    } else if (status == 'delivered') {
+      return 'Delivered';
+    } else if (status == 'canceled') {
+      return 'Canceled';
+    }
+    return (status ?? '').replaceAll('_', ' ').capitalizeFirst ?? '';
   }
 }

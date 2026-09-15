@@ -25,7 +25,7 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/countdown_timer_widget.dart';
+import 'package:stackfood_multivendor/features/order/widgets/tracking_stepper_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
@@ -134,60 +134,38 @@ class OrderInfoSection extends StatelessWidget {
                       textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
                     ) : order.orderStatus == 'processing' ? Column(children: [
                       Text(
-                        'your_food_is_almost_ready'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
+                        'Cooking',
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
+                        textAlign: TextAlign.center,
                       ),
-
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-
-                        Text(
-                          DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing) < 5 ? '1 - 5'
-                              : '${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing)-5} '
-                              '- ${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing)}',
-                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                        Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                      ]),
-
-                    ]) : order.orderStatus == 'confirmed' ? RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(text: 'your_dine_in_order_is_confirmed_please_make_sure_to_arrive_on_time'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge - 1, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                        TextSpan(text: ' - ', style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color)),
-                        TextSpan(
-                          text: DateConverter.dateTimeStringToDateTime(order.scheduleAt!),
-                          style: robotoMedium.copyWith(fontSize:Dimensions.fontSizeLarge - 1, color: Theme.of(context).textTheme.bodyMedium!.color),
-                        ),
-                      ]),
-                    ) : order.orderStatus == 'handover' ? DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt) > 0 ? Column(children: [
+                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                       Text(
-                        'your_food_is_ready_to_serve_you_are'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
+                        'Your food is being prepared in the kitchen',
+                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
                       ),
-
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-
-                        Text(
-                          DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt) < 5 ? '1 - 5 ${'min'.tr}'
-                              : DateConverter.convertMinutesToDayHourMinute(DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt)),
-                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
-                        ),
-                        // const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                        // Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                      ]),
-
+                    ]) : order.orderStatus == 'confirmed' ? Column(children: [
                       Text(
-                        'away_from_restaurant_hurry_up'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
+                        'Confirmed',
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
+                        textAlign: TextAlign.center,
                       ),
-
+                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                      Text(
+                        'your_dine_in_order_is_confirmed_please_make_sure_to_arrive_on_time'.tr,
+                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
+                      ),
+                    ]) : order.orderStatus == 'handover' ? Column(children: [
+                      Text(
+                        'Food Ready',
+                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                      Text(
+                        'your_food_is_ready_to_serve_hurry_up'.tr,
+                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
+                      ),
                     ]) : Text(
-                      'your_food_is_ready_to_serve_hurry_up'.tr,
-                      textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
-                    ) : Text(
                       'enjoy_your_meal'.tr,
                       textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge/*, color: Theme.of(context).disabledColor*/),
                     ),
@@ -210,51 +188,34 @@ class OrderInfoSection extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  order.orderStatus == 'pending'
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'your_order_is_pending_to_confirm'.tr == 'your_order_is_pending_to_confirm'
-                                  ? 'Your order is pending to confirm'
-                                  : 'your_order_is_pending_to_confirm'.tr,
-                              style: robotoBold.copyWith(
-                                fontSize: Dimensions.fontSizeExtraLarge,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                            Text(
-                              'Waiting for restaurant confirmation',
-                              style: robotoRegular.copyWith(
-                                fontSize: Dimensions.fontSizeSmall,
-                                color: Theme.of(context).disabledColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            order.scheduled == 1 && order.scheduleAt != null && DateConverter.isBeforeTime(order.scheduleAt)
-                                ? Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor))
-                                : Text('your_order_is_arriving_soon'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
-                            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                            CountdownTimerWidget(
-                              startTime: DateTime.parse(order.createdAt!),
-                              durationMinutes: _getDeliveryDurationMinutes(order),
-                              textStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge, color: Theme.of(context).primaryColor),
-                              showMessageOnTimeUp: false,
-                            ),
-                          ],
-                        ),
+                  Text(
+                    _getOrderStatusTitle(order.orderStatus, takeAway),
+                    style: robotoBold.copyWith(
+                      fontSize: Dimensions.fontSizeExtraLarge,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                  Text(
+                    _getOrderStatusSubtitle(order.orderStatus, takeAway),
+                    style: robotoRegular.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                      color: Theme.of(context).disabledColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (order.orderStatus != 'canceled' && order.orderStatus != 'failed') ...[
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                      child: TrackingStepperWidget(status: order.orderStatus, takeAway: takeAway),
+                    ),
+                  ],
                 ],
               ),
             ),
-            const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
 
           ]) : const SizedBox() : const SizedBox(),
 
@@ -1331,10 +1292,48 @@ Widget offlineView(BuildContext context, OrderController orderController, Expans
 
 //   return minTime;
 // }
-int _getDeliveryDurationMinutes(OrderModel order) {
-  
-  // Hardcoded delivery duration of 35 minutes
-  return 35;
+String _getOrderStatusTitle(String? status, bool takeAway) {
+  if (status == 'pending') {
+    return 'Order Placed';
+  } else if (status == 'accepted' || status == 'confirmed') {
+    return 'Confirmed';
+  } else if (status == 'processing') {
+    return 'Cooking';
+  } else if (status == 'handover') {
+    return takeAway ? 'Ready for Pickup' : 'Food Ready';
+  } else if (status == 'picked_up') {
+    return 'Out for Delivery';
+  } else if (status == 'delivered') {
+    return 'Delivered';
+  } else if (status == 'canceled') {
+    return 'Canceled';
+  } else if (status == 'failed') {
+    return 'Failed';
+  } else if (status == 'refund_requested') {
+    return 'Refund Requested';
+  } else if (status == 'refunded') {
+    return 'Refunded';
+  }
+  return (status ?? '').replaceAll('_', ' ').capitalizeFirst ?? '';
+}
+
+String _getOrderStatusSubtitle(String? status, bool takeAway) {
+  if (status == 'pending') {
+    return 'Waiting for restaurant confirmation';
+  } else if (status == 'accepted' || status == 'confirmed') {
+    return 'Restaurant has confirmed your order';
+  } else if (status == 'processing') {
+    return 'Your food is being prepared in the kitchen';
+  } else if (status == 'handover') {
+    return takeAway ? 'Your order is ready to be collected' : 'Order packed & waiting for delivery partner';
+  } else if (status == 'picked_up') {
+    return 'Delivery partner is on the way to your address';
+  } else if (status == 'delivered') {
+    return 'Your food has been delivered successfully';
+  } else if (status == 'canceled') {
+    return 'This order has been canceled';
+  }
+  return '';
 }
 
 void openDialog(BuildContext context, String imageUrl) => showDialog(
