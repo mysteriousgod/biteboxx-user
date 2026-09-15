@@ -1,19 +1,13 @@
-import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
 import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
-import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
-import 'package:stackfood_multivendor/features/address/widgets/address_card_widget.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/delivery_info_fields.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
-import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_dropdown_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DeliverySection extends StatelessWidget {
   final CheckoutController checkoutController;
@@ -33,7 +27,6 @@ class DeliverySection extends StatelessWidget {
     bool takeAway = (checkoutController.orderType == 'take_away');
     bool isDineIn = (checkoutController.orderType == 'dine_in');
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    GlobalKey<CustomDropdownState> dropDownKey = GlobalKey<CustomDropdownState>();
 
     return Column(children: [
       isGuestLoggedIn || isDineIn ? DeliveryInfoFields(
@@ -50,97 +43,8 @@ class DeliverySection extends StatelessWidget {
           boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('deliver_to'.tr, style: robotoMedium),
-            CustomInkWellWidget(
-              onTap: () async{
-                dropDownKey.currentState?.toggleDropdown();
-              },
-              radius: Dimensions.radiusDefault,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeSmall),
-                child: Icon(Icons.arrow_drop_down_rounded, size: 40),
-              ),
-            ),
-          ]),
-
-
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                color: Colors.transparent,
-                border: Border.all(color: Colors.transparent)
-            ),
-            child: CustomDropdown<int>(
-              key: dropDownKey,
-              hideIcon: true,
-              onChange: (int? value, int index) async {
-
-                if(value == -1) {
-                  var address = await Get.toNamed(RouteHelper.getAddAddressRoute(true, checkoutController.restaurant!.zoneId));
-                  if(address != null) {
-
-                    checkoutController.insertAddresses(Get.context!, address, notify: true);
-
-                    checkoutController.streetNumberController.text = address.road ?? '';
-                    checkoutController.houseController.text = address.house ?? '';
-                    checkoutController.floorController.text = address.floor ?? '';
-
-                    checkoutController.getDistanceInKM(
-                      LatLng(double.parse(address.latitude), double.parse(address.longitude )),
-                      LatLng(double.parse(checkoutController.restaurant!.latitude!), double.parse(checkoutController.restaurant!.longitude!)),
-                    );
-                  }
-                } else if(value != null && value >= 0 && value < checkoutController.address.length) {
-                  checkoutController.getDistanceInKM(
-                    LatLng(
-                      double.parse(checkoutController.address[value].latitude!),
-                      double.parse(checkoutController.address[value].longitude!),
-                    ),
-                    LatLng(double.parse(checkoutController.restaurant!.latitude!), double.parse(checkoutController.restaurant!.longitude!)),
-                  );
-                  checkoutController.setAddressIndex(value);
-
-                  checkoutController.streetNumberController.text = checkoutController.address[value].road ?? '';
-                  checkoutController.houseController.text = checkoutController.address[value].house ?? '';
-                  checkoutController.floorController.text = checkoutController.address[value].floor ?? '';
-                }
-
-              },
-              dropdownButtonStyle: DropdownButtonStyle(
-                height: 0, width: double.infinity,
-                padding: EdgeInsets.zero,
-                backgroundColor: Colors.transparent,
-                primaryColor: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-              dropdownStyle: DropdownStyle(
-                elevation: 10,
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-              ),
-              items: checkoutController.addressList,
-              child: const SizedBox(),
-
-            ),
-          ),
-          Container(
-            constraints: BoxConstraints(minHeight: ResponsiveHelper.isDesktop(context) ? 90 : 75),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              border: Border.all(color: Theme.of(context).primaryColor, width: 0.3),
-            ),
-            child: AddressCardWidget(
-              address: checkoutController.address.isNotEmpty
-                  ? ((checkoutController.address.length - 1) >= checkoutController.addressIndex
-                      ? checkoutController.address[checkoutController.addressIndex]
-                      : checkoutController.address[0])
-                  : AddressModel(address: 'no_address_found'.tr),
-              fromAddress: false, fromCheckout: true,
-            ),
-          ),
-
-          SizedBox(height: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeExtraLarge : Dimensions.paddingSizeLarge),
+          Text('deliver_to'.tr, style: robotoMedium),
+          const SizedBox(height: Dimensions.paddingSizeDefault),
 
           !ResponsiveHelper.isDesktop(context) ? CustomTextFieldWidget(
             hintText: 'write_street_number'.tr == 'write_street_number' ? 'Enter your address' : 'write_street_number'.tr,

@@ -198,7 +198,7 @@ class OrderPlaceButton extends StatelessWidget {
     if(isGuestLogIn && checkoutController.guestAddress == null && checkoutController.orderType != 'take_away'&& checkoutController.orderType != 'dine_in'){
       showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
       return true;
-    } else if(!isGuestLogIn && checkoutController.orderType == 'delivery' && checkoutController.address.isEmpty) {
+    } else if(!isGuestLogIn && checkoutController.orderType == 'delivery' && checkoutController.address.isEmpty && AddressHelper.getAddressFromSharedPref() == null) {
       showCustomSnackBar('please_setup_your_delivery_address_first'.tr);
       return true;
     } else if(checkoutController.orderType == 'dine_in' && checkoutController.selectedDineInDate == null){
@@ -286,6 +286,8 @@ class OrderPlaceButton extends StatelessWidget {
       finalAddress = checkoutController.address[checkoutController.addressIndex];
     } else if(checkoutController.address.isNotEmpty) {
       finalAddress = checkoutController.address[0];
+    } else {
+      finalAddress = AddressHelper.getAddressFromSharedPref();
     }
 
     if(isGuestLogIn && (checkoutController.orderType == 'take_away' || checkoutController.orderType == 'dine_in')) {
@@ -358,6 +360,32 @@ class OrderPlaceButton extends StatelessWidget {
 
   PlaceOrderBodyModel _preparePlaceOrderModel(List<place_order_model.OnlineCart> carts, DateTime scheduleStartDate, AddressModel? finalAddress, bool isGuestLogIn,
       List<place_order_model.SubscriptionDays> days) {
+    String userEnteredRoad = isGuestLogIn ? (finalAddress?.road ?? '') : checkoutController.streetNumberController.text.trim();
+    String userEnteredHouse = isGuestLogIn ? (finalAddress?.house ?? '') : checkoutController.houseController.text.trim();
+    String userEnteredFloor = isGuestLogIn ? (finalAddress?.floor ?? '') : checkoutController.floorController.text.trim();
+
+    String orderDeliveryAddress;
+    if (checkoutController.orderType == 'delivery' && userEnteredRoad.isNotEmpty) {
+      List<String> addressParts = [];
+      if (userEnteredHouse.isNotEmpty) addressParts.add(userEnteredHouse);
+      if (userEnteredFloor.isNotEmpty) {
+        String floorText = userEnteredFloor.toLowerCase().contains('floor') ? userEnteredFloor : 'Floor $userEnteredFloor';
+        addressParts.add(floorText);
+      }
+      addressParts.add(userEnteredRoad);
+      orderDeliveryAddress = addressParts.join(', ');
+
+      AddressModel? currentPrefAddress = AddressHelper.getAddressFromSharedPref();
+      if (currentPrefAddress != null) {
+        currentPrefAddress.road = userEnteredRoad;
+        currentPrefAddress.house = userEnteredHouse;
+        currentPrefAddress.floor = userEnteredFloor;
+        AddressHelper.saveAddressInSharedPref(currentPrefAddress);
+      }
+    } else {
+      orderDeliveryAddress = finalAddress?.address ?? userEnteredRoad;
+    }
+
     return PlaceOrderBodyModel(
       cart: carts, couponDiscountAmount: Get.find<CouponController>().discount, distance: checkoutController.distance,
       couponDiscountTitle: Get.find<CouponController>().discount! > 0 ? Get.find<CouponController>().coupon!.title : null,
@@ -371,14 +399,14 @@ class OrderPlaceButton extends StatelessWidget {
       couponCode: (Get.find<CouponController>().discount! > 0 || (Get.find<CouponController>().coupon != null
           && Get.find<CouponController>().freeDelivery)) ? Get.find<CouponController>().coupon!.code : null,
       restaurantId: cartList?[0].product?.restaurantId,
-      address: finalAddress!.address, latitude: finalAddress.latitude, longitude: finalAddress.longitude, addressType: finalAddress.addressType,
-      contactPersonName: finalAddress.contactPersonName ?? '${Get.find<ProfileController>().userInfoModel!.fName} '
+      address: orderDeliveryAddress, latitude: finalAddress?.latitude, longitude: finalAddress?.longitude, addressType: finalAddress?.addressType,
+      contactPersonName: finalAddress?.contactPersonName ?? '${Get.find<ProfileController>().userInfoModel!.fName} '
           '${Get.find<ProfileController>().userInfoModel!.lName}',
-      contactPersonNumber: finalAddress.contactPersonNumber ?? Get.find<ProfileController>().userInfoModel!.phone,
+      contactPersonNumber: finalAddress?.contactPersonNumber ?? Get.find<ProfileController>().userInfoModel!.phone,
       discountAmount: discount, taxAmount: tax, cutlery: Get.find<CartController>().addCutlery ? 1 : 0,
-      road: isGuestLogIn ? finalAddress.road??'' : checkoutController.streetNumberController.text.trim(),
-      house: isGuestLogIn ? finalAddress.house??'' : checkoutController.houseController.text.trim(),
-      floor: isGuestLogIn ? finalAddress.floor??'' : checkoutController.floorController.text.trim(),
+      road: userEnteredRoad,
+      house: userEnteredHouse,
+      floor: userEnteredFloor,
       dmTips: (checkoutController.orderType == 'take_away' || checkoutController.subscriptionOrder || checkoutController.selectedTips == 0) ? '' : checkoutController.tips.toString(),
       subscriptionOrder: checkoutController.subscriptionOrder ? '1' : '0',
       subscriptionType: checkoutController.subscriptionType, subscriptionQuantity: subscriptionQty.toString(),
@@ -388,7 +416,7 @@ class OrderPlaceButton extends StatelessWidget {
       unavailableItemNote: Get.find<CartController>().notAvailableIndex != -1 ? Get.find<CartController>().notAvailableList[Get.find<CartController>().notAvailableIndex] : '',
       deliveryInstruction: checkoutController.selectedInstruction != -1 ? AppConstants.deliveryInstructionList[checkoutController.selectedInstruction] : '',
       partialPayment: checkoutController.isPartialPay ? 1 : 0, guestId: isGuestLogIn ? int.parse(Get.find<AuthController>().getGuestId()) : 0,
-      isBuyNow: fromCart ? 0 : 1, guestEmail: isGuestLogIn ? finalAddress.email : null,
+      isBuyNow: fromCart ? 0 : 1, guestEmail: isGuestLogIn ? finalAddress?.email : null,
       extraPackagingAmount: extraPackagingAmount, bringChangeAmount: checkoutController.paymentMethodIndex == 0 && checkoutController.exchangeAmount > 0 ? checkoutController.exchangeAmount : null,
     );
   }
