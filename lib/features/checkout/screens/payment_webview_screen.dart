@@ -203,8 +203,9 @@ class PaymentScreenState extends State<PaymentWebViewScreen> with WidgetsBinding
               initialSettings: InAppWebViewSettings(
                 useHybridComposition: true,
                 useShouldOverrideUrlLoading: true,
-                userAgent:
-                    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+                userAgent: GetPlatform.isIOS
+                    ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+                    : 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
                 domStorageEnabled: true,
                 supportMultipleWindows: true,
                 javaScriptCanOpenWindowsAutomatically: true,
