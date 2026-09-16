@@ -219,7 +219,7 @@ class OrderPlaceButton extends StatelessWidget {
     } else if(!isCashOnDeliveryActive && !isDigitalPaymentActive && !isWalletActive) {
       showCustomSnackBar('no_payment_method_is_enabled'.tr);
       return true;
-    }else if(!Get.find<SplashController>().configModel!.instantOrder! && !checkoutController.restaurant!.instantOrder! && checkoutController.restaurant!.scheduleOrder! && (checkoutController.preferableTime.isEmpty || checkoutController.preferableTime == 'Not Available')) {
+    }else if(!checkoutController.subscriptionOrder && !Get.find<SplashController>().configModel!.instantOrder! && !checkoutController.restaurant!.instantOrder! && checkoutController.restaurant!.scheduleOrder! && (checkoutController.preferableTime.isEmpty || checkoutController.preferableTime == 'Not Available')) {
       showCustomSnackBar('please_select_order_preference_time'.tr);
       return true;
     } else if(checkoutController.paymentMethodIndex == -1) {
@@ -250,14 +250,14 @@ class OrderPlaceButton extends StatelessWidget {
     }else if(checkoutController.subscriptionOrder && !datePicked) {
       showCustomSnackBar('select_at_least_one_day_for_subscription'.tr);
       return true;
-    }else if(((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed) || (checkoutController.selectedDateSlot == 2 && checkoutController.customDateRestaurantClose)) && checkoutController.orderType != 'dine_in') {
+    }else if(!checkoutController.subscriptionOrder && ((checkoutController.selectedDateSlot == 0 && todayClosed) || (checkoutController.selectedDateSlot == 1 && tomorrowClosed) || (checkoutController.selectedDateSlot == 2 && checkoutController.customDateRestaurantClose)) && checkoutController.orderType != 'dine_in') {
       showCustomSnackBar('restaurant_is_closed'.tr);
       return true;
-    }else if(checkoutController.paymentMethodIndex == 0 && Get.find<SplashController>().configModel!.cashOnDelivery! && maxCodOrderAmount != null && (total > maxCodOrderAmount!)){
+    }else if(checkoutController.paymentMethodIndex == 0 && Get.find<SplashController>().configModel!.cashOnDelivery! && maxCodOrderAmount != null && ((checkoutController.subscriptionOrder ? (total * (subscriptionQty == 0 ? 1 : subscriptionQty)) : total) > maxCodOrderAmount!)){
       showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
       return true;
-    } else if (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty) {
-      if(checkoutController.restaurant!.scheduleOrder! && !checkoutController.subscriptionOrder) {
+    } else if (!checkoutController.subscriptionOrder && (checkoutController.timeSlots == null || checkoutController.timeSlots!.isEmpty)) {
+      if(checkoutController.restaurant!.scheduleOrder!) {
         showCustomSnackBar('select_a_time'.tr);
       }else {
         showCustomSnackBar('restaurant_is_closed'.tr);
@@ -270,7 +270,7 @@ class OrderPlaceButton extends StatelessWidget {
       showCustomSnackBar('delivery_fee_not_set_yet'.tr);
       return true;
     } else if(checkoutController.paymentMethodIndex == 1 && Get.find<ProfileController>().userInfoModel
-        != null && Get.find<ProfileController>().userInfoModel!.walletBalance! < total) {
+        != null && Get.find<ProfileController>().userInfoModel!.walletBalance! < (checkoutController.subscriptionOrder ? (total * (subscriptionQty == 0 ? 1 : subscriptionQty)) : total)) {
       showCustomSnackBar('you_do_not_have_sufficient_balance_in_wallet'.tr);
       return true;
     } else {

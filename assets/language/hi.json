@@ -1309,5 +1309,12 @@
   "cart_has_subscription_only_item_note": "आपके कार्ट में केवल सदस्यता वाले आइटम हैं। कृपया नीचे अपना डिलीवरी शेड्यूल चुनें।",
   "subscription_only": "केवल सदस्यता",
   "subscription_only_product": "केवल सदस्यता उत्पाद",
-  "subscription_only_item_description": "यह खाद्य पदार्थ केवल आवर्ती सदस्यता (दैनिक / साप्ताहिक / मासिक) के आधार पर उपलब्ध है।"
+  "subscription_only_item_description": "यह खाद्य पदार्थ केवल आवर्ती सदस्यता (दैनिक / साप्ताहिक / मासिक) के आधार पर उपलब्ध है।",
+  "meal_subscription_only": "केवल भोजन सदस्यता",
+  "subscription_restaurant_note": "यह रेस्तरां विशेष रूप से भोजन सदस्यता प्रदान करता है। कृपया नीचे अपनी डिलीवरी तिथियां और शेड्यूल चुनें।",
+  "subscription_meal_plan": "सदस्यता भोजन योजना",
+  "proceed_to_subscription": "सदस्यता योजना के लिए आगे बढ़ें",
+  "per_delivery_subtotal": "प्रति डिलीवरी उप-योग",
+  "total_subscription_price": "कुल सदस्यता राशि",
+  "deliveries": "डिलीवरी"
 }

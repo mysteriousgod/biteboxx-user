@@ -7,11 +7,16 @@ class AppConstants {
   static String appName = dotenv.env['APP_NAME']!;
   static const double appVersion = 8.4; ///Flutter SDK: 3.35.2
 
-  /// Feature flag for limited APK builds (Can be overridden via --dart-define=ENABLE_SUBSCRIPTION_FEATURE=true/false)
+  /// Feature flag for subscription feature (Can be overridden via --dart-define=ENABLE_SUBSCRIPTION_FEATURE=true/false)
   static const bool enableSubscriptionFeature = bool.fromEnvironment(
     'ENABLE_SUBSCRIPTION_FEATURE',
     defaultValue: true,
   );
+
+  static bool isSubscriptionRestaurant({int? restaurantId, bool? orderSubscriptionActive}) {
+    if (!enableSubscriptionFeature) return false;
+    return orderSubscriptionActive == true;
+  }
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = true;

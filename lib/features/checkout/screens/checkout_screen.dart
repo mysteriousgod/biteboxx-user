@@ -133,6 +133,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
     checkoutController.initCheckoutData(_cartList![0].product!.restaurantId);
 
+    int? resId = _cartList![0].product!.restaurantId;
+    bool isSubRest = AppConstants.isSubscriptionRestaurant(
+      restaurantId: resId,
+      orderSubscriptionActive: checkoutController.restaurant?.orderSubscriptionActive,
+    );
+    bool hasSubProduct = _cartList!.any((c) => c.product?.isSubscriptionOnly == true);
+    if (isSubRest || hasSubProduct) {
+      checkoutController.setSubscription(true);
+    }
 
     Get.find<CouponController>().setCoupon('', isUpdate: false);
 
@@ -344,7 +353,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
               ConfigModel? configModel = Get.find<SplashController>().configModel;
 
-              restaurantSubscriptionActive = (AppConstants.enableSubscriptionFeature && ((checkoutController.restaurant?.orderSubscriptionActive == true) || (_cartList != null && _cartList!.any((c) => c.product?.isSubscriptionOnly == true)))) && widget.fromCart;
+              restaurantSubscriptionActive = (AppConstants.enableSubscriptionFeature && (AppConstants.isSubscriptionRestaurant(restaurantId: checkoutController.restaurant?.id, orderSubscriptionActive: checkoutController.restaurant?.orderSubscriptionActive) || (_cartList != null && _cartList!.any((c) => c.product?.isSubscriptionOnly == true)))) && widget.fromCart;
 
               subscriptionQty = _getSubscriptionQty(checkoutController: checkoutController, restaurantSubscriptionActive: restaurantSubscriptionActive);
 
@@ -717,6 +726,9 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           subscriptionQty = checkoutController.subscriptionRange!.duration.inDays + 1;
         }
       }
+    }
+    if (checkoutController.subscriptionOrder && subscriptionQty <= 0) {
+      subscriptionQty = 1;
     }
     return subscriptionQty;
   }

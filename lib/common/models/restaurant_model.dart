@@ -1,4 +1,5 @@
 import 'package:stackfood_multivendor/features/wallet/domain/models/fund_bonus_model.dart';
+import 'package:stackfood_multivendor/util/app_constants.dart';
 
 class RestaurantModel {
   int? totalSize;
@@ -97,6 +98,8 @@ class Restaurant {
   int? dineInBookingDuration;
   String? dineInBookingDurationTimeFormat;
   double? priceStartFrom;
+
+  bool get isSubscriptionOnly => AppConstants.isSubscriptionRestaurant(restaurantId: id, orderSubscriptionActive: orderSubscriptionActive);
 
   Restaurant({
     this.id,

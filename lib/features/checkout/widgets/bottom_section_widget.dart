@@ -320,7 +320,7 @@ class BottomSectionWidget extends StatelessWidget {
 
                   Row(children: [
                     Text(
-                      'subtotal'.tr,
+                      'per_delivery_subtotal'.tr,
                       style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: checkoutController.isPartialPay ? Theme.of(context).textTheme.bodyMedium!.color : Theme.of(context).primaryColor),
                     ),
                     const Expanded(child: SizedBox()),
@@ -337,7 +337,12 @@ class BottomSectionWidget extends StatelessWidget {
                 const SizedBox(height: Dimensions.paddingSizeSmall),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   Text('subscription_order_count'.tr, style: robotoMedium),
-                  Text(subscriptionQty.toString(), style: robotoMedium),
+                  Text('$subscriptionQty ${'deliveries'.tr}', style: robotoMedium),
+                ]),
+                const SizedBox(height: Dimensions.paddingSizeSmall),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text('total_subscription_price'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor)),
+                  Text(PriceConverter.convertPrice(total * (subscriptionQty == 0 ? 1 : subscriptionQty)), style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).primaryColor), textDirection: TextDirection.ltr),
                 ]),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),

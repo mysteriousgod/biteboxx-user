@@ -86,6 +86,32 @@ class InfoViewWidget extends StatelessWidget {
             ),
           ]),
 
+          if (restaurant.isSubscriptionOnly) ...[
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), width: 0.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.autorenew_rounded, color: Theme.of(context).primaryColor, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    'meal_subscription_only'.tr,
+                    style: robotoMedium.copyWith(
+                      fontSize: Dimensions.fontSizeExtraSmall - (scrollingRate * 2),
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
         ])),
         const SizedBox(width: Dimensions.paddingSizeSmall),
 

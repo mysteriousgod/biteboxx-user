@@ -1314,5 +1314,12 @@
   "cart_has_subscription_only_item_note": "Your cart contains subscription-only items. Please configure your delivery schedule below.",
   "subscription_only": "Subscription Only",
   "subscription_only_product": "Subscription-Only Product",
-  "subscription_only_item_description": "This food item is available only on a recurring subscription basis (Daily / Weekly / Monthly)."
+  "subscription_only_item_description": "This food item is available only on a recurring subscription basis (Daily / Weekly / Monthly).",
+  "meal_subscription_only": "Meal Subscription Only",
+  "subscription_restaurant_note": "This restaurant exclusively provides meal subscriptions. Set your delivery dates and preferred schedule below.",
+  "subscription_meal_plan": "Subscription Meal Plan",
+  "proceed_to_subscription": "Proceed to Subscription Plan",
+  "per_delivery_subtotal": "Per Delivery Subtotal",
+  "total_subscription_price": "Total Subscription Amount",
+  "deliveries": "deliveries"
 }

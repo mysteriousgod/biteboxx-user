@@ -79,9 +79,12 @@ class CheckoutButtonWidget extends StatelessWidget {
 
             GetBuilder<CartController>(
               builder: (cartController) {
+                bool isSubscription = (restaurantController.restaurant?.isSubscriptionOnly == true) ||
+                    cartController.cartList.any((c) => c.product?.isSubscriptionOnly == true);
+
                 return CustomButtonWidget(
                   radius: 10,
-                  buttonText: 'confirm_delivery_details'.tr,
+                  buttonText: isSubscription ? 'proceed_to_subscription'.tr : 'confirm_delivery_details'.tr,
                   onPressed: cartController.isLoading || restaurantController.restaurant == null ? null : () {
                     Get.find<CheckoutController>().updateFirstTime();
                     _processToCheckoutButtonPressed(restaurantController);
@@ -97,7 +100,8 @@ class CheckoutButtonWidget extends StatelessWidget {
   }
 
   void _processToCheckoutButtonPressed(RestaurantController restaurantController) {
-    bool hasSubscriptionOnly = cartController.cartList.any((c) => c.product?.isSubscriptionOnly == true);
+    bool hasSubscriptionOnly = (restaurantController.restaurant?.isSubscriptionOnly == true) ||
+        cartController.cartList.any((c) => c.product?.isSubscriptionOnly == true);
     if(!cartController.cartList.first.product!.scheduleOrder! && !hasSubscriptionOnly && cartController.availableList.contains(false)) {
       showCustomSnackBar('one_or_more_product_unavailable'.tr);
     } else if(restaurantController.restaurant!.freeDelivery == null || restaurantController.restaurant!.cutlery == null) {

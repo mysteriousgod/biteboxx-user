@@ -418,6 +418,14 @@ class CheckoutController extends GetxController implements GetxService {
   void setSubscription(bool isSubscribed) {
     _subscriptionOrder = isSubscribed;
     _orderType = 'delivery';
+    if(isSubscribed && _subscriptionRange == null) {
+      DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+      DateTime defaultEnd = tomorrow.add(const Duration(days: 6)); // Default 7 days plan
+      _subscriptionRange = DateTimeRange(start: tomorrow, end: defaultEnd);
+      if(_selectedDays.isEmpty || _selectedDays[0] == null) {
+        _selectedDays = [DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 13, 0)];
+      }
+    }
     update();
   }
 
@@ -429,8 +437,16 @@ class CheckoutController extends GetxController implements GetxService {
   void setSubscriptionType(String? type, int index) {
     _subscriptionType = type;
     _selectedDays = [];
-    for(int index=0; index < (type == 'weekly' ? 7 : type == 'monthly' ? 31 : 1); index++) {
+    int count = (type == 'weekly' ? 7 : type == 'monthly' ? 31 : 1);
+    for(int i = 0; i < count; i++) {
       _selectedDays.add(null);
+    }
+    DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+    if (type == 'daily') {
+      _selectedDays[0] = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 13, 0);
+    } else if (type == 'weekly') {
+      // Pre-select the first day with standard lunch time so user has a valid starting day
+      _selectedDays[0] = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 13, 0);
     }
     _subscriptionTypeIndex = index;
     update();

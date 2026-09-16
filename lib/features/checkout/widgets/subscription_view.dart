@@ -143,7 +143,7 @@ class SubscriptionView extends StatelessWidget {
                 if(checkoutController.selectedDays[index] != null) {
                   checkoutController.addDay(index, null);
                 }else {
-                  TimeOfDay? time = await showTimePicker(context: context, initialTime: const TimeOfDay(hour: 0, minute: 0));
+                  TimeOfDay? time = await showTimePicker(context: context, initialTime: const TimeOfDay(hour: 12, minute: 30));
                   if(time != null) {
                     checkoutController.addDay(index, time);
                   }

@@ -133,15 +133,28 @@ class TopSectionWidget extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('order_type'.tr, style: robotoMedium),
-                    if (hasSubscriptionOnlyItem)
-                      Padding(
-                        padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall, bottom: Dimensions.paddingSizeExtraSmall),
-                        child: Text(
-                          'cart_has_subscription_only_item_note'.tr,
-                          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                    if (hasSubscriptionOnlyItem) ...[
+                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.25)),
                         ),
+                        child: Row(children: [
+                          Icon(Icons.auto_awesome, color: Theme.of(context).primaryColor, size: 20),
+                          const SizedBox(width: Dimensions.paddingSizeSmall),
+                          Expanded(
+                            child: Text(
+                              'cart_has_subscription_only_item_note'.tr,
+                              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                            ),
+                          ),
+                        ]),
                       ),
-                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                    ],
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
                     Row(children: [
                       Expanded(child: OrderTypeWidget(
                         title: 'regular'.tr,
