@@ -6,6 +6,8 @@ import 'package:stackfood_multivendor/features/review/domain/models/rate_review_
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/order/domain/models/order_details_model.dart';
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
+import 'package:stackfood_multivendor/features/checkout/screens/payment_webview_screen.dart';
+import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
@@ -41,8 +43,67 @@ class BottomViewWidget extends StatelessWidget {
     bool cod = order.paymentMethod == 'cash_on_delivery';
     bool digitalPay = order.paymentMethod == 'digital_payment';
     bool offlinePay = order.paymentMethod == 'offline_payment';
+    bool isDigitalOrder = digitalPay || (!cod && !offlinePay && order.paymentMethod != 'wallet');
+    bool isUnpaidDigital = (pending || order.orderStatus == 'failed') && isDigitalOrder && order.paymentStatus != 'paid' && !cancelled && !delivered;
 
     return Column(children: [
+      isUnpaidDigital ? Center(
+        child: Container(
+          width: Dimensions.webMaxWidth + 20,
+          margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraSmall),
+          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+          child: CustomButtonWidget(
+            buttonText: 'continue_payment'.tr,
+            icon: Icons.payment,
+            height: 48,
+            onPressed: () {
+              String? paymentMethod = order.paymentMethod;
+              if (order.payments != null && order.payments!.isNotEmpty) {
+                for (var p in order.payments!) {
+                  if (p.paymentStatus == 'unpaid' && p.paymentMethod != null && p.paymentMethod!.isNotEmpty) {
+                    paymentMethod = p.paymentMethod;
+                    break;
+                  }
+                }
+              }
+              if (paymentMethod == null || paymentMethod.isEmpty || paymentMethod == 'digital_payment') {
+                final activeList = Get.find<SplashController>().configModel?.activePaymentMethodList;
+                if (activeList != null && activeList.isNotEmpty) {
+                  paymentMethod = activeList.first.getWay;
+                } else {
+                  paymentMethod = 'paytm';
+                }
+              }
+              int? currentUserId = order.userId;
+              if (currentUserId == null || currentUserId == 0) {
+                if (Get.isRegistered<ProfileController>()) {
+                  currentUserId = Get.find<ProfileController>().userInfoModel?.id;
+                }
+              }
+              OrderModel minimalOrder = OrderModel(
+                id: order.id ?? orderId,
+                userId: currentUserId ?? 0,
+                orderAmount: order.orderAmount ?? total,
+                orderType: order.orderType,
+                restaurant: order.restaurant,
+                deliveryAddress: order.deliveryAddress,
+                paymentMethod: paymentMethod,
+                paymentStatus: order.paymentStatus,
+              );
+              String phone = contactNumber ?? order.deliveryAddress?.contactPersonNumber ?? (Get.isRegistered<ProfileController>() ? Get.find<ProfileController>().userInfoModel?.phone ?? '' : '');
+              String guestId = Get.isRegistered<AuthController>() ? Get.find<AuthController>().getGuestId() : '';
+              Get.to(() => PaymentWebViewScreen(
+                orderModel: minimalOrder,
+                paymentMethod: paymentMethod ?? 'paytm',
+                guestId: guestId,
+                contactNumber: phone,
+                restaurantId: order.restaurant?.id,
+              ));
+            },
+          ),
+        ),
+      ) : const SizedBox(),
+
       !orderController.showCancelled ? Center(
         child: SizedBox(
           width: Dimensions.webMaxWidth + 20,
@@ -60,7 +121,7 @@ class BottomViewWidget extends StatelessWidget {
               ),
             ) : const SizedBox(),
 
-            (!offlinePay && pending && order.paymentStatus == 'unpaid' && digitalPay && Get.find<SplashController>().configModel!.cashOnDelivery!) ?
+            (!offlinePay && isUnpaidDigital && Get.find<SplashController>().configModel!.cashOnDelivery!) ?
             Expanded(
               child: CustomButtonWidget(
                 buttonText: 'switch_to_cash_on_delivery'.tr,
@@ -104,7 +165,7 @@ class BottomViewWidget extends StatelessWidget {
                     Get.dialog(SubscriptionPauseDialog(subscriptionID: order.subscriptionId, isPause: false));
                   }else {
                     orderController.setOrderCancelReason('');
-                    Get.dialog(CancellationDialogue(orderId: order.id));
+                    Get.dialog(CancellationDialogue(orderId: order.id ?? orderId));
                   }
                 },
                 child: Text(subscription ? 'cancel_subscription'.tr : 'cancel_order'.tr, style: robotoBold.copyWith(

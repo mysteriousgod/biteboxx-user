@@ -74,6 +74,18 @@ class PaymentFailedDialog extends StatelessWidget {
                 radius: Dimensions.radiusSmall, height: 40,
               ) : const SizedBox(),
               SizedBox(height: Get.find<SplashController>().configModel!.cashOnDelivery! ? Dimensions.paddingSizeLarge : 0),
+              CustomButtonWidget(
+                buttonText: 'view_order_details'.tr.isNotEmpty ? 'view_order_details'.tr : 'View Order & Pay Later',
+                onPressed: () {
+                  if (orderID != null && orderID!.isNotEmpty) {
+                    Get.offAllNamed(RouteHelper.getOrderDetailsRoute(int.tryParse(orderID!), contactNumber: contactPersonNumber));
+                  } else {
+                    Get.offAllNamed(RouteHelper.getInitialRoute());
+                  }
+                },
+                radius: Dimensions.radiusSmall, height: 40,
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
               !orderController.isCancelLoading ? TextButton(
                 onPressed: () {
                   Get.find<OrderController>().cancelOrder(int.parse(orderID!), 'Digital payment issue').then((success) {
@@ -83,10 +95,10 @@ class PaymentFailedDialog extends StatelessWidget {
                   });
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.3), minimumSize: const Size(Dimensions.webMaxWidth, 40), padding: EdgeInsets.zero,
+                  backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.15), minimumSize: const Size(Dimensions.webMaxWidth, 40), padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
                 ),
-                child: Text('cancel_order'.tr, textAlign: TextAlign.center, style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
+                child: Text('cancel_order'.tr, textAlign: TextAlign.center, style: robotoBold.copyWith(color: Theme.of(context).disabledColor)),
               ) : const Center(child: CircularProgressIndicator()),
             ]) : const Center(child: CircularProgressIndicator());
           }),

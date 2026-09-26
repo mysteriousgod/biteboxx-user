@@ -1321,5 +1321,9 @@
   "proceed_to_subscription": "Proceed to Subscription Plan",
   "per_delivery_subtotal": "Per Delivery Subtotal",
   "total_subscription_price": "Total Subscription Amount",
-  "deliveries": "deliveries"
+  "deliveries": "deliveries",
+  "continue_payment": "Continue Payment",
+  "pay_now": "Pay Now",
+  "verifying_payment": "Verifying Payment",
+  "please_do_not_close_app": "Please do not close or exit the app"
 }

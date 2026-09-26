@@ -12,35 +12,38 @@ class UpiPaymentHelper {
     'about',
   ];
 
-  static const List<String> knownUpiSchemes = [
-    'upi',
-    'paytmmp',
-    'paytm',
-    'phonepe',
-    'tez',
-    'gpay',
-    'bhim',
-    'credpay',
-    'mobikwik',
-    'whatsapp',
-  ];
+  static final Map<String, String> packageToScheme = {
+    'com.phonepe.app': 'phonepe',
+    'net.one97.paytm': 'paytmmp',
+    'com.google.android.apps.nbu.paisa.user': 'tez',
+    'com.dreamplug.androidapp': 'credpay',
+    'in.amazon.mShop.android.shopping': 'amazonpay',
+    'com.whatsapp': 'whatsapp',
+    'com.mobikwik_new': 'mobikwik',
+  };
 
-  /// Checks if a given URL string or Uri represents an external UPI payment or Android Intent.
-  static bool isUpiOrIntentUrl(String urlString, [Uri? uri]) {
-    final lower = urlString.toLowerCase().trim();
-    if (lower.startsWith('intent://') || lower.startsWith('intent:#intent')) {
-      return true;
+  /// Returns true if the URL represents a UPI deep link, Android intent, or non-web custom scheme
+  static bool isUpiOrIntentUrl(String url, [Uri? uri]) {
+    final parsed = uri ?? Uri.tryParse(url);
+    if (parsed == null) return false;
+    final scheme = parsed.scheme.toLowerCase();
+    if (scheme.isEmpty) return false;
+    if (standardWebSchemes.contains(scheme)) {
+      return false;
     }
-    final scheme = (uri?.scheme.isNotEmpty == true ? uri!.scheme : Uri.tryParse(urlString)?.scheme)?.toLowerCase();
-    if (scheme != null && scheme.isNotEmpty) {
-      if (knownUpiSchemes.contains(scheme)) {
-        return true;
-      }
-      if (!standardWebSchemes.contains(scheme)) {
-        return true;
-      }
+    return true;
+  }
+
+  /// Builds a direct app-specific UPI URI if package is known
+  static String? buildAppSpecificUpiUrl(String? targetPackage, String query) {
+    if (targetPackage == null || !packageToScheme.containsKey(targetPackage)) {
+      return null;
     }
-    return false;
+    final scheme = packageToScheme[targetPackage]!;
+    if (scheme == 'tez') {
+      return 'tez://upi/pay?$query';
+    }
+    return '$scheme://pay?$query';
   }
 
   /// Parses Android intent or custom UPI scheme and launches the appropriate UPI app.
@@ -51,78 +54,122 @@ class UpiPaymentHelper {
         print('UPI/Intent processing: $urlString');
       }
 
-      String targetUrl = urlString;
       String? targetPackage;
       String? fallbackUrl;
+      String? scheme;
+      String query = '';
 
-      // Case 1: Intent URI (Chrome intent syntax: intent://... or intent:#Intent...)
-      if (urlString.startsWith('intent://') || urlString.startsWith('intent:#Intent')) {
-        // Extract fallback URL if present
-        final fallbackMatch = RegExp(r'browser_fallback_url=([^;]+)').firstMatch(urlString);
-        if (fallbackMatch != null) {
-          fallbackUrl = Uri.decodeComponent(fallbackMatch.group(1)!);
-        }
+      // Extract query parameters
+      if (urlString.contains('?')) {
+        final qPart = urlString.split('?')[1];
+        query = qPart.split('#Intent')[0];
+      }
 
-        // Extract package if specified
-        final pkgMatch = RegExp(r'package=([^;]+);?').firstMatch(urlString);
-        if (pkgMatch != null) {
-          targetPackage = pkgMatch.group(1);
-        }
+      // Extract package if present
+      final pkgMatch = RegExp(r'package=([^;]+);?').firstMatch(urlString);
+      if (pkgMatch != null) {
+        targetPackage = pkgMatch.group(1);
+      }
 
-        if (urlString.startsWith('intent://')) {
-          final schemeMatch = RegExp(r'scheme=([a-zA-Z0-9_-]+);?').firstMatch(urlString);
-          final scheme = schemeMatch?.group(1) ?? 'upi';
-          final pathWithQuery = urlString.substring('intent://'.length).split('#Intent')[0];
-          targetUrl = '$scheme://$pathWithQuery';
-        } else if (urlString.startsWith('intent:#Intent')) {
-          final dataMatch = RegExp(r'data=([^;]+);?').firstMatch(urlString);
-          if (dataMatch != null) {
-            targetUrl = Uri.decodeComponent(dataMatch.group(1)!);
-          }
+      // Extract fallback URL if present
+      final fallbackMatch = RegExp(r'browser_fallback_url=([^;]+)').firstMatch(urlString);
+      if (fallbackMatch != null) {
+        fallbackUrl = Uri.decodeComponent(fallbackMatch.group(1)!);
+      }
+
+      // Extract scheme
+      final schemeMatch = RegExp(r'scheme=([a-zA-Z0-9_-]+);?').firstMatch(urlString);
+      if (schemeMatch != null) {
+        scheme = schemeMatch.group(1);
+      } else {
+        final parsed = Uri.tryParse(urlString);
+        if (parsed != null && parsed.scheme.isNotEmpty && parsed.scheme != 'intent') {
+          scheme = parsed.scheme;
         }
       }
 
       if (kDebugMode) {
-        print('Parsed UPI target: $targetUrl, package: $targetPackage, fallback: $fallbackUrl');
+        print('Parsed package: $targetPackage, scheme: $scheme, query: $query');
       }
 
-      // First attempt: try launching targetUrl directly
-      final targetUri = Uri.tryParse(targetUrl);
-      if (targetUri != null) {
+      List<String> urlsToTry = [];
+
+      // 1. If a specific package was targeted (e.g. com.phonepe.app, net.one97.paytm, com.google.android.apps.nbu.paisa.user),
+      // build that app's dedicated direct URI so Android launches that exact app, NOT another default app!
+      if (targetPackage != null && query.isNotEmpty) {
+        final directAppUrl = buildAppSpecificUpiUrl(targetPackage, query);
+        if (directAppUrl != null) {
+          urlsToTry.add(directAppUrl);
+        }
+      }
+
+      // 2. If the scheme itself is an app-specific scheme (e.g. phonepe://, paytmmp://, tez://)
+      if (scheme != null && scheme != 'upi' && scheme != 'intent' && query.isNotEmpty) {
+        if (scheme == 'tez') {
+          urlsToTry.add('tez://upi/pay?$query');
+        } else {
+          urlsToTry.add('$scheme://pay?$query');
+        }
+      }
+
+      // 3. Generic NPCI UPI URL (upi://pay?...) - allows system chooser if dedicated app not installed
+      if (query.isNotEmpty) {
+        urlsToTry.add('upi://pay?$query');
+      }
+
+      // 4. Clean normalized original URL if distinct
+      String normalized = urlString.trim();
+      if (normalized.startsWith('intent://')) {
+        String pathWithQuery = normalized.substring('intent://'.length).split('#Intent')[0];
+        while (pathWithQuery.startsWith('/')) {
+          pathWithQuery = pathWithQuery.substring(1);
+        }
+        if (pathWithQuery.startsWith('upi/')) {
+          pathWithQuery = pathWithQuery.substring('upi/'.length);
+        }
+        if (!pathWithQuery.startsWith('pay') && pathWithQuery.contains('?')) {
+          pathWithQuery = 'pay${pathWithQuery.substring(pathWithQuery.indexOf('?'))}';
+        }
+        normalized = 'upi://$pathWithQuery';
+      }
+      if (!urlsToTry.contains(normalized)) {
+        urlsToTry.add(normalized);
+      }
+
+      // Attempt launching in priority order
+      for (final candidate in urlsToTry) {
+        final uri = Uri.tryParse(candidate);
+        if (uri == null) continue;
+
         try {
-          if (await canLaunchUrl(targetUri)) {
-            final launched = await launchUrl(targetUri, mode: LaunchMode.externalApplication);
-            if (launched) return true;
+          if (await canLaunchUrl(uri)) {
+            final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+            if (launched) {
+              if (kDebugMode) {
+                print('Successfully launched UPI URL: $candidate');
+              }
+              return true;
+            }
           }
         } catch (e) {
           if (kDebugMode) {
-            print('Direct launch failed for $targetUri: $e');
+            print('canLaunchUrl error for $candidate: $e');
           }
         }
 
-        // Secondary attempt: if direct launch returned false, try force-launching with externalApplication
+        // Secondary attempt for Android 11+ package visibility: try direct launch
         try {
-          final launched = await launchUrl(targetUri, mode: LaunchMode.externalApplication);
-          if (launched) return true;
+          final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (launched) {
+            if (kDebugMode) {
+              print('Successfully launched via direct fallback: $candidate');
+            }
+            return true;
+          }
         } catch (_) {}
       }
 
-      // Third attempt: if specific scheme (like paytmmp / tez / phonepe) failed, convert to generic upi://
-      if (!targetUrl.startsWith('upi://') && targetUrl.contains('?')) {
-        final queryIndex = targetUrl.indexOf('?');
-        final genericUpiUrl = 'upi://pay${targetUrl.substring(queryIndex)}';
-        final genericUri = Uri.tryParse(genericUpiUrl);
-        if (genericUri != null) {
-          try {
-            if (await canLaunchUrl(genericUri)) {
-              final launched = await launchUrl(genericUri, mode: LaunchMode.externalApplication);
-              if (launched) return true;
-            }
-          } catch (_) {}
-        }
-      }
-
-      // Fourth attempt: browser fallback URL
+      // Fallback URL (browser checkout)
       if (fallbackUrl != null && fallbackUrl.isNotEmpty) {
         final fallbackUri = Uri.tryParse(fallbackUrl);
         if (fallbackUri != null && await canLaunchUrl(fallbackUri)) {

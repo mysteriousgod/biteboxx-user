@@ -352,11 +352,23 @@ class OrderController extends GetxController implements GetxService {
     return responseModel.isSuccess;
   }
 
+  static List<CancellationData> get defaultCancellationReasons => [
+    CancellationData(id: 1, reason: 'Order placed by mistake'),
+    CancellationData(id: 2, reason: 'Payment issue / Want to change payment method'),
+    CancellationData(id: 3, reason: 'Delivery time is taking too long'),
+    CancellationData(id: 4, reason: 'Incorrect delivery address or contact number'),
+    CancellationData(id: 5, reason: 'Selected wrong food items or quantity'),
+    CancellationData(id: 6, reason: 'Change of mind / No longer needed'),
+    CancellationData(id: 7, reason: 'Other reason'),
+  ];
+
   Future<void> getOrderCancelReasons()async {
     List<CancellationData>? reasons = await orderServiceInterface.getCancelReasons();
-    if (reasons != null) {
-      _orderCancelReasons = [];
+    _orderCancelReasons = [];
+    if (reasons != null && reasons.isNotEmpty) {
       _orderCancelReasons!.addAll(reasons);
+    } else {
+      _orderCancelReasons!.addAll(defaultCancellationReasons);
     }
     update();
   }

@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
@@ -14,12 +16,13 @@ import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/helper/upi_payment_helper.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor/api/api_client.dart';
+import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
+import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;
@@ -50,8 +53,19 @@ class PaymentScreenState extends State<PaymentScreen> with WidgetsBindingObserve
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    String customerId = '';
+    if (widget.orderModel.userId != null && widget.orderModel.userId != 0) {
+      customerId = widget.orderModel.userId.toString();
+    } else if (widget.guestId.isNotEmpty) {
+      customerId = widget.guestId;
+    } else if (Get.isRegistered<ProfileController>() && Get.find<ProfileController>().userInfoModel?.id != null) {
+      customerId = Get.find<ProfileController>().userInfoModel!.id.toString();
+    } else if (Get.isRegistered<AuthController>()) {
+      customerId = Get.find<AuthController>().getGuestId();
+    }
+
     if((widget.addFundUrl == null || widget.addFundUrl!.isEmpty) && (widget.subscriptionUrl == null || widget.subscriptionUrl!.isEmpty)) {
-      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId == 0 ? widget.guestId : widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}';
+      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=$customerId&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}';
     } else if(widget.subscriptionUrl != null && widget.subscriptionUrl!.isNotEmpty){
       selectedUrl = widget.subscriptionUrl!;
     } else {
@@ -68,7 +82,7 @@ class PaymentScreenState extends State<PaymentScreen> with WidgetsBindingObserve
     }
 
     browser = MyInAppBrowser(orderID: widget.orderModel.id.toString(), orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: maxCodOrderAmount, addFundUrl: widget.addFundUrl,
-        subscriptionUrl: widget.subscriptionUrl, contactNumber: widget.contactNumber, restaurantId: widget.restaurantId, packageId: widget.packageId, isDeliveryOrder: widget.orderModel.orderType == 'delivery');
+        subscriptionUrl: widget.subscriptionUrl, contactNumber: widget.contactNumber, restaurantId: widget.restaurantId, packageId: widget.packageId, isDeliveryOrder: widget.orderModel.orderType == 'delivery', paymentMethod: widget.paymentMethod);
 
     if(!GetPlatform.isIOS) {
       await InAppWebViewController.setWebContentsDebuggingEnabled(true);
@@ -123,16 +137,55 @@ class PaymentScreenState extends State<PaymentScreen> with WidgetsBindingObserve
     }
   }
 
+  Future<bool> _verifyPaymentWithBackend(String orderId) async {
+    bool isPaid = false;
+
+    // 1. Actively query gateway status API for Paytm (triggers backend getTxnStatus)
+    if (widget.paymentMethod.toLowerCase().contains('paytm')) {
+      try {
+        final res = await Get.find<ApiClient>().getData('/payment/paytm/status?order_id=$orderId');
+        if (res.statusCode == 200 && res.body != null) {
+          if (res.body['is_paid'] == 1 || res.body['status'] == 'paid') {
+            isPaid = true;
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Paytm status API check error: $e');
+        }
+      }
+    }
+
+    // 2. Track order in order controller to get latest DB status
+    try {
+      final orderController = Get.find<OrderController>();
+      await orderController.trackOrder(
+        orderId,
+        null,
+        false,
+        contactNumber: widget.contactNumber,
+      );
+      if (orderController.trackModel?.paymentStatus == 'paid') {
+        isPaid = true;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Track order error: $e');
+      }
+    }
+
+    return isPaid;
+  }
+
   Future<void> _verifyStatusOnResume() async {
     final orderId = widget.orderModel.id;
     if (orderId != null && orderId != 0) {
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 8; i++) {
         if (!browser.canRedirect || !mounted) break;
         await Future.delayed(const Duration(milliseconds: 2500));
         try {
-          final orderController = Get.find<OrderController>();
-          await orderController.trackOrder(orderId.toString(), null, false, contactNumber: widget.contactNumber);
-          if (orderController.trackModel?.paymentStatus == 'paid') {
+          bool isPaid = await _verifyPaymentWithBackend(orderId.toString());
+          if (isPaid) {
             if (kDebugMode) {
               print('Order confirmed as paid on resume!');
             }
@@ -185,15 +238,12 @@ class PaymentScreenState extends State<PaymentScreen> with WidgetsBindingObserve
       print('---check------- : ${widget.addFundUrl == null} && ${widget.addFundUrl!.isEmpty} && ${widget.subscriptionUrl == ''} && ${widget.subscriptionUrl!.isEmpty}');
     }
 
-    if (browser.isAwaitingUpiReturn && widget.orderModel.id != null && widget.orderModel.id != 0) {
-      try {
-        final orderController = Get.find<OrderController>();
-        await orderController.trackOrder(widget.orderModel.id.toString(), null, false, contactNumber: widget.contactNumber);
-        if (orderController.trackModel?.paymentStatus == 'paid') {
-          browser.triggerSuccessRedirect();
-          return true;
-        }
-      } catch (_) {}
+    if (widget.orderModel.id != null && widget.orderModel.id != 0) {
+      bool isPaid = await _verifyPaymentWithBackend(widget.orderModel.id.toString());
+      if (isPaid) {
+        browser.triggerSuccessRedirect();
+        return true;
+      }
     }
 
     if((widget.addFundUrl == null || widget.addFundUrl!.isEmpty) && (widget.subscriptionUrl == null || widget.subscriptionUrl!.isEmpty)){
@@ -220,13 +270,44 @@ class MyInAppBrowser extends InAppBrowser {
   final int? restaurantId;
   final int? packageId;
   final bool isDeliveryOrder;
+  final String paymentMethod;
   bool isAwaitingUpiReturn = false;
 
   MyInAppBrowser({required this.orderID, required this.orderAmount, required this.maxCodOrderAmount, this.contactNumber, super.windowId,
-    super.initialUserScripts, this.addFundUrl, this.subscriptionUrl, this.restaurantId, this.packageId, this.isDeliveryOrder = false});
+    super.initialUserScripts, this.addFundUrl, this.subscriptionUrl, this.restaurantId, this.packageId, this.isDeliveryOrder = false, required this.paymentMethod});
 
   bool _canRedirect = true;
   bool get canRedirect => _canRedirect;
+
+  Future<bool> _verifyPaymentWithBackend(String orderId) async {
+    bool isPaid = false;
+    if (paymentMethod.toLowerCase().contains('paytm')) {
+      try {
+        final res = await Get.find<ApiClient>().getData('/payment/paytm/status?order_id=$orderId');
+        if (res.statusCode == 200 && res.body != null) {
+          if (res.body['is_paid'] == 1 || res.body['status'] == 'paid') {
+            isPaid = true;
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Paytm status API check error: $e');
+        }
+      }
+    }
+    try {
+      final orderController = Get.find<OrderController>();
+      await orderController.trackOrder(orderId, null, false, contactNumber: contactNumber);
+      if (orderController.trackModel?.paymentStatus == 'paid') {
+        isPaid = true;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Track order error: $e');
+      }
+    }
+    return isPaid;
+  }
 
   void triggerSuccessRedirect() {
     _redirect('${AppConstants.baseUrl}/payment-success', contactNumber, restaurantId, packageId);
@@ -277,15 +358,12 @@ class MyInAppBrowser extends InAppBrowser {
   @override
   void onExit() async {
     if(_canRedirect) {
-      if (isAwaitingUpiReturn && orderID.isNotEmpty && orderID != '0') {
-        try {
-          final orderController = Get.find<OrderController>();
-          await orderController.trackOrder(orderID, null, false, contactNumber: contactNumber);
-          if (orderController.trackModel?.paymentStatus == 'paid') {
-            triggerSuccessRedirect();
-            return;
-          }
-        } catch (_) {}
+      if (orderID.isNotEmpty && orderID != '0') {
+        bool isPaid = await _verifyPaymentWithBackend(orderID);
+        if (isPaid) {
+          triggerSuccessRedirect();
+          return;
+        }
       }
 
       if((addFundUrl == null || addFundUrl!.isEmpty) && (subscriptionUrl == null || subscriptionUrl!.isEmpty)){
@@ -345,8 +423,7 @@ class MyInAppBrowser extends InAppBrowser {
     }
   }
 
-  void _redirect(String url, String? contactNumber, int? restaurantId, int? packageId) {
-
+  void _redirect(String url, String? contactNumber, int? restaurantId, int? packageId) async {
     bool forSubscription = (subscriptionUrl != null && subscriptionUrl!.isNotEmpty && (addFundUrl == null || addFundUrl!.isEmpty));
 
     if(_canRedirect) {
@@ -356,10 +433,20 @@ class MyInAppBrowser extends InAppBrowser {
           : url.startsWith('${AppConstants.baseUrl}/payment-fail');
       bool isCancel = forSubscription ? url.startsWith('${AppConstants.baseUrl}/subscription-cancel')
           : url.startsWith('${AppConstants.baseUrl}/payment-cancel');
-      if (isSuccess || isFailed || isCancel) {
-        _canRedirect = false;
-        close();
+      if (!isSuccess && !isFailed && !isCancel) return;
+
+      _canRedirect = false;
+
+      if ((isFailed || isCancel) && !forSubscription && orderID.isNotEmpty && orderID != '0') {
+        bool actuallyPaid = await _verifyPaymentWithBackend(orderID);
+        if (actuallyPaid) {
+          isSuccess = true;
+          isFailed = false;
+          isCancel = false;
+        }
       }
+
+      close();
 
       if((addFundUrl == null || addFundUrl!.isEmpty) && (subscriptionUrl == null || subscriptionUrl!.isEmpty)){
         _orderPaymentDoneDecision(isSuccess, isFailed, isCancel);
@@ -378,7 +465,7 @@ class MyInAppBrowser extends InAppBrowser {
       Get.find<LoyaltyController>().saveEarningPoint(total.toStringAsFixed(0));
       Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID, 'success', orderAmount, contactNumber, isDeliveryOrder: isDeliveryOrder));
     } else if (isFailed || isCancel) {
-      Get.find<OrderController>().cancelOrder(int.parse(orderID), 'Payment failed or cancelled');
+      // Do not automatically cancel the order in the database.
       Get.offNamed(RouteHelper.getOrderSuccessRoute(orderID, 'fail', orderAmount, contactNumber, isDeliveryOrder: isDeliveryOrder));
     }
   }
