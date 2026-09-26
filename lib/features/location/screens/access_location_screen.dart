@@ -40,11 +40,11 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
   void initState() {
     super.initState();
 
-    if(ResponsiveHelper.isDesktop(Get.context!)) {
-      Future.delayed(const Duration(milliseconds: 600), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!widget.fromHome && mounted) {
         _checkPermission();
-      });
-    }
+      }
+    });
   }
 
   void _checkPermission() async {
@@ -73,7 +73,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
     AddressModel address = await Get.find<LocationController>().getCurrentLocation(true);
     ZoneResponseModel response = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
     if(response.isSuccess) {
-      if(!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
+      if(!Get.find<AuthController>().isGuestLoggedIn() && !Get.find<AuthController>().isLoggedIn()) {
         Get.find<AuthController>().guestLogin().then((response) {
           if(response.isSuccess) {
             Get.find<ProfileController>().setForceFullyUserEmpty();

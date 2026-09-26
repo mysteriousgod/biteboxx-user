@@ -291,7 +291,7 @@ class _PickMapDialogState extends State<PickMapDialog> {
           longitude: locationController.pickPosition.longitude.toString(),
           addressType: 'others', address: locationController.pickAddress,
         );
-        if(!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
+        if(!Get.find<AuthController>().isGuestLoggedIn() && !Get.find<AuthController>().isLoggedIn()) {
           Get.find<AuthController>().guestLogin().then((response) {
             if(response.isSuccess) {
               Get.find<ProfileController>().setForceFullyUserEmpty();

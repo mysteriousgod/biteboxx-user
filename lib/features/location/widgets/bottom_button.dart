@@ -38,7 +38,7 @@ class BottomButton extends StatelessWidget {
               AddressModel address = await Get.find<LocationController>().getCurrentLocation(true);
               ZoneResponseModel response = await Get.find<LocationController>().getZone(address.latitude, address.longitude, false);
               if(response.isSuccess) {
-                if(!Get.find<AuthController>().isGuestLoggedIn() || !Get.find<AuthController>().isLoggedIn()) {
+                if(!Get.find<AuthController>().isGuestLoggedIn() && !Get.find<AuthController>().isLoggedIn()) {
                   Get.find<AuthController>().guestLogin().then((response) {
                     if(response.isSuccess) {
                       Get.find<ProfileController>().setForceFullyUserEmpty();
