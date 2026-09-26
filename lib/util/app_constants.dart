@@ -58,6 +58,8 @@ class AppConstants {
   static const String couponApplyUri = '/api/v1/coupon/apply?code=';
   static const String runningOrderListUri = '/api/v1/customer/order/running-orders';
   static const String runningSubscriptionOrderListUri = '/api/v1/customer/order/order-subscription-list';
+  static const String checkAddressChangeUri = '/api/v1/customer/order/check-address-change';
+  static const String updateDeliveryAddressUri = '/api/v1/customer/order/update-delivery-address';
   static const String historyOrderListUri = '/api/v1/customer/order/list';
   static const String orderCancelUri = '/api/v1/customer/order/cancel';
   static const String codSwitchUri = '/api/v1/customer/order/payment-method';

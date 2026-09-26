@@ -316,5 +316,14 @@ class OrderService implements OrderServiceInterface {
     return canReorder;
   }
 
+  @override
+  Future<Response> checkAddressChange(int orderId, double lat, double lng, String address, {String? guestId}) async {
+    return await orderRepositoryInterface.checkAddressChange(orderId, lat, lng, address, guestId: guestId);
+  }
+
+  @override
+  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId}) async {
+    return await orderRepositoryInterface.updateDeliveryAddress(orderId, lat, lng, address, contactPersonName: contactPersonName, contactPersonNumber: contactPersonNumber, addressType: addressType, guestId: guestId);
+  }
 
 }

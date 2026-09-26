@@ -205,23 +205,43 @@ class CheckoutService implements CheckoutServiceInterface {
     double distance = -1;
     Response response = await checkoutRepositoryInterface.getDistanceInMeter(originLatLng, destinationLatLng);
     try {
-      if (response.statusCode == 200 && response.statusText == 'OK') {
-        if(isDuration){
-          final String duration = response.body['duration'] as String;
-          double parsedDuration = parseDuration(duration);
-          distance = parsedDuration / 3600;
-        }else{
-          final double distanceMater = response.body['distanceMeters']?.toDouble();
-          distance = distanceMater / 1000;
-        }
-      } else {
-        if(!isDuration) {
-          distance = Geolocator.distanceBetween(originLatLng.latitude, originLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude) / 1000;
+      if (response.statusCode == 200 && response.body != null) {
+        if (isDuration) {
+          if (response.body['rows'] != null && response.body['rows'] is List && (response.body['rows'] as List).isNotEmpty) {
+            final elements = response.body['rows'][0]['elements'];
+            if (elements != null && elements is List && elements.isNotEmpty && elements[0]['status'] == 'OK') {
+              final num durationVal = elements[0]['duration']?['value'] ?? 0;
+              distance = durationVal.toDouble() / 3600;
+            }
+          } else if (response.body['duration'] != null) {
+            final String duration = response.body['duration'] as String;
+            double parsedDuration = parseDuration(duration);
+            distance = parsedDuration / 3600;
+          }
+        } else {
+          // 1. Google Distance Matrix API format: rows[0].elements[0].distance.value
+          if (response.body['rows'] != null && response.body['rows'] is List && (response.body['rows'] as List).isNotEmpty) {
+            final elements = response.body['rows'][0]['elements'];
+            if (elements != null && elements is List && elements.isNotEmpty && elements[0]['status'] == 'OK') {
+              final num distanceMeters = elements[0]['distance']?['value'] ?? 0;
+              distance = distanceMeters.toDouble() / 1000;
+            }
+          }
+          // 2. Google Routes API format: distanceMeters
+          else if (response.body['distanceMeters'] != null) {
+            final num distanceMeter = response.body['distanceMeters'];
+            distance = distanceMeter.toDouble() / 1000;
+          }
         }
       }
+
+      if (distance <= 0 && !isDuration) {
+        // Fallback: apply 1.3x road winding factor to straight line
+        distance = (Geolocator.distanceBetween(originLatLng.latitude, originLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude) / 1000) * 1.3;
+      }
     } catch (e) {
-      if(!isDuration) {
-        distance = Geolocator.distanceBetween(originLatLng.latitude, originLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude) / 1000;
+      if (!isDuration) {
+        distance = (Geolocator.distanceBetween(originLatLng.latitude, originLatLng.longitude, destinationLatLng.latitude, destinationLatLng.longitude) / 1000) * 1.3;
       }
     }
 

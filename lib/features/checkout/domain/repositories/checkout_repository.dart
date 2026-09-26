@@ -67,7 +67,7 @@ class CheckoutRepository implements CheckoutRepositoryInterface {
 
     final response = await apiClient.getData(
       '${AppConstants.distanceMatrixUri}?origin_lat=${originLatLng.latitude}&origin_lng=${originLatLng.longitude}'
-        '&destination_lat=${destinationLatLng.latitude}&destination_lng=${destinationLatLng.longitude}&mode=WALK',
+        '&destination_lat=${destinationLatLng.latitude}&destination_lng=${destinationLatLng.longitude}&mode=driving',
     );
 
     return response;

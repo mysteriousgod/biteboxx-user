@@ -521,6 +521,53 @@ class OrderController extends GetxController implements GetxService {
 
   }
 
+  bool _isAddressUpdating = false;
+  bool get isAddressUpdating => _isAddressUpdating;
 
+  Map<String, dynamic>? _addressChangePreview;
+  Map<String, dynamic>? get addressChangePreview => _addressChangePreview;
+
+  Future<Map<String, dynamic>?> checkAddressChange(int orderId, double lat, double lng, String address) async {
+    _isAddressUpdating = true;
+    _addressChangePreview = null;
+    update();
+
+    Response response = await orderServiceInterface.checkAddressChange(
+      orderId, lat, lng, address,
+      guestId: AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId(),
+    );
+
+    _isAddressUpdating = false;
+    if (response.statusCode == 200 && response.body != null) {
+      _addressChangePreview = Map<String, dynamic>.from(response.body);
+    } else {
+      showCustomSnackBar(response.body?['errors']?[0]?['message'] ?? response.statusText ?? 'Failed to check address');
+    }
+    update();
+    return _addressChangePreview;
+  }
+
+  Future<bool> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType}) async {
+    _isAddressUpdating = true;
+    update();
+
+    ResponseModel response = await orderServiceInterface.updateDeliveryAddress(
+      orderId, lat, lng, address,
+      contactPersonName: contactPersonName,
+      contactPersonNumber: contactPersonNumber,
+      addressType: addressType,
+      guestId: AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId(),
+    );
+
+    _isAddressUpdating = false;
+    if (response.isSuccess) {
+      showCustomSnackBar(response.message, isError: false);
+      await trackOrder(orderId.toString(), null, true);
+    } else {
+      showCustomSnackBar(response.message);
+    }
+    update();
+    return response.isSuccess;
+  }
 
 }

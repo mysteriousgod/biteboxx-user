@@ -209,9 +209,42 @@ class OrderRepository implements OrderRepositoryInterface {
 
   @override
   Future update(Map<String, dynamic> body, int? id) {
-    // TODO: implement update
     throw UnimplementedError();
   }
 
-  
+  @override
+  Future<Response> checkAddressChange(int orderId, double lat, double lng, String address, {String? guestId}) async {
+    Map<String, dynamic> data = {
+      'order_id': orderId,
+      'latitude': lat,
+      'longitude': lng,
+      'address': address,
+    };
+    if (guestId != null) {
+      data['guest_id'] = guestId;
+    }
+    return await apiClient.postData(AppConstants.checkAddressChangeUri, data);
+  }
+
+  @override
+  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId}) async {
+    Map<String, dynamic> data = {
+      'order_id': orderId,
+      'latitude': lat,
+      'longitude': lng,
+      'address': address,
+    };
+    if (contactPersonName != null) data['contact_person_name'] = contactPersonName;
+    if (contactPersonNumber != null) data['contact_person_number'] = contactPersonNumber;
+    if (addressType != null) data['address_type'] = addressType;
+    if (guestId != null) data['guest_id'] = guestId;
+
+    Response response = await apiClient.putData(AppConstants.updateDeliveryAddressUri, data);
+    if (response.statusCode == 200) {
+      return ResponseModel(true, response.body['message'] ?? 'Address updated successfully');
+    } else {
+      String? errorMessage = response.body?['errors']?[0]?['message'] ?? response.statusText;
+      return ResponseModel(false, errorMessage);
+    }
+  }
 }

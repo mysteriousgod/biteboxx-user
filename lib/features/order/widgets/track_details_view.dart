@@ -6,6 +6,7 @@ import 'package:stackfood_multivendor/helper/date_converter.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:stackfood_multivendor/features/order/widgets/change_order_address_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/order/widgets/address_details_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
@@ -155,6 +156,41 @@ class TrackDetailsView extends StatelessWidget {
           ),
 
         ]),
+        if (!takeAway && ['pending', 'confirmed', 'processing', 'handover', 'picked_up'].contains(track.orderStatus)) ...[
+          const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => ChangeOrderAddressBottomSheet(order: track),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_location_alt, size: 14, color: Theme.of(context).primaryColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Change Address',
+                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: Dimensions.paddingSizeSmall),
 
         Container(

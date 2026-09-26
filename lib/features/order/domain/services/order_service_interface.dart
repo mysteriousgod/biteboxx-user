@@ -35,4 +35,6 @@ abstract class OrderServiceInterface {
   Future<PaginatedDeliveryLogModel?> getSubscriptionDeliveryLog(int? subscriptionID, int offset);
   Future<PaginatedPauseLogModel?> getSubscriptionPauseLog(int? subscriptionID, int offset);
   Future<ResponseModel> updateSubscriptionStatus(int? subscriptionID, String? startDate, String? endDate, String status, String note, String? reason);
+  Future<Response> checkAddressChange(int orderId, double lat, double lng, String address, {String? guestId});
+  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId});
 }
