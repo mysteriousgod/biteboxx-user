@@ -227,7 +227,7 @@ class OrderRepository implements OrderRepositoryInterface {
   }
 
   @override
-  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId}) async {
+  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId, String? extraPaymentMethod}) async {
     Map<String, dynamic> data = {
       'order_id': orderId,
       'latitude': lat,
@@ -238,6 +238,7 @@ class OrderRepository implements OrderRepositoryInterface {
     if (contactPersonNumber != null) data['contact_person_number'] = contactPersonNumber;
     if (addressType != null) data['address_type'] = addressType;
     if (guestId != null) data['guest_id'] = guestId;
+    if (extraPaymentMethod != null) data['extra_payment_method'] = extraPaymentMethod;
 
     Response response = await apiClient.putData(AppConstants.updateDeliveryAddressUri, data);
     if (response.statusCode == 200) {

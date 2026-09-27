@@ -8,8 +8,10 @@ import 'package:stackfood_multivendor/features/address/domain/models/address_mod
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
+import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
+import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 
@@ -25,6 +27,7 @@ class _ChangeOrderAddressBottomSheetState extends State<ChangeOrderAddressBottom
   AddressModel? _selectedAddress;
   Map<String, dynamic>? _previewData;
   bool _isChecking = false;
+  String _paymentOption = 'doorstep';
 
   @override
   void initState() {
@@ -293,6 +296,69 @@ class _ChangeOrderAddressBottomSheetState extends State<ChangeOrderAddressBottom
                           ),
                         ],
                       ),
+
+                      if ((_previewData!['extra_charge'] as num) > 0) ...[
+                        const Divider(height: 24),
+                        Text('Choose How to Pay Extra Fee:', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                        const SizedBox(height: 8),
+
+                        // Option 1: Doorstep (Cash or UPI to Rider)
+                        InkWell(
+                          onTap: () => setState(() => _paymentOption = 'doorstep'),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            margin: const EdgeInsets.only(bottom: 6),
+                            decoration: BoxDecoration(
+                              color: _paymentOption == 'doorstep' ? Theme.of(context).primaryColor.withValues(alpha: 0.08) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                              border: Border.all(
+                                color: _paymentOption == 'doorstep' ? Theme.of(context).primaryColor : Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(children: [
+                              Icon(
+                                _paymentOption == 'doorstep' ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: _paymentOption == 'doorstep' ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text('Pay at Doorstep (Cash / UPI)', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                Text('Pay directly to delivery partner upon arrival', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                              ])),
+                            ]),
+                          ),
+                        ),
+
+                        // Option 2: Pay Online Now
+                        InkWell(
+                          onTap: () => setState(() => _paymentOption = 'online'),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _paymentOption == 'online' ? Theme.of(context).primaryColor.withValues(alpha: 0.08) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                              border: Border.all(
+                                color: _paymentOption == 'online' ? Theme.of(context).primaryColor : Theme.of(context).disabledColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(children: [
+                              Icon(
+                                _paymentOption == 'online' ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: _paymentOption == 'online' ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text('Pay Online Now', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                                Text('Pay digitally via UPI / Netbanking / Cards', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
+                              ])),
+                            ]),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -302,10 +368,17 @@ class _ChangeOrderAddressBottomSheetState extends State<ChangeOrderAddressBottom
 
               // Confirm button
               GetBuilder<OrderController>(builder: (orderController) {
+                String buttonText = 'Confirm & Update Address';
+                if (orderController.isAddressUpdating) {
+                  buttonText = 'Updating Address...';
+                } else if (_previewData != null && (_previewData!['extra_charge'] as num) > 0) {
+                  buttonText = _paymentOption == 'online'
+                      ? 'Pay ${_previewData!['currency_symbol']}${_previewData!['extra_charge']} Online & Update'
+                      : 'Confirm & Pay at Doorstep';
+                }
+
                 return CustomButtonWidget(
-                  buttonText: orderController.isAddressUpdating
-                      ? 'Updating Address...'
-                      : 'Confirm & Update Address',
+                  buttonText: buttonText,
                   isLoading: orderController.isAddressUpdating,
                   onPressed: (_selectedAddress != null && _previewData != null && !orderController.isAddressUpdating)
                       ? () async {
@@ -317,9 +390,17 @@ class _ChangeOrderAddressBottomSheetState extends State<ChangeOrderAddressBottom
                             contactPersonName: _selectedAddress!.contactPersonName,
                             contactPersonNumber: _selectedAddress!.contactPersonNumber,
                             addressType: _selectedAddress!.addressType,
+                            extraPaymentMethod: _paymentOption,
                           );
                           if (success && mounted) {
                             Navigator.pop(context);
+                            if (_paymentOption == 'online' && (_previewData!['extra_charge'] as num) > 0) {
+                              Get.toNamed(RouteHelper.getPaymentRoute(
+                                widget.order,
+                                'digital_payment',
+                                guestId: AuthHelper.isLoggedIn() ? '' : AuthHelper.getGuestId(),
+                              ));
+                            }
                           }
                         }
                       : null,

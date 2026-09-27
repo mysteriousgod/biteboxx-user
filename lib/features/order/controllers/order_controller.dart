@@ -547,7 +547,7 @@ class OrderController extends GetxController implements GetxService {
     return _addressChangePreview;
   }
 
-  Future<bool> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType}) async {
+  Future<bool> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? extraPaymentMethod}) async {
     _isAddressUpdating = true;
     update();
 
@@ -557,6 +557,7 @@ class OrderController extends GetxController implements GetxService {
       contactPersonNumber: contactPersonNumber,
       addressType: addressType,
       guestId: AuthHelper.isLoggedIn() ? null : AuthHelper.getGuestId(),
+      extraPaymentMethod: extraPaymentMethod,
     );
 
     _isAddressUpdating = false;

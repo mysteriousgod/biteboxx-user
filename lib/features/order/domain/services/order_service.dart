@@ -322,8 +322,8 @@ class OrderService implements OrderServiceInterface {
   }
 
   @override
-  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId}) async {
-    return await orderRepositoryInterface.updateDeliveryAddress(orderId, lat, lng, address, contactPersonName: contactPersonName, contactPersonNumber: contactPersonNumber, addressType: addressType, guestId: guestId);
+  Future<ResponseModel> updateDeliveryAddress(int orderId, double lat, double lng, String address, {String? contactPersonName, String? contactPersonNumber, String? addressType, String? guestId, String? extraPaymentMethod}) async {
+    return await orderRepositoryInterface.updateDeliveryAddress(orderId, lat, lng, address, contactPersonName: contactPersonName, contactPersonNumber: contactPersonNumber, addressType: addressType, guestId: guestId, extraPaymentMethod: extraPaymentMethod);
   }
 
 }

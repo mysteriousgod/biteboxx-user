@@ -8,6 +8,7 @@ import 'package:stackfood_multivendor/features/order/widgets/offline_info_edit_d
 import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/order/widgets/delivery_details.dart';
+import 'package:stackfood_multivendor/features/order/widgets/change_order_address_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/order/widgets/delivered_success_banner_widget.dart';
 import 'package:stackfood_multivendor/features/order/widgets/order_product_widget.dart';
 import 'package:stackfood_multivendor/features/review/widgets/review_dialog_widget.dart';
@@ -920,6 +921,41 @@ class OrderInfoSection extends StatelessWidget {
               },
               child: DeliveryDetails(from: false, address: order.deliveryAddress?.address ?? ''),
             ),
+            if (order.orderType != 'take_away' && ['pending', 'confirmed', 'processing', 'handover', 'picked_up'].contains(order.orderStatus)) ...[
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => ChangeOrderAddressBottomSheet(order: order),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                      border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.edit_location_alt, size: 14, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Change Address',
+                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).primaryColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ]),
         ),
 
