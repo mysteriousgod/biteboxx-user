@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 class AppConstants {
   static String appName = dotenv.env['APP_NAME']!;
-  static const double appVersion = 8.5; ///Flutter SDK: 3.35.2
+  static const double appVersion = 8.6; ///Flutter SDK: 3.35.2
 
   /// Feature flag for subscription feature (Can be overridden via --dart-define=ENABLE_SUBSCRIPTION_FEATURE=true/false)
   static const bool enableSubscriptionFeature = bool.fromEnvironment(
