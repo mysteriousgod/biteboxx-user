@@ -11,7 +11,10 @@ import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/date_converter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
 
 class RestaurantService implements RestaurantServiceInterface {
@@ -21,10 +24,37 @@ class RestaurantService implements RestaurantServiceInterface {
   @override
   double getRestaurantDistanceFromUser(LatLng restaurantLatLng){
     double distance = 0;
-    distance = Geolocator.distanceBetween(
-        restaurantLatLng.latitude, restaurantLatLng.longitude,
-        double.parse(AddressHelper.getAddressFromSharedPref()!.latitude!), double.parse(AddressHelper.getAddressFromSharedPref()!.longitude!)
-    ) / 1000;
+    try {
+      double? userLat;
+      double? userLng;
+
+      // 1. Prioritize active saved/selected delivery address in SharedPreferences
+      final address = AddressHelper.getAddressFromSharedPref();
+      if (address?.latitude != null && address?.longitude != null) {
+        userLat = double.tryParse(address!.latitude!);
+        userLng = double.tryParse(address.longitude!);
+      }
+
+      // 2. Fallback to live GPS position from LocationController if no address selected
+      if (userLat == null || userLng == null) {
+        if (Get.isRegistered<LocationController>()) {
+          final locController = Get.find<LocationController>();
+          if (locController.position.latitude != 0 && locController.position.longitude != 0) {
+            userLat = locController.position.latitude;
+            userLng = locController.position.longitude;
+          }
+        }
+      }
+
+      if (userLat != null && userLng != null) {
+        distance = Geolocator.distanceBetween(
+          restaurantLatLng.latitude, restaurantLatLng.longitude,
+          userLat, userLng,
+        ) / 1000;
+      }
+    } catch (e) {
+      debugPrint('Error calculating restaurant distance: $e');
+    }
 
     return distance;
   }

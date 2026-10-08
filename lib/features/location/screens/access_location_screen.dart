@@ -42,7 +42,9 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
 
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!widget.fromHome && mounted) {
-        _checkPermission();
+        if (!Get.find<AuthController>().isLoggedIn()) {
+          _checkPermission();
+        }
       }
     });
   }
@@ -84,7 +86,11 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
         Get.find<LocationController>().saveAddressAndNavigate(address, false, null, false, ResponsiveHelper.isDesktop(Get.context!));
       }
     } else {
+      if(Get.isDialogOpen ?? false) {
+        Get.back();
+      }
       showCustomSnackBar('service_not_available_in_current_location'.tr);
+      Get.toNamed(RouteHelper.getPickMapRoute(widget.route ?? (widget.fromSignUp ? RouteHelper.signUp : RouteHelper.accessLocation), widget.route != null));
     }
   }
 

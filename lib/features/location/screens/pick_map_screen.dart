@@ -95,7 +95,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
 
             Positioned(
               top: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall,
-              child: LocationSearchDialog(mapController: _mapController, pickedLocation: locationController.pickAddress!),
+              child: LocationSearchDialog(mapController: _mapController, pickedLocation: locationController.pickAddress ?? ''),
               /*child: InkWell(
                 onTap: () => Get.dialog(LocationSearchDialog(mapController: _mapController)),
                 child: Container(

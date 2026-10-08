@@ -205,7 +205,11 @@ class LocationController extends GetxController implements GetxService {
         address.zoneData!.addAll(response.zoneData);
         autoNavigate(address, fromSignUp, route, canRoute, isDesktop);
       } else {
-        Get.back();
+        _isLoading = false;
+        update();
+        if(Get.isDialogOpen ?? false) {
+          Get.back();
+        }
         showCustomSnackBar(response.message);
         if(route == 'splash') {
           Get.toNamed(RouteHelper.getPickMapRoute(route, false));
@@ -337,6 +341,14 @@ class LocationController extends GetxController implements GetxService {
 
   Future<void> updateZone() async {
     await locationServiceInterface.updateZone();
+  }
+
+  void updatePositionWithLatLng(LatLng latLng) {
+    _position = Position(
+      latitude: latLng.latitude, longitude: latLng.longitude, timestamp: DateTime.now(),
+      altitude: 1, heading: 1, speed: 1, speedAccuracy: 1, floor: 1, accuracy: 1, altitudeAccuracy: 1, headingAccuracy: 1,
+    );
+    update();
   }
 
 }

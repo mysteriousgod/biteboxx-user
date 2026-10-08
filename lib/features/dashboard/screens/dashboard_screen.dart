@@ -12,7 +12,6 @@ import 'package:stackfood_multivendor/features/splash/controllers/splash_control
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
-import 'package:stackfood_multivendor/features/dashboard/widgets/address_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/dashboard/widgets/bottom_nav_item.dart';
 import 'package:stackfood_multivendor/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/screens/favourite_screen.dart';
@@ -61,7 +60,6 @@ class DashboardScreenState extends State<DashboardScreen> {
             () => showAnimatedDialog(
                 Get.context!, const CongratulationDialogue()));
       }
-      _suggestAddressBottomSheet();
       Get.find<OrderController>().getRunningOrders(1, notify: false);
     }
 
@@ -112,24 +110,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> _suggestAddressBottomSheet() async {
-    active = await Get.find<DashboardController>().checkLocationActive();
-    if (widget.fromSplash &&
-        Get.find<DashboardController>().showLocationSuggestion &&
-        active) {
-      Future.delayed(const Duration(seconds: 1), () {
-        showModalBottomSheet(
-          context: Get.context!,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (con) => const AddressBottomSheet(),
-        ).then((value) {
-          Get.find<DashboardController>().hideSuggestedLocation();
-          setState(() {});
-        });
-      });
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {

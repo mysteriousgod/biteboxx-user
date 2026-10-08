@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
+import 'package:location/location.dart' hide LocationAccuracy;
 import 'package:stackfood_multivendor/api/api_client.dart';
 import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_loader_widget.dart';
@@ -8,6 +8,7 @@ import 'package:stackfood_multivendor/features/address/controllers/address_contr
 import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
+import 'package:stackfood_multivendor/features/location/domain/models/zone_response_model.dart';
 import 'package:stackfood_multivendor/features/location/widgets/pick_map_dialog.dart';
 import 'package:stackfood_multivendor/features/notification/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
@@ -19,6 +20,8 @@ import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stackfood_multivendor/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:stackfood_multivendor/helper/splash_route_helper.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -312,8 +315,9 @@ class SplashController extends GetxController implements GetxService {
       }
     }
 
-    // 1. Fast-path: If an address is already saved, navigate immediately
+    // 1. Fast-path: If an address is already saved, navigate immediately and sync GPS in background
     if (AddressHelper.getAddressFromSharedPref() != null) {
+      _syncLocationInBackground();
       navigateToInitial();
       return;
     }
@@ -355,6 +359,35 @@ class SplashController extends GetxController implements GetxService {
     } else {
       navigateToAccessLocation();
     }
+  }
+
+  void _syncLocationInBackground() {
+    Future.microtask(() async {
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+          if (serviceEnabled) {
+            Position position = await Geolocator.getCurrentPosition(
+              locationSettings: LocationSettings(accuracy: LocationAccuracy.medium, timeLimit: const Duration(seconds: 5)),
+            );
+            if (Get.isRegistered<LocationController>()) {
+              ZoneResponseModel response = await Get.find<LocationController>().getZone(
+                position.latitude.toString(), position.longitude.toString(), false,
+              );
+              if (response.isSuccess) {
+                Get.find<LocationController>().updatePositionWithLatLng(LatLng(position.latitude, position.longitude));
+                if (Get.isRegistered<RestaurantController>()) {
+                  Get.find<RestaurantController>().update();
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Background location sync error: $e');
+      }
+    });
   }
 
   void _checkPermission(String page) async {

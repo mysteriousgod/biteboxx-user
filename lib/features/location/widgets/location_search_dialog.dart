@@ -107,10 +107,12 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                 title: Text(location),
                 onTap: () async {
                   int selectedIndex = _predictList.indexOf(location);
-                  PredictionModel suggestion = _predictionList[selectedIndex];
-                  Position position = await Get.find<LocationController>().setLocation(suggestion.placeId!, suggestion.description, widget.mapController);
-                  if(widget.fromAddress!) {
-                    widget.callBack!(position);
+                  if (selectedIndex >= 0 && selectedIndex < _predictionList.length) {
+                    PredictionModel suggestion = _predictionList[selectedIndex];
+                    Position position = await Get.find<LocationController>().setLocation(suggestion.placeId!, suggestion.description, widget.mapController);
+                    if(widget.fromAddress!) {
+                      widget.callBack!(position);
+                    }
                   }
                   controller.closeView(location);
                 },
