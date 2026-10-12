@@ -22,7 +22,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:url_strategy/url_strategy.dart';
@@ -79,18 +78,6 @@ Future<void> main() async {
       }
     }catch(_) {}
 
-    if (ResponsiveHelper.isWeb()) {
-      try {
-        await FacebookAuth.instance.webAndDesktopInitialize(
-          appId: dotenv.env['FACEBOOK_APP_ID'] ?? "452131619626499",
-          cookie: true,
-          xfbml: true,
-          version: "v13.0",
-        );
-      } catch (e) {
-         debugPrint("Facebook Auth Failed: $e");
-      }
-    }
     runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
   } catch (e, stack) {
     runApp(MaterialApp(

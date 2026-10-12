@@ -31,22 +31,11 @@
 			<array>
 				<string>com.googleusercontent.apps.491987943015-8enep3h58pfk6da9oc17rv2iqostjvln</string>
 				<string>com.googleusercontent.apps.651863605412-isgics249n4024snpsqe3eknt5kelv9g</string>
-				<string>fb452131619626499</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>FacebookAppID</key>
-	<string>452131619626499</string>
-	<key>FacebookClientToken</key>
-	<string>CLIENT-TOKEN</string>
-	<key>FacebookDisplayName</key>
-	<string>BiteBoxx</string>
-	<key>FacebookAutoLogAppEventsEnabled</key>
-	<false/>
-	<key>FacebookAdvertiserIDCollectionEnabled</key>
-	<false/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
 	<key>GIDClientID</key>

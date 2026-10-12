@@ -15,7 +15,6 @@ import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -33,14 +32,13 @@ class SocialLoginWidget extends StatelessWidget {
     bool canAppleLogin = Get.find<SplashController>().configModel!.appleLogin!.isNotEmpty && Get.find<SplashController>().configModel!.appleLogin![0].status!
         && !GetPlatform.isAndroid && !GetPlatform.isWeb;
 
-    bool canGoogleAndFacebookLogin = Get.find<SplashController>().configModel!.socialLogin!.isNotEmpty && (Get.find<SplashController>().configModel!.socialLogin![0].status!
-        || Get.find<SplashController>().configModel!.socialLogin![1].status!);
+    bool canGoogleLogin = Get.find<SplashController>().configModel!.socialLogin!.isNotEmpty && Get.find<SplashController>().configModel!.socialLogin![0].status!;
 
     if(onlySocialLogin) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          canGoogleAndFacebookLogin ? Column(children: [
+          canGoogleLogin ? Column(children: [
 
             showWelcomeText ? Text('${'welcome_to'.tr} ${AppConstants.appName}', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)) : const SizedBox(),
             const SizedBox(height: Dimensions.paddingSizeLarge),
@@ -69,29 +67,7 @@ class SocialLoginWidget extends StatelessWidget {
             ) : const SizedBox(),
             SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeLarge : 0),
 
-            Get.find<SplashController>().configModel!.socialLogin![1].status! ? Container(
-              height: 50,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5, offset: const Offset(2, 2))],
-              ),
-              child: CustomInkWellWidget(
-                onTap: ()=> _facebookLogin(),
-                radius: Dimensions.radiusDefault,
-                child: Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.facebookIcon, height: 20, width: 20),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                    Text('continue_with_facebook'.tr, style: robotoMedium.copyWith()),
-                  ]),
-                ),
-              ),
-            ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! ? Dimensions.paddingSizeLarge : 0),
 
             canAppleLogin ? Container(
               height: 50,
@@ -146,7 +122,7 @@ class SocialLoginWidget extends StatelessWidget {
       );
     }
 
-    return canGoogleAndFacebookLogin || canAppleLogin ? Column(children: [
+    return canGoogleLogin || canAppleLogin ? Column(children: [
 
       const SizedBox(height: Dimensions.paddingSizeSmall),
 
@@ -185,22 +161,7 @@ class SocialLoginWidget extends StatelessWidget {
         ) : const SizedBox(),
         // SizedBox(width: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeLarge : 0),
 
-        Get.find<SplashController>().configModel!.socialLogin![1].status! ? Padding(
-          padding: EdgeInsets.only(left: Get.find<LocalizationController>().isLtr ? Dimensions.paddingSizeLarge : 0, right: Get.find<LocalizationController>().isLtr ? 0 : Dimensions.paddingSizeLarge),
-          child: InkWell(
-            onTap: () => _facebookLogin(),
-            child: Container(
-              height: 40, width: 40,
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusDefault)),
-                boxShadow: [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, spreadRadius: 1, blurRadius: 5, offset: const Offset(2, 2))],
-              ),
-              child: Image.asset(Images.facebookIcon),
-            ),
-          ),
-        ) : const SizedBox(),
+
         // const SizedBox(width: Dimensions.paddingSizeLarge),
 
         canAppleLogin ? Padding(
@@ -245,25 +206,7 @@ class SocialLoginWidget extends StatelessWidget {
     });
   }
 
-  void _facebookLogin() async {
-    LoginResult result = await FacebookAuth.instance.login(permissions: ["public_profile", "email"]);
-    if (result.status == LoginStatus.success) {
-      Map userData = await FacebookAuth.instance.getUserData();
 
-      SocialLogInBodyModel facebookBodyModel = SocialLogInBodyModel(
-        email: userData['email'], token: result.accessToken!.token, uniqueId: result.accessToken!.userId,
-        medium: 'facebook', loginType: CentralizeLoginType.social.name,
-      );
-
-      Get.find<AuthController>().loginWithSocialMedia(facebookBodyModel).then((response) {
-        if (response.isSuccess) {
-          _processSocialSuccessSetup(response, null, null, facebookBodyModel);
-        } else {
-          showCustomSnackBar(response.message);
-        }
-      });
-    }
-  }
 
   void _appleLogin() async {
     final credential = await SignInWithApple.getAppleIDCredential(scopes: [
