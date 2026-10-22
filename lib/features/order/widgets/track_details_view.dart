@@ -12,7 +12,8 @@ import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
+import 'package:stackfood_multivendor/helper/secure_calling_helper.dart';
+import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class TrackDetailsView extends StatelessWidget {
@@ -236,13 +237,24 @@ class TrackDetailsView extends StatelessWidget {
               const SizedBox(width: Dimensions.paddingSizeLarge),
 
               InkWell(
-                onTap: () async {
-                  if(await canLaunchUrlString('tel:${takeAway ? track.restaurant != null ? track.restaurant!.phone : '' : track.deliveryMan!.phone}')) {
-                    launchUrlString('tel:${takeAway ? track.restaurant != null ? track.restaurant!.phone : '' : track.deliveryMan!.phone}', mode: LaunchMode.externalApplication);
-                  }else {
-                    showCustomSnackBar('${'can_not_launch'.tr} ${takeAway ? track.restaurant != null ? track.restaurant!.phone : '' : track.deliveryMan!.phone}');
-                  }
+                onTap: () {
+                  final customerPhone = track.deliveryAddress?.contactPersonNumber ??
+                      (Get.isRegistered<ProfileController>() ? Get.find<ProfileController>().userInfoModel?.phone : null);
+                  final targetPhone = takeAway
+                      ? (track.restaurant != null ? track.restaurant!.phone : '')
+                      : (track.deliveryMan != null ? track.deliveryMan!.phone : '');
+                  final targetName = takeAway
+                      ? (track.restaurant != null ? track.restaurant!.name ?? 'Restaurant' : 'Restaurant')
+                      : (track.deliveryMan != null ? '${track.deliveryMan!.fName ?? ''} ${track.deliveryMan!.lName ?? ''}'.trim() : 'Delivery Partner');
 
+                  SecureCallingHelper.initiateMaskedCall(
+                    context: context,
+                    orderId: track.id.toString(),
+                    customerPhone: customerPhone,
+                    targetPhone: targetPhone,
+                    targetName: targetName.isNotEmpty ? targetName : 'Delivery Partner',
+                    callerRole: 'customer',
+                  );
                 },
                 child: Image.asset(Images.callImageOrderDetails, height: 25, width: 25),
               ),

@@ -16,6 +16,7 @@ import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor/helper/secure_calling_helper.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 class GuestTrackOrderScreen extends StatefulWidget {
   final String orderId;
@@ -128,14 +129,16 @@ class _GuestTrackOrderScreenState extends State<GuestTrackOrderScreen> {
                             isActive: status == AppConstants.handover,
                             subTitle: 'your_delivery_man_is_coming'.tr,
                             trailing: (orderController.trackModel?.deliveryMan?.phone != null && status != AppConstants.delivered && status != AppConstants.refundRequested) ? InkWell(
-                              onTap: () async {
-
-                                if(await canLaunchUrlString('tel:${orderController.trackModel?.deliveryMan?.phone}')) {
-                                  launchUrlString('tel:${orderController.trackModel?.deliveryMan?.phone}');
-                                }else {
-                                  showCustomSnackBar('${'can_not_launch'.tr} ${orderController.trackModel?.deliveryMan?.phone}');
-                                }
-
+                              onTap: () {
+                                final deliveryName = '${orderController.trackModel?.deliveryMan?.fName ?? ''} ${orderController.trackModel?.deliveryMan?.lName ?? ''}'.trim();
+                                SecureCallingHelper.initiateMaskedCall(
+                                  context: context,
+                                  orderId: widget.orderId,
+                                  customerPhone: widget.number,
+                                  targetPhone: orderController.trackModel?.deliveryMan?.phone,
+                                  targetName: deliveryName.isNotEmpty ? deliveryName : 'Delivery Partner',
+                                  callerRole: 'customer',
+                                );
                               },
                               child: const Icon(Icons.phone_in_talk),
                             ) : const SizedBox(),

@@ -30,6 +30,7 @@ import 'package:stackfood_multivendor/features/order/widgets/tracking_stepper_wi
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stackfood_multivendor/helper/secure_calling_helper.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class OrderInfoSection extends StatelessWidget {
@@ -1144,13 +1145,19 @@ class OrderInfoSection extends StatelessWidget {
                 const SizedBox(width: Dimensions.paddingSizeDefault),
 
                 InkWell(
-                  onTap: () async {
-                    if(await canLaunchUrlString('tel:${order.deliveryMan!.phone}')) {
-                      launchUrlString('tel:${order.deliveryMan!.phone}', mode: LaunchMode.externalApplication);
-                    }else {
-                      showCustomSnackBar('${'can_not_launch'.tr} ${order.deliveryMan!.phone}');
-                    }
+                  onTap: () {
+                    final customerPhone = contactNumber ?? order.deliveryAddress?.contactPersonNumber;
+                    final deliveryPhone = order.deliveryMan?.phone;
+                    final deliveryName = '${order.deliveryMan?.fName ?? ''} ${order.deliveryMan?.lName ?? ''}'.trim();
 
+                    SecureCallingHelper.initiateMaskedCall(
+                      context: context,
+                      orderId: order.id.toString(),
+                      customerPhone: customerPhone,
+                      targetPhone: deliveryPhone,
+                      targetName: deliveryName.isNotEmpty ? deliveryName : 'Delivery Partner',
+                      callerRole: 'customer',
+                    );
                   },
                   child: Image.asset(Images.callImageOrderDetails, height: 25, width: 25, fit: BoxFit.cover),
                 ),
