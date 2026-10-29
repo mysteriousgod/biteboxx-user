@@ -10,6 +10,8 @@ import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/order/screens/biteboxx_modern_order_view.dart';
+import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -44,6 +46,18 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
     bool isLoggedIn = AuthHelper.isLoggedIn();
     return GetBuilder<SplashController>(builder: (splashController) {
       final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      if (splashController.activeTheme == 11) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).cardColor,
+          body: BiteboxxModernOrderView(
+            tabController: _tabController!,
+            onContinueShopping: () {
+              Get.offAllNamed(RouteHelper.getInitialRoute());
+            },
+          ),
+        );
+      }
 
       Widget content = isLoggedIn ? GetBuilder<OrderController>(
         builder: (orderController) {

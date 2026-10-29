@@ -11,4 +11,6 @@ abstract class ProfileServiceInterface {
   Future<ResponseModel> changePassword(UserInfoModel userInfoModel);
   Future<XFile?> pickImageFromGallery();
   Future<Response> deleteUser();
+  Future<Response> sendDeleteAccountOtp();
+  Future<Response> deleteUserWithOtp(String otp);
 }

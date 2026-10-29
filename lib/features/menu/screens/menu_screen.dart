@@ -1,6 +1,7 @@
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/menu/screens/biteboxx_modern_profile_view.dart';
 import 'package:stackfood_multivendor/features/home/themes/theme_tokens.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/language/widgets/language_bottom_sheet_widget.dart';
@@ -38,6 +39,17 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return GetBuilder<SplashController>(builder: (splashController) {
       final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      if (splashController.activeTheme == 11) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).cardColor,
+          body: BiteboxxModernProfileView(
+            onOrdersTap: () {
+              Get.toNamed(RouteHelper.getOrderRoute());
+            },
+          ),
+        );
+      }
 
       Widget screenContent = Scaffold(
         backgroundColor: isGlassmorphic ? Colors.transparent : Theme.of(context).cardColor,

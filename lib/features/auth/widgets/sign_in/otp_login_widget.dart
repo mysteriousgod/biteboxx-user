@@ -9,6 +9,7 @@ import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_che
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
+import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 
@@ -98,10 +99,32 @@ class OtpLoginWidget extends StatelessWidget {
             onPressed: authController.acceptTerms ? onClickLoginButton : null,
             fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault,
           ),
-          const SizedBox(height: Dimensions.paddingSizeLarge),
+          const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-          // No social login, no sign-up link — phone OTP only
-          const SizedBox(height: 50),
+          // Help / Support Link for account recovery
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.headset_mic_outlined, size: 16, color: Theme.of(context).primaryColor),
+              const SizedBox(width: 6),
+              Text(
+                'having_trouble'.tr.isEmpty ? 'Need help or recovering an account? ' : 'having_trouble'.tr,
+                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
+              ),
+              InkWell(
+                onTap: () => Get.toNamed(RouteHelper.getSupportRoute()),
+                child: Text(
+                  'help_support'.tr,
+                  style: robotoBold.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).primaryColor,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
 
         ]),
       );

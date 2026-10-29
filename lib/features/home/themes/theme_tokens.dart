@@ -14,7 +14,8 @@ enum ActiveTheme {
   minimalist(7, 'Minimalist 2.0'),
   darkFuturistic(8, 'Dark Futuristic'),
   vaporwave(9, 'Retro Vaporwave'),
-  skeuomorphic(10, 'Skeuomorphism');
+  skeuomorphic(10, 'Skeuomorphism'),
+  biteboxxModern(11, 'BiteBoxx Modern');
 
   final int id;
   final String label;
@@ -161,6 +162,50 @@ class ThemeTokens {
       ],
     );
   }
+
+  // BiteBoxx Modern (Theme 11)
+  static const Color modernOrange = Color(0xFFFF6000);
+  static const Color modernPeach = Color(0xFFFFE8D6);
+  static const Color modernLightPeach = Color(0xFFFFF0E6);
+  static const Color modernDark = Color(0xFF26262B);
+  static const Color modernBg = Color(0xFFF7F8FA);
+
+  static const LinearGradient modernHeaderGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFFFFE8D6),
+      Color(0xFFFFF4EC),
+      Color(0xFFF7F8FA),
+    ],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  static const LinearGradient modernProfileCardGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFFFE5D0),
+      Color(0xFFFFF2E8),
+      Color(0xFFFFFFFF),
+    ],
+  );
+
+  static BoxDecoration modernCardBox({double radius = 22, Color? color, Border? border}) {
+    return BoxDecoration(
+      color: color ?? Colors.white,
+      borderRadius: BorderRadius.circular(radius),
+      border: border,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.04),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
 }
 
 /// Glassmorphic frosted container with backdrop blur

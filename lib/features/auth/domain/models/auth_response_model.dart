@@ -6,6 +6,8 @@ class AuthResponseModel {
   IsExistUser? isExistUser;
   String? loginType;
   String? email;
+  bool? isDeletionPending;
+  int? daysRemaining;
 
   AuthResponseModel({
     this.token,
@@ -15,6 +17,8 @@ class AuthResponseModel {
     this.isExistUser,
     this.loginType,
     this.email,
+    this.isDeletionPending,
+    this.daysRemaining,
   });
 
   AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +31,8 @@ class AuthResponseModel {
         : null;
     loginType = json['login_type'];
     email = json['email'];
+    isDeletionPending = json['is_deletion_pending'] == true || json['is_deletion_pending'] == 1;
+    daysRemaining = json['days_remaining'];
   }
 
   Map<String, dynamic> toJson() {
@@ -40,6 +46,8 @@ class AuthResponseModel {
     }
     data['login_type'] = loginType;
     data['email'] = email;
+    data['is_deletion_pending'] = isDeletionPending;
+    data['days_remaining'] = daysRemaining;
     return data;
   }
 }

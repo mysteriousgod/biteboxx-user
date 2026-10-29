@@ -60,6 +60,16 @@ class ProfileRepository implements ProfileRepositoryInterface {
   }
 
   @override
+  Future<Response> sendDeleteAccountOtp() async {
+    return await apiClient.postData(AppConstants.sendDeleteAccountOtpUri, {});
+  }
+
+  @override
+  Future<Response> deleteUserWithOtp(String otp) async {
+    return await apiClient.postData(AppConstants.customerRemoveUri, {"_method": "delete", "otp": otp});
+  }
+
+  @override
   Future<UserInfoModel?> get(String? id) async {
     UserInfoModel? userInfoModel;
     Response response = await apiClient.getData(AppConstants.customerInfoUri);

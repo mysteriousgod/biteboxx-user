@@ -4,7 +4,11 @@ import 'package:stackfood_multivendor/features/profile/domain/models/userinfo_mo
 import 'package:stackfood_multivendor/interface/repository_interface.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:get/get_connect/http/src/response/response.dart';
+
 abstract class ProfileRepositoryInterface extends RepositoryInterface {
   Future<ResponseModel> updateProfile(UpdateUserModel userInfoModel, XFile? data, String token);
   Future<ResponseModel> changePassword(UserInfoModel userInfoModel);
+  Future<Response> sendDeleteAccountOtp();
+  Future<Response> deleteUserWithOtp(String otp);
 }

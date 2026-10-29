@@ -9,9 +9,12 @@ import 'package:stackfood_multivendor/features/auth/domain/centralize_login_enum
 import 'package:stackfood_multivendor/features/auth/widgets/sign_in/otp_login_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
+import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/helper/custom_validator.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
+import 'package:stackfood_multivendor/util/dimensions.dart';
+import 'package:stackfood_multivendor/util/styles.dart';
 
 class SignInView extends StatefulWidget {
   final bool exitFromApp;
@@ -123,7 +126,12 @@ class _SignInViewState extends State<SignInView> {
           _processOtpSuccessSetup(response, authController, phone, countryDialCode);
         } else {
           debugPrint('OTP Login Failed: ${response.message}');
-          showCustomSnackBar(response.message);
+          String msgLower = (response.message ?? '').toLowerCase();
+          if (msgLower.contains('deleted') || msgLower.contains('blocked') || msgLower.contains('scheduled') || msgLower.contains('deletion') || msgLower.contains('support')) {
+            _showAccountStatusSupportDialog(response.message ?? '');
+          } else {
+            showCustomSnackBar(response.message);
+          }
         }
       } catch (e) {
         debugPrint('Error in otpLogin: $e');
@@ -133,6 +141,58 @@ class _SignInViewState extends State<SignInView> {
     } catch (e) {
       debugPrint('Exception in _otpLogin: $e');
     }
+  }
+
+  void _showAccountStatusSupportDialog(String message) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusLarge)),
+        insetPadding: const EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.info_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+
+            Text(
+              'Account Notice',
+              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeLarge),
+
+            CustomButtonWidget(
+              buttonText: 'help_support'.tr,
+              radius: Dimensions.radiusDefault,
+              onPressed: () {
+                Get.back();
+                Get.toNamed(RouteHelper.getSupportRoute());
+              },
+            ),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text('close'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
+            ),
+          ]),
+        ),
+      ),
+    );
   }
 
   void _processOtpSuccessSetup(ResponseModel response, AuthController authController, String phone, String countryDialCode) async {

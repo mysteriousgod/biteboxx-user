@@ -15,6 +15,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:stackfood_multivendor/helper/secure_calling_helper.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:get/get.dart';
 
 class TrackDetailsView extends StatelessWidget {
   final OrderModel track;

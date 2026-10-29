@@ -93,6 +93,7 @@ class AppConstants {
   static const String loyaltyTransactionUri = '/api/v1/customer/loyalty-point/transactions';
   static const String loyaltyPointTransferUri = '/api/v1/customer/loyalty-point/point-transfer';
   static const String customerRemoveUri = '/api/v1/customer/remove-account';
+  static const String sendDeleteAccountOtpUri = '/api/v1/customer/send-delete-account-otp';
   static const String conversationListUri = '/api/v1/customer/message/list';
   static const String searchConversationListUri = '/api/v1/customer/message/search-list';
   static const String messageListUri = '/api/v1/customer/message/details';

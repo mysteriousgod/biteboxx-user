@@ -116,6 +116,63 @@ class ProfileController extends GetxController implements GetxService {
     _pickedFile = null;
   }
 
+  bool _isDeleteOtpSent = false;
+  bool get isDeleteOtpSent => _isDeleteOtpSent;
+
+  void resetDeleteAccountState() {
+    _isDeleteOtpSent = false;
+    update();
+  }
+
+  Future<bool> sendDeleteAccountOtp() async {
+    _isLoading = true;
+    update();
+    Response response = await profileServiceInterface.sendDeleteAccountOtp();
+    _isLoading = false;
+    bool isSuccess = false;
+    if (response.statusCode == 200) {
+      _isDeleteOtpSent = true;
+      isSuccess = true;
+      showCustomSnackBar('otp_sent_successfully'.tr, isError: false);
+    } else {
+      String message = response.body?['errors']?[0]?['message'] ?? response.statusText ?? 'failed_to_send_otp'.tr;
+      showCustomSnackBar(message);
+    }
+    update();
+    return isSuccess;
+  }
+
+  Future<bool> removeUserWithOtp(String otp) async {
+    _isLoading = true;
+    update();
+    Response response = await profileServiceInterface.deleteUserWithOtp(otp);
+    _isLoading = false;
+    bool isSuccess = false;
+    if (response.statusCode == 200) {
+      isSuccess = true;
+      _isDeleteOtpSent = false;
+      await Get.find<AuthController>().clearSharedData(removeToken: false);
+      await Get.find<AuthController>().clearUserNumberAndPassword();
+      await Get.find<CartController>().clearCartList();
+      if(Get.find<AuthController>().isActiveRememberMe) {
+        Get.find<AuthController>().toggleRememberMe();
+      }
+      if(Get.find<AuthController>().isActiveRememberMeForOtp) {
+        Get.find<AuthController>().toggleRememberMeForOtp();
+      }
+      Get.find<FavouriteController>().removeFavourites();
+      setForceFullyUserEmpty();
+      Get.back();
+      showCustomSnackBar('account_deletion_scheduled_grace_period'.tr, isError: false);
+      Get.find<SplashController>().navigateToLocationScreen('splash', offNamed: true);
+    } else {
+      String message = response.body?['errors']?[0]?['message'] ?? response.statusText ?? 'there_is_a_problem_on_removing_your_account'.tr;
+      showCustomSnackBar(message);
+    }
+    update();
+    return isSuccess;
+  }
+
   Future removeUser() async {
     _isLoading = true;
     update();

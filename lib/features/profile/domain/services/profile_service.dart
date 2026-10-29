@@ -47,4 +47,14 @@ class ProfileService implements ProfileServiceInterface {
     return await profileRepositoryInterface.delete(null);
   }
 
+  @override
+  Future<Response> sendDeleteAccountOtp() async {
+    return await profileRepositoryInterface.sendDeleteAccountOtp();
+  }
+
+  @override
+  Future<Response> deleteUserWithOtp(String otp) async {
+    return await profileRepositoryInterface.deleteUserWithOtp(otp);
+  }
+
 }

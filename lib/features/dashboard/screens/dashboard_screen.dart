@@ -13,6 +13,7 @@ import 'package:stackfood_multivendor/features/order/domain/models/order_model.d
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:stackfood_multivendor/features/dashboard/widgets/bottom_nav_item.dart';
+import 'package:stackfood_multivendor/features/dashboard/widgets/biteboxx_modern_bottom_nav_bar.dart';
 import 'package:stackfood_multivendor/features/dashboard/widgets/running_order_view_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/screens/favourite_screen.dart';
 import 'package:stackfood_multivendor/features/loyalty/controllers/loyalty_controller.dart';
@@ -161,6 +162,13 @@ class DashboardScreenState extends State<DashboardScreen> {
                           orderController.runningOrderList!.isNotEmpty &&
                           _isLogin)) {
                     return const SizedBox();
+                  }
+
+                  if (splashController.activeTheme == 11) {
+                    return BiteboxxModernBottomNavBar(
+                      selectedIndex: _pageIndex,
+                      onTap: (index) => _setPage(index),
+                    );
                   }
 
                   return BottomAppBar(

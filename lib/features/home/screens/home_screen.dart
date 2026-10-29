@@ -28,6 +28,7 @@ import 'package:stackfood_multivendor/features/home/themes/glassmorphic_home_scr
 import 'package:stackfood_multivendor/features/home/themes/brutalist_home_screen.dart';
 import 'package:stackfood_multivendor/features/home/themes/cyberpunk_home_screen.dart';
 import 'package:stackfood_multivendor/features/home/themes/minimalist_home_screen.dart';
+import 'package:stackfood_multivendor/features/home/themes/biteboxx_modern_home_screen.dart';
 import 'package:stackfood_multivendor/features/home/widgets/today_trends_view_widget.dart';
 import 'package:stackfood_multivendor/features/home/widgets/what_on_your_mind_view_widget.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
@@ -214,6 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ) : (activeTheme == 9) ? GlassmorphicHomeScreen(
                       scrollController: _scrollController,
                     ) : (activeTheme == 10) ? NeumorphicHomeScreen(
+                      scrollController: _scrollController,
+                    ) : (activeTheme == 11) ? BiteboxxModernHomeScreen(
                       scrollController: _scrollController,
                     ) : CustomScrollView(
                 controller: _scrollController,

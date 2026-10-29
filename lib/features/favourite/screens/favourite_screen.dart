@@ -10,6 +10,8 @@ import 'package:stackfood_multivendor/common/widgets/not_logged_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:stackfood_multivendor/features/home/themes/glass_components.dart';
+import 'package:stackfood_multivendor/features/favourite/screens/biteboxx_modern_favourite_view.dart';
+import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 
 class FavouriteScreen extends StatefulWidget {
@@ -40,6 +42,18 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
   Widget build(BuildContext context) {
     return GetBuilder<SplashController>(builder: (splashController) {
       final bool isGlassmorphic = splashController.activeTheme == 4 || splashController.activeTheme == 9;
+
+      if (splashController.activeTheme == 11) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).cardColor,
+          body: BiteboxxModernFavouriteView(
+            tabController: _tabController!,
+            onExploreRestaurants: () {
+              Get.offAllNamed(RouteHelper.getInitialRoute());
+            },
+          ),
+        );
+      }
 
       Widget content = Get.find<AuthController>().isLoggedIn() ? SafeArea(child: Column(children: [
 
