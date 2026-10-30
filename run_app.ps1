@@ -20,5 +20,8 @@ if (-not $emulatorRunning) {
     Write-Host "Emulator is already running!" -ForegroundColor Green
 }
 
+# Ensure emulator low-storage threshold does not block installs
+adb shell settings put global sys_storage_threshold_percentage 1 2>$null
+
 Write-Host "Launching Flutter App..." -ForegroundColor Cyan
 flutter run -d emulator-5554

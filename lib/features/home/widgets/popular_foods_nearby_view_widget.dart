@@ -26,7 +26,7 @@ class _PopularFoodNearbyViewWidgetState extends State<PopularFoodNearbyViewWidge
         return (productController.popularProductList !=null && productController.popularProductList!.isEmpty) ? const SizedBox() : Padding(
           padding: EdgeInsets.symmetric(vertical: ResponsiveHelper.isMobile(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeLarge),
           child: SizedBox(
-            height: ResponsiveHelper.isMobile(context) ? 360 : 375, width: Dimensions.webMaxWidth,
+            height: ResponsiveHelper.isMobile(context) ? 370 : 385, width: Dimensions.webMaxWidth,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -50,20 +50,26 @@ class _PopularFoodNearbyViewWidgetState extends State<PopularFoodNearbyViewWidge
                       child: CarouselSlider.builder(
                         carouselController: carouselController,
                         options: CarouselOptions(
-                          height: ResponsiveHelper.isMobile(context) ? 300 : 300,
-                          viewportFraction: ResponsiveHelper.isDesktop(context) ? 0.2 : 0.47,
-                          enlargeFactor: ResponsiveHelper.isDesktop(context) ? 0.2 : 0.35,
-                          autoPlay: true,
+                          height: ResponsiveHelper.isMobile(context) ? 305 : 315,
+                          viewportFraction: ResponsiveHelper.isDesktop(context) ? 0.2 : 0.54,
+                          enlargeFactor: ResponsiveHelper.isDesktop(context) ? 0.2 : 0.2,
+                          autoPlay: (productController.popularProductList!.length > 1),
+                          autoPlayInterval: const Duration(seconds: 4),
+                          autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                          autoPlayCurve: Curves.fastOutSlowIn,
                           enlargeCenterPage: true,
                           disableCenter: true,
                         ),
                         itemCount: productController.popularProductList!.length,
                         itemBuilder: (context, index, _) {
 
-                          return productController.popularProductList != null ? ItemCardWidget(
-                            product: productController.popularProductList![index],
-                            isBestItem: true,
-                            isPopularNearbyItem: true,
+                          return productController.popularProductList != null ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: ItemCardWidget(
+                              product: productController.popularProductList![index],
+                              isBestItem: true,
+                              isPopularNearbyItem: true,
+                            ),
                           ) : const ItemCardShimmer(isPopularNearbyItem: true);
                         },
                       ),
